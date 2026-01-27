@@ -1,0 +1,29 @@
+@import "tailwindcss";
+
+:root {
+  --primary-orange: #e97223;
+  --primary-orange-hover: #d45e10;
+  --sidebar-bg: #f5f5f5;
+  --sidebar-active: #3d3d3d;
+  --border-color: #e5e7eb;
+  --text-primary: #1f2937;
+  --text-secondary: #6b7280;
+  --status-yellow: #fef3c7;
+  --status-yellow-text: #b45309;
+  --status-green: #d1fae5;
+  --status-green-text: #059669;
+  --card-highlight-bg: #fff7ed;
+  --card-highlight-border: #fdba74;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-color: #ffffff;
+  color: var(--text-primary);
+}
