@@ -25,7 +25,7 @@ export default function StoragePage() {
         <div style={{ display: 'flex', minHeight: '100vh' }}>
             <Sidebar activePage="storage" />
 
-            <main style={{ flex: 1, padding: '24px 32px', backgroundColor: '#fff' }}>
+            <main style={{ flex: 1, padding: '24px 32px', backgroundColor: 'var(--main-bg)' }}>
                 {/* Header */}
                 <div style={{ marginBottom: '24px' }}>
                     <h1 style={{ fontSize: '24px', fontWeight: '600', marginBottom: '4px' }}>

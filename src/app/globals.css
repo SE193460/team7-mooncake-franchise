@@ -1,19 +1,22 @@
-@import "tailwindcss";
-
 :root {
-  --primary-orange: #e97223;
-  --primary-orange-hover: #d45e10;
-  --sidebar-bg: #f5f5f5;
-  --sidebar-active: #3d3d3d;
-  --border-color: #e5e7eb;
+  --primary-orange: #FF6B35;
+  --primary-orange-hover: #E55A2B;
+  --sidebar-bg: #47301F;
+  --sidebar-header-bg: #3C2C20;
+  --sidebar-active: rgba(255, 107, 53, 0.2);
+  --border-color: rgba(255, 255, 255, 0.1);
   --text-primary: #1f2937;
   --text-secondary: #6b7280;
-  --status-yellow: #fef3c7;
-  --status-yellow-text: #b45309;
-  --status-green: #d1fae5;
+  --text-white: #ffffff;
+  --status-yellow: #FEF3C7;
+  --status-yellow-text: #B45309;
+  --status-green: #D1FAE5;
   --status-green-text: #059669;
-  --card-highlight-bg: #fff7ed;
-  --card-highlight-border: #fdba74;
+  --card-highlight-bg: #FFF7ED;
+  --card-highlight-border: #FDBA74;
+  --main-bg: #F5F3F0;
+  --card-bg: #ffffff;
+  --table-border: #E5E7EB;
 }
 
 * {
@@ -24,6 +27,6 @@
 
 body {
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  background-color: #ffffff;
+  background-color: var(--main-bg);
   color: var(--text-primary);
 }

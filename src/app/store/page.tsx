@@ -36,7 +36,7 @@ export default function StoreDashboard() {
         <div style={{ display: 'flex', minHeight: '100vh' }}>
             <Sidebar activePage="dashboard" />
 
-            <main style={{ flex: 1, padding: '24px 32px', backgroundColor: '#fff' }}>
+            <main style={{ flex: 1, padding: '32px 40px', backgroundColor: 'var(--main-bg)' }}>
                 {/* Header */}
                 <div
                     style={{
@@ -50,7 +50,7 @@ export default function StoreDashboard() {
                         <h1 style={{ fontSize: '24px', fontWeight: '600', marginBottom: '4px' }}>
                             Tổng Quan Cửa Hàng
                         </h1>
-                        <p style={{ fontSize: '14px', color: 'var(--text-secondary)' }}>
+                        <p style={{ fontSize: '14px', color: 'var(--text-secondary)', marginTop: '4px' }}>
                             Quản lý đơn hàng bánh Trung Thu và theo dõi giao hàng
                         </p>
                     </div>
@@ -59,17 +59,29 @@ export default function StoreDashboard() {
                             display: 'flex',
                             alignItems: 'center',
                             gap: '8px',
-                            padding: '10px 20px',
+                            padding: '12px 24px',
                             backgroundColor: 'var(--primary-orange)',
                             color: 'white',
                             border: 'none',
                             borderRadius: '8px',
                             fontSize: '14px',
-                            fontWeight: '500',
+                            fontWeight: '600',
                             cursor: 'pointer',
+                            boxShadow: '0 2px 4px rgba(255, 107, 53, 0.3)',
+                            transition: 'all 0.2s ease',
+                        }}
+                        onMouseEnter={(e) => {
+                            e.currentTarget.style.backgroundColor = 'var(--primary-orange-hover)';
+                            e.currentTarget.style.transform = 'translateY(-1px)';
+                            e.currentTarget.style.boxShadow = '0 4px 8px rgba(255, 107, 53, 0.4)';
+                        }}
+                        onMouseLeave={(e) => {
+                            e.currentTarget.style.backgroundColor = 'var(--primary-orange)';
+                            e.currentTarget.style.transform = 'translateY(0)';
+                            e.currentTarget.style.boxShadow = '0 2px 4px rgba(255, 107, 53, 0.3)';
                         }}
                     >
-                        <span>+</span>
+                        <span style={{ fontSize: '18px' }}>+</span>
                         <span>Đặt Hàng Mới</span>
                     </button>
                 </div>
@@ -98,7 +110,7 @@ export default function StoreDashboard() {
                         icon="🚚"
                         count={2}
                         label="Sẵn Sàng Giao"
-                        subLabel="Chờ đến giao"
+                        subLabel="Chờ điều phối"
                         highlighted={true}
                     />
                     <StatusCard

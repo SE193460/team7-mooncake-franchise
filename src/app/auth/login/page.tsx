@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Image from 'next/image';
 import styles from './login.module.css';
 
 export default function LoginPage() {
@@ -21,11 +22,17 @@ export default function LoginPage() {
       <div className={styles.leftSide}>
         <div className={styles.logo}>
           <div className={styles.logoIcon}>
-            <span>🍰</span>
+            <Image
+              src="/logo.png"
+              alt="Mooncake Franchise"
+              width={96}
+              height={96}
+              style={{ objectFit: 'contain' }}
+            />
           </div>
           <div className={styles.logoText}>
-            <h2>Central Kitchen</h2>
-            <p>Franchise Manager</p>
+            <h2>Mooncake Franchise</h2>
+            <p>Mid-Autumn Delights</p>
           </div>
         </div>
 
@@ -49,14 +56,14 @@ export default function LoginPage() {
         </div>
 
         <div className={styles.footer}>
-          © 2024 Central Kitchen System. All rights reserved.
+          © 2024 Mooncake Franchise. All rights reserved.
         </div>
       </div>
 
       {/* Right Side */}
       <div className={styles.rightSide}>
         <div className={styles.formContainer}>
-          <h2 className={styles.formTitle}>Đăng nhập / Login</h2>
+          <h2 className={styles.formTitle}>Đăng nhập</h2>
           <p className={styles.formSubtitle}>
             Chào mừng trở lại! Vui lòng đăng nhập để tiếp tục.
           </p>
