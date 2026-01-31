@@ -39,123 +39,132 @@ export default function OrdersTable({ orders }: OrdersTableProps) {
                     display: 'flex',
                     justifyContent: 'space-between',
                     alignItems: 'center',
-                    marginBottom: '16px',
+                    marginBottom: '20px',
                 }}
             >
-                <h2 style={{ fontSize: '16px', fontWeight: '600', color: 'var(--text-primary)' }}>
+                <h2 style={{ fontSize: '18px', fontWeight: '600', color: 'var(--text-primary)' }}>
                     Đơn Hàng Gần Đây
                 </h2>
                 <button
                     style={{
                         background: 'none',
                         border: 'none',
-                        color: 'var(--text-secondary)',
-                        fontSize: '13px',
+                        color: 'var(--primary-orange)',
+                        fontSize: '14px',
                         cursor: 'pointer',
+                        fontWeight: '500',
                     }}
                 >
                     Xem tất cả
                 </button>
             </div>
 
-            <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-                <thead>
-                    <tr style={{ borderBottom: '1px solid var(--border-color)' }}>
-                        <th
-                            style={{
-                                textAlign: 'left',
-                                padding: '12px 0',
-                                fontSize: '12px',
-                                fontWeight: '500',
-                                color: 'var(--text-secondary)',
-                                textTransform: 'uppercase',
-                            }}
-                        >
-                            Mã Đơn
-                        </th>
-                        <th
-                            style={{
-                                textAlign: 'left',
-                                padding: '12px 0',
-                                fontSize: '12px',
-                                fontWeight: '500',
-                                color: 'var(--text-secondary)',
-                                textTransform: 'uppercase',
-                            }}
-                        >
-                            Sản Phẩm
-                        </th>
-                        <th
-                            style={{
-                                textAlign: 'left',
-                                padding: '12px 0',
-                                fontSize: '12px',
-                                fontWeight: '500',
-                                color: 'var(--text-secondary)',
-                                textTransform: 'uppercase',
-                            }}
-                        >
-                            Trạng Thái
-                        </th>
-                        <th
-                            style={{
-                                textAlign: 'left',
-                                padding: '12px 0',
-                                fontSize: '12px',
-                                fontWeight: '500',
-                                color: 'var(--text-secondary)',
-                                textTransform: 'uppercase',
-                            }}
-                        >
-                            Ngày Tạo
-                        </th>
-                        <th
-                            style={{
-                                textAlign: 'left',
-                                padding: '12px 0',
-                                fontSize: '12px',
-                                fontWeight: '500',
-                                color: 'var(--text-secondary)',
-                                textTransform: 'uppercase',
-                            }}
-                        >
-                            Ngày Giao
-                        </th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {orders.map((order) => (
-                        <tr key={order.id} style={{ borderBottom: '1px solid var(--border-color)' }}>
-                            <td style={{ padding: '16px 0', fontSize: '14px' }}>
-                                <span style={{ color: 'var(--primary-orange)', marginRight: '8px' }}>🔗</span>
-                                {order.id}
-                            </td>
-                            <td style={{ padding: '16px 0', fontSize: '14px', color: 'var(--text-secondary)' }}>
-                                {order.products}
-                            </td>
-                            <td style={{ padding: '16px 0' }}>
-                                <span
-                                    style={{
-                                        ...getStatusStyle(order.status),
-                                        padding: '4px 12px',
-                                        borderRadius: '12px',
-                                        fontSize: '12px',
-                                        fontWeight: '500',
-                                    }}
-                                >
-                                    {order.statusLabel}
-                                </span>
-                            </td>
-                            <td style={{ padding: '16px 0', fontSize: '14px', color: 'var(--text-secondary)' }}>
-                                {order.createdDate}
-                            </td>
-                            <td style={{ padding: '16px 0', fontSize: '14px', color: 'var(--text-secondary)' }}>
-                                {order.deliveryDate || '—'}
-                            </td>
+            <div style={{ backgroundColor: 'var(--card-bg)', borderRadius: '12px', padding: '20px', boxShadow: '0 1px 3px rgba(0, 0, 0, 0.05)' }}>
+                <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                    <thead>
+                        <tr style={{ borderBottom: '1px solid var(--table-border)' }}>
+                            <th
+                                style={{
+                                    textAlign: 'left',
+                                    padding: '12px 0',
+                                    fontSize: '12px',
+                                    fontWeight: '600',
+                                    color: 'var(--text-secondary)',
+                                    textTransform: 'uppercase',
+                                    letterSpacing: '0.5px',
+                                }}
+                            >
+                                Mã Đơn
+                            </th>
+                            <th
+                                style={{
+                                    textAlign: 'left',
+                                    padding: '12px 0',
+                                    fontSize: '12px',
+                                    fontWeight: '600',
+                                    color: 'var(--text-secondary)',
+                                    textTransform: 'uppercase',
+                                    letterSpacing: '0.5px',
+                                }}
+                            >
+                                Sản Phẩm
+                            </th>
+                            <th
+                                style={{
+                                    textAlign: 'left',
+                                    padding: '12px 0',
+                                    fontSize: '12px',
+                                    fontWeight: '600',
+                                    color: 'var(--text-secondary)',
+                                    textTransform: 'uppercase',
+                                    letterSpacing: '0.5px',
+                                }}
+                            >
+                                Trạng Thái
+                            </th>
+                            <th
+                                style={{
+                                    textAlign: 'left',
+                                    padding: '12px 0',
+                                    fontSize: '12px',
+                                    fontWeight: '600',
+                                    color: 'var(--text-secondary)',
+                                    textTransform: 'uppercase',
+                                    letterSpacing: '0.5px',
+                                }}
+                            >
+                                Ngày Tạo
+                            </th>
+                            <th
+                                style={{
+                                    textAlign: 'left',
+                                    padding: '12px 0',
+                                    fontSize: '12px',
+                                    fontWeight: '600',
+                                    color: 'var(--text-secondary)',
+                                    textTransform: 'uppercase',
+                                    letterSpacing: '0.5px',
+                                }}
+                            >
+                                Ngày Giao
+                            </th>
                         </tr>
-                    ))}
-                </tbody>
-            </table>
+                    </thead>
+                    <tbody>
+                        {orders.map((order) => (
+                            <tr key={order.id} style={{ borderBottom: '1px solid var(--table-border)' }}>
+                                <td style={{ padding: '16px 0', fontSize: '14px', fontWeight: '500', color: 'var(--text-primary)' }}>
+                                    <span style={{ color: 'var(--primary-orange)', marginRight: '8px' }}>📎</span>
+                                    {order.id}
+                                </td>
+                                <td style={{ padding: '16px 0', fontSize: '14px', color: 'var(--text-secondary)' }}>
+                                    {order.products}
+                                </td>
+                                <td style={{ padding: '16px 0' }}>
+                                    <span
+                                        style={{
+                                            ...getStatusStyle(order.status),
+                                            padding: '6px 14px',
+                                            borderRadius: '20px',
+                                            fontSize: '12px',
+                                            fontWeight: '500',
+                                            display: 'inline-block',
+                                        }}
+                                    >
+                                        {order.statusLabel}
+                                    </span>
+                                </td>
+                                <td style={{ padding: '16px 0', fontSize: '14px', color: 'var(--text-secondary)' }}>
+                                    {order.createdDate}
+                                </td>
+                                <td style={{ padding: '16px 0', fontSize: '14px', color: 'var(--text-secondary)' }}>
+                                    {order.deliveryDate || '—'}
+                                </td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
+            </div>
         </div>
     );
 }
