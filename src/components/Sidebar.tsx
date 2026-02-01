@@ -13,6 +13,7 @@ export default function Sidebar({ activePage = 'dashboard' }: SidebarProps) {
         { id: 'order', label: 'Đặt Hàng', icon: '🛒', href: '/store/order' },
         { id: 'tracking', label: 'Theo Dõi Đơn', icon: '🚚', href: '/store/tracking' },
         { id: 'confirm', label: 'Xác Nhận Nhận Hàng', icon: '📦', href: '/store/confirm' },
+        { id: 'storage', label: 'Kho Lưu Trữ', icon: '🏪', href: '/store/storage' },
     ];
 
     return (
@@ -78,30 +79,7 @@ export default function Sidebar({ activePage = 'dashboard' }: SidebarProps) {
                         <span>{item.label}</span>
                     </Link>
                 ))}
-
-                {/* Kho Lưu Trữ Section */}
-                <Link
-                    href="/store/storage"
-                    style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '14px',
-                        padding: '14px 20px',
-                        margin: '4px 12px',
-                        borderRadius: '8px',
-                        textDecoration: 'none',
-                        color: activePage === 'storage' ? 'var(--text-white)' : 'rgba(255, 255, 255, 0.9)',
-                        backgroundColor: activePage === 'storage' ? 'var(--sidebar-active)' : 'transparent',
-                        fontSize: '15px',
-                        transition: 'all 0.2s ease',
-                        fontWeight: activePage === 'storage' ? '500' : '400',
-                    }}
-                >
-                    <span style={{ fontSize: '18px' }}>📦</span>
-                    <span>Kho Lưu Trữ</span>
-                </Link>
             </nav>
-
             {/* User Info */}
             <div
                 style={{
