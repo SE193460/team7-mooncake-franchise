@@ -1,10 +1,12 @@
 'use client';
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import styles from './login.module.css';
 
 export default function LoginPage() {
+  const router = useRouter();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -14,6 +16,8 @@ export default function LoginPage() {
     e.preventDefault();
     // Handle login logic here
     console.log({ email, password, rememberMe });
+    // Redirect to store page after login
+    router.push('/store');
   };
 
   return (
