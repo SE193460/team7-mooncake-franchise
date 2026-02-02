@@ -6,4 +6,4 @@
 3. npm run dev
 
 ## Tech
-NextJS, NodeJS, DBeaver, Vercel, Render, Figma
+NextJS, NodeJS, PostgreSQL, DBeaver, Vercel, Render, Figma
