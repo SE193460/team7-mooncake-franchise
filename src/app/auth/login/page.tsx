@@ -5,19 +5,71 @@ import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import styles from './login.module.css';
 
+const API_URL = 'https://franchisemooncake.onrender.com/api';
+
 export default function LoginPage() {
   const router = useRouter();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Handle login logic here
-    console.log({ email, password, rememberMe });
-    // Redirect to store page after login
-    router.push('/store');
+    setError('');
+    setLoading(true);
+
+    try {
+      const response = await fetch(`${API_URL}/auth/login`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email,
+          password,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || 'Đăng nhập thất bại');
+      }
+
+      // Lưu token và user data
+      if (data.token) {
+        localStorage.setItem('token', data.token);
+      }
+      if (data.user) {
+        localStorage.setItem('user', JSON.stringify(data.user));
+      }
+
+      // Điều hướng theo role
+      const userRole = data.user?.role || 'store';
+      switch (userRole.toLowerCase()) {
+        case 'manager':
+          router.push('/manager');
+          break;
+        case 'kitchen':
+          router.push('/kitchen');
+          break;
+        case 'store':
+        default:
+          router.push('/store');
+          break;
+      }
+    } catch (err) {
+      console.error('Login error:', err);
+      setError(
+        err instanceof Error ? err.message : 
+        'Đăng nhập thất bại. Vui lòng kiểm tra email và mật khẩu.'
+      );
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -73,6 +125,12 @@ export default function LoginPage() {
           </p>
 
           <form onSubmit={handleSubmit} className={styles.form}>
+            {error && (
+              <div className={styles.errorMessage}>
+                {error}
+              </div>
+            )}
+
             <div className={styles.formGroup}>
               <label htmlFor="email" className={styles.label}>Email</label>
               <div className={styles.inputWrapper}>
@@ -132,8 +190,12 @@ export default function LoginPage() {
               </label>
             </div>
 
-            <button type="submit" className={styles.submitButton}>
-              Đăng nhập
+            <button 
+              type="submit" 
+              className={styles.submitButton}
+              disabled={loading}
+            >
+              {loading ? 'Đang đăng nhập...' : 'Đăng nhập'}
             </button>
 
             <div className={styles.support}>
