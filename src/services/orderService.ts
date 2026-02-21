@@ -1,5 +1,12 @@
-import axiosClient from "./axiosClient";
+import fetchClient from "./fetchClient";
 
-export const getOrders = () => {
-  return axiosClient.get("/orders");
+// Define the Order interface
+export interface Order {
+  id: number;
+  status: string;
+  // Add more fields as needed based on your API
+}
+
+export const getOrders = async (): Promise<Order[]> => {
+  return fetchClient.get<Order[]>("/orders");
 };

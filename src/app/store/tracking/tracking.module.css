@@ -175,6 +175,21 @@
   color: #b45309;
 }
 
+.statusReady {
+  background: #dbeafe;
+  color: #1e40af;
+}
+
+.statusPreparing {
+  background: #fed7aa;
+  color: #c2410c;
+}
+
+.statusDelivered {
+  background: #e9d5ff;
+  color: #7e22ce;
+}
+
 .statusCompleted {
   background: #d1fae5;
   color: #059669;
@@ -294,6 +309,21 @@
 .statusPending {
   background: #fef3c7;
   color: #b45309;
+}
+
+.statusReady {
+  background: #dbeafe;
+  color: #1e40af;
+}
+
+.statusPreparing {
+  background: #fed7aa;
+  color: #c2410c;
+}
+
+.statusDelivered {
+  background: #e9d5ff;
+  color: #7e22ce;
 }
 
 .statusCompleted {

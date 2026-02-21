@@ -2,9 +2,18 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useState } from 'react';
+import authService, { User } from '../services/authService';
 
 export default function ManagerSidebar() {
   const pathname = usePathname();
+  const [currentUser] = useState<User | null>(() => {
+    // Lazy initialization - only runs once
+    if (typeof window !== 'undefined') {
+      return authService.getCurrentUser();
+    }
+    return null;
+  });
 
   const menuItems = [
     { name: "Bảng điều khiển", href: "/manager", icon: "dashboard" },
@@ -162,16 +171,17 @@ export default function ManagerSidebar() {
               fontWeight: "bold",
             }}
           >
-            P
+            {currentUser?.username?.charAt(0).toUpperCase() || 'M'}
           </div>
           <div>
-            <div style={{ fontSize: "14px", fontWeight: "500" }}>Phạm Thị D</div>
+            <div style={{ fontSize: "14px", fontWeight: "500" }}>{currentUser?.username || 'Manager'}</div>
             <div style={{ fontSize: "12px", opacity: 0.7 }}>
-              manager@franchise.com
+              {currentUser?.email || ''}
             </div>
           </div>
         </div>
         <button
+          onClick={() => authService.logout()}
           style={{
             display: "flex",
             alignItems: "center",
@@ -184,6 +194,12 @@ export default function ManagerSidebar() {
             padding: "0",
             fontSize: "14px",
             opacity: 0.8,
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.opacity = "1";
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.opacity = "0.8";
           }}
         >
           <svg

@@ -1,36 +1,47 @@
 'use client';
 
+import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import Sidebar from '../../components/Sidebar';
 import StatusCard from '../../components/StatusCard';
 import OrdersTable from '../../components/OrdersTable';
+import storeService, { DashboardStats, Order } from '../../services/storeService';
 
 export default function StoreDashboard() {
-    const sampleOrders = [
-        {
-            id: 'ORD-001',
-            products: '2 sản phẩm',
-            status: 'pending' as const,
-            statusLabel: 'Chờ Xử Lý',
-            createdDate: '08/01/2026',
-            deliveryDate: '',
-        },
-        {
-            id: 'ORD-003',
-            products: '2 sản phẩm',
-            status: 'ready' as const,
-            statusLabel: 'Sẵn Sàng Giao',
-            createdDate: '06/01/2026',
-            deliveryDate: '12/01/2026',
-        },
-        {
-            id: 'ORD-006',
-            products: '1 sản phẩm',
-            status: 'ready' as const,
-            statusLabel: 'Sẵn Sàng Giao',
-            createdDate: '03/01/2026',
-            deliveryDate: '05/01/2026',
-        },
-    ];
+    const router = useRouter();
+    const [dashboardStats, setDashboardStats] = useState<DashboardStats>({
+        pendingOrders: 0,
+        approvedOrders: 0,
+        processingOrders: 0,
+        fulfilledOrders: 0,
+        totalOrders: 0,
+    });
+    const [orders, setOrders] = useState<Order[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
+
+    useEffect(() => {
+        fetchDashboardData();
+    }, []);
+
+    const fetchDashboardData = async () => {
+        try {
+            setLoading(true);
+            // Only call dashboard API - it returns both stats and recent orders
+            const dashboardData = await storeService.getDashboard();
+            
+            console.log('Dashboard data received:', dashboardData);
+            
+            // Set stats and recent orders (only 5 most recent)
+            setDashboardStats(dashboardData.stats);
+            setOrders(dashboardData.recentOrders);
+        } catch (err) {
+            console.error('Error fetching dashboard data:', err);
+            setError('Không thể tải dữ liệu. Vui lòng thử lại.');
+        } finally {
+            setLoading(false);
+        }
+    };
 
     return (
         <div style={{ display: 'flex', minHeight: '100vh' }}>
@@ -55,6 +66,7 @@ export default function StoreDashboard() {
                         </p>
                     </div>
                     <button
+                        onClick={() => router.push('/store/order')}
                         style={{
                             display: 'flex',
                             alignItems: 'center',
@@ -86,43 +98,75 @@ export default function StoreDashboard() {
                     </button>
                 </div>
 
-                {/* Status Cards */}
-                <div
-                    style={{
-                        display: 'flex',
-                        gap: '16px',
-                        marginBottom: '32px',
-                    }}
-                >
-                    <StatusCard
-                        icon="🛒"
-                        count={1}
-                        label="Chờ Xử Lý"
-                        subLabel="Đang chờ xác nhận"
-                    />
-                    <StatusCard
-                        icon="📦"
-                        count={0}
-                        label="Đã Chấp Nhận"
-                        subLabel="Đang chuẩn bị"
-                    />
-                    <StatusCard
-                        icon="🚚"
-                        count={2}
-                        label="Sẵn Sàng Giao"
-                        subLabel="Chờ điều phối"
-                        highlighted={true}
-                    />
-                    <StatusCard
-                        icon="✅"
-                        count={1}
-                        label="Đã Giao"
-                        subLabel="Chờ xác nhận nhận hàng"
-                    />
-                </div>
+                {loading ? (
+                    <div style={{ textAlign: 'center', padding: '40px' }}>
+                        <p>Đang tải dữ liệu...</p>
+                    </div>
+                ) : error ? (
+                    <div style={{ 
+                        textAlign: 'center', 
+                        padding: '40px',
+                        backgroundColor: '#fee',
+                        borderRadius: '8px',
+                        color: '#c00',
+                    }}>
+                        <p>{error}</p>
+                        <button 
+                            onClick={fetchDashboardData}
+                            style={{
+                                marginTop: '16px',
+                                padding: '8px 16px',
+                                backgroundColor: 'var(--primary-orange)',
+                                color: 'white',
+                                border: 'none',
+                                borderRadius: '6px',
+                                cursor: 'pointer',
+                            }}
+                        >
+                            Thử lại
+                        </button>
+                    </div>
+                ) : (
+                    <>
+                        {/* Status Cards */}
+                        <div
+                            style={{
+                                display: 'flex',
+                                gap: '16px',
+                                marginBottom: '32px',
+                            }}
+                        >
+                            <StatusCard
+                                icon="🛒"
+                                count={dashboardStats.pendingOrders || 0}
+                                label="Chờ Xử Lý"
+                                subLabel="Đang chờ xác nhận"
+                            />
+                            <StatusCard
+                                icon="✅"
+                                count={dashboardStats.approvedOrders || 0}
+                                label="Đã Chấp Nhận"
+                                subLabel="Đã xác nhận đơn hàng"
+                            />
+                            <StatusCard
+                                icon="📦"
+                                count={dashboardStats.processingOrders || 0}
+                                label="Đang Xử Lý"
+                                subLabel="Đang chuẩn bị hàng"
+                                highlighted={true}
+                            />
+                            <StatusCard
+                                icon="🎉"
+                                count={dashboardStats.fulfilledOrders || 0}
+                                label="Hoàn Thành"
+                                subLabel="Đã giao thành công"
+                            />
+                        </div>
 
-                {/* Orders Table */}
-                <OrdersTable orders={sampleOrders} />
+                        {/* Orders Table */}
+                        <OrdersTable orders={orders} />
+                    </>
+                )}
             </main>
         </div>
     );

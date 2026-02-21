@@ -1,53 +1,82 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Sidebar from '../../../components/Sidebar';
 import styles from './tracking.module.css';
+import storeService from '../../../services/storeService';
 
 interface Order {
   id: string;
-  storeName: string;
+  storeName?: string;
   products: string;
   createdDate: string;
   deliveryDate: string;
-  status: string;
+  status: 'pending' | 'ready' | 'preparing' | 'delivered' | 'completed';
+  statusLabel: string;
 }
 
 export default function OrderTrackingPage() {
-  const [orders] = useState<Order[]>([
-    {
-      id: 'ORD-001',
-      storeName: 'Bánh Trung Thu "Phố Cổ Bánh Ốc"',
-      products: '2 sản phẩm',
-      createdDate: '06/01/2026',
-      deliveryDate: '—',
-      status: 'Chờ xử lý',
-    },
-    {
-      id: 'ORD-003',
-      storeName: 'Bánh Trung Thu Bánh Hương Xưa',
-      products: '2 sản phẩm',
-      createdDate: '06/01/2026',
-      deliveryDate: '12/01/2026',
-      status: 'Đã hoàn thành',
-    },
-    {
-      id: 'ORD-006',
-      storeName: 'Bánh Hương Lúa Vàng',
-      products: '1 sản phẩm',
-      createdDate: '03/01/2026',
-      deliveryDate: '03/01/2026',
-      status: 'Đã hoàn thành',
-    },
-  ]);
-
+  const [orders, setOrders] = useState<Order[]>([]);
+  const [filteredOrders, setFilteredOrders] = useState<Order[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [selectedFilter, setSelectedFilter] = useState('Tất cả');
   const [searchQuery, setSearchQuery] = useState('');
 
+  useEffect(() => {
+    fetchOrders();
+  }, []);
+
+  useEffect(() => {
+    filterOrders();
+  }, [orders, selectedFilter, searchQuery]);
+
+  const fetchOrders = async () => {
+    try {
+      setLoading(true);
+      const data = await storeService.getOrders();
+      setOrders(data);
+    } catch (err) {
+      console.error('Error fetching orders:', err);
+      setError('Không thể tải danh sách đơn hàng. Vui lòng thử lại.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const filterOrders = () => {
+    let filtered = [...orders];
+
+    // Filter by status
+    if (selectedFilter !== 'Tất cả') {
+      filtered = filtered.filter(order => {
+        if (selectedFilter === 'Chờ xử lý') return order.status === 'pending';
+        if (selectedFilter === 'Đã hoàn thành') return order.status === 'completed' || order.status === 'delivered';
+        return true;
+      });
+    }
+
+    // Filter by search query
+    if (searchQuery) {
+      filtered = filtered.filter(order =>
+        order.id.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+    }
+
+    setFilteredOrders(filtered);
+  };
+
   const getStatusClass = (status: string) => {
-    if (status === 'Chờ xử lý') return styles.statusPending;
-    if (status === 'Đã hoàn thành') return styles.statusCompleted;
+    if (status === 'pending' || status === 'Chờ xử lý') return styles.statusPending;
+    if (status === 'ready' || status === 'Đã chấp nhận') return styles.statusReady;
+    if (status === 'preparing' || status === 'Đang chuẩn bị') return styles.statusPreparing;
+    if (status === 'delivered' || status === 'Đã Giao') return styles.statusDelivered;
+    if (status === 'completed' || status === 'Đã hoàn thành') return styles.statusCompleted;
     return '';
+  };
+
+  const getStatusDisplay = (order: Order) => {
+    return order.statusLabel || order.status;
   };
 
   return (
@@ -81,44 +110,86 @@ export default function OrderTrackingPage() {
           </select>
         </div>
 
-        <div className={styles.tableContainer}>
-          <table className={styles.table}>
-            <thead>
-              <tr>
-                <th>Mã đơn hàng</th>
-                <th>Sản phẩm</th>
-                <th>Trạng thái</th>
-                <th>Ngày tạo</th>
-                <th>Ngày giao</th>
-              </tr>
-            </thead>
-            <tbody>
-              {orders.map((order) => (
-                <tr key={order.id}>
-                  <td>
-                    <div className={styles.orderIdCell}>
-                      <span className={styles.orderIcon}>📦</span>
-                      <span className={styles.orderId}>{order.id}</span>
-                    </div>
-                  </td>
-                  <td>
-                    <div className={styles.productCell}>
-                      <div className={styles.productCount}>{order.products}</div>
-                      <div className={styles.storeName}>{order.storeName}</div>
-                    </div>
-                  </td>
-                  <td>
-                    <span className={`${styles.statusBadge} ${getStatusClass(order.status)}`}>
-                      {order.status}
-                    </span>
-                  </td>
-                  <td className={styles.dateCell}>{order.createdDate}</td>
-                  <td className={styles.dateCell}>{order.deliveryDate}</td>
+        {loading ? (
+          <div style={{ textAlign: 'center', padding: '40px' }}>
+            <p>Đang tải danh sách đơn hàng...</p>
+          </div>
+        ) : error ? (
+          <div
+            style={{
+              textAlign: 'center',
+              padding: '40px',
+              backgroundColor: '#fee',
+              borderRadius: '8px',
+              color: '#c00',
+            }}
+          >
+            <p>{error}</p>
+            <button
+              onClick={fetchOrders}
+              style={{
+                marginTop: '16px',
+                padding: '8px 16px',
+                backgroundColor: 'var(--primary-orange)',
+                color: 'white',
+                border: 'none',
+                borderRadius: '6px',
+                cursor: 'pointer',
+              }}
+            >
+              Thử lại
+            </button>
+          </div>
+        ) : (
+          <div className={styles.tableContainer}>
+            <table className={styles.table}>
+              <thead>
+                <tr>
+                  <th>Mã đơn hàng</th>
+                  <th>Sản phẩm</th>
+                  <th>Trạng thái</th>
+                  <th>Ngày tạo</th>
+                  <th>Ngày giao</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+              </thead>
+              <tbody>
+                {filteredOrders.length === 0 ? (
+                  <tr>
+                    <td colSpan={5} style={{ textAlign: 'center', padding: '24px' }}>
+                      Không tìm thấy đơn hàng nào
+                    </td>
+                  </tr>
+                ) : (
+                  filteredOrders.map((order) => (
+                    <tr key={order.id}>
+                      <td>
+                        <div className={styles.orderIdCell}>
+                          <span className={styles.orderIcon}>📦</span>
+                          <span className={styles.orderId}>{order.id}</span>
+                        </div>
+                      </td>
+                      <td>
+                        <div className={styles.productCell}>
+                          <div className={styles.productCount}>{order.products}</div>
+                          {order.storeName && (
+                            <div className={styles.storeName}>{order.storeName}</div>
+                          )}
+                        </div>
+                      </td>
+                      <td>
+                        <span className={`${styles.statusBadge} ${getStatusClass(order.status)}`}>
+                          {getStatusDisplay(order)}
+                        </span>
+                      </td>
+                      <td className={styles.dateCell}>{order.createdDate}</td>
+                      <td className={styles.dateCell}>{order.deliveryDate || '—'}</td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
+        )}
       </div>
     </div>
   );

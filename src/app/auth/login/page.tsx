@@ -4,8 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import styles from './login.module.css';
-
-const API_URL = 'https://franchisemooncake.onrender.com/api';
+import authService from '../../../services/authService';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -22,51 +21,58 @@ export default function LoginPage() {
     setLoading(true);
 
     try {
-      const response = await fetch(`${API_URL}/auth/login`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          email,
-          password,
-        }),
-      });
+      console.log('Attempting login with:', { email });
+      const response = await authService.login({ email, password });
+      
+      console.log('Login response:', response);
 
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.message || 'Đăng nhập thất bại');
+      // Lưu token và user data từ response.data
+      if (response.data?.token) {
+        localStorage.setItem('token', response.data.token);
+        console.log('Token saved');
+      } else {
+        console.warn('No token in response');
       }
-
-      // Lưu token và user data
-      if (data.token) {
-        localStorage.setItem('token', data.token);
-      }
-      if (data.user) {
-        localStorage.setItem('user', JSON.stringify(data.user));
+      
+      if (response.data?.user) {
+        localStorage.setItem('user', JSON.stringify(response.data.user));
+        console.log('User data saved:', response.data.user);
+      } else {
+        console.warn('No user data in response');
       }
 
       // Điều hướng theo role
-      const userRole = data.user?.role || 'store';
+      const userRole = response.data?.user?.role || 'store';
+      console.log('Redirecting to role:', userRole);
+      
       switch (userRole.toLowerCase()) {
         case 'manager':
+        case 'central_kitchen_manager':
           router.push('/manager');
           break;
         case 'kitchen':
+        case 'central_kitchen_staff':
           router.push('/kitchen');
           break;
+        case 'franchise_staff':
         case 'store':
         default:
           router.push('/store');
           break;
       }
-    } catch (err) {
-      console.error('Login error:', err);
-      setError(
-        err instanceof Error ? err.message : 
-        'Đăng nhập thất bại. Vui lòng kiểm tra email và mật khẩu.'
-      );
+    } catch (err: any) {
+      console.error('Login error details:', {
+        error: err,
+        message: err.message,
+        response: err.response,
+        stack: err.stack
+      });
+      
+      const errorMessage = err.response?.data?.message 
+        || err.message 
+        || 'Đăng nhập thất bại. Vui lòng kiểm tra email và mật khẩu.';
+      
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }
