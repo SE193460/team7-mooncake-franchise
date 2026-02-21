@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import styles from './login.module.css';
+import authService from '../../../services/authService';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -11,13 +12,70 @@ export default function LoginPage() {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Handle login logic here
-    console.log({ email, password, rememberMe });
-    // Redirect to store page after login
-    router.push('/store');
+    setError('');
+    setLoading(true);
+
+    try {
+      console.log('Attempting login with:', { email });
+      const response = await authService.login({ email, password });
+      
+      console.log('Login response:', response);
+
+      // Lưu token và user data từ response.data
+      if (response.data?.token) {
+        localStorage.setItem('token', response.data.token);
+        console.log('Token saved');
+      } else {
+        console.warn('No token in response');
+      }
+      
+      if (response.data?.user) {
+        localStorage.setItem('user', JSON.stringify(response.data.user));
+        console.log('User data saved:', response.data.user);
+      } else {
+        console.warn('No user data in response');
+      }
+
+      // Điều hướng theo role
+      const userRole = response.data?.user?.role || 'store';
+      console.log('Redirecting to role:', userRole);
+      
+      switch (userRole.toLowerCase()) {
+        case 'manager':
+        case 'central_kitchen_manager':
+          router.push('/manager');
+          break;
+        case 'kitchen':
+        case 'central_kitchen_staff':
+          router.push('/kitchen');
+          break;
+        case 'franchise_staff':
+        case 'store':
+        default:
+          router.push('/store');
+          break;
+      }
+    } catch (err: any) {
+      console.error('Login error details:', {
+        error: err,
+        message: err.message,
+        response: err.response,
+        stack: err.stack
+      });
+      
+      const errorMessage = err.response?.data?.message 
+        || err.message 
+        || 'Đăng nhập thất bại. Vui lòng kiểm tra email và mật khẩu.';
+      
+      setError(errorMessage);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -73,6 +131,12 @@ export default function LoginPage() {
           </p>
 
           <form onSubmit={handleSubmit} className={styles.form}>
+            {error && (
+              <div className={styles.errorMessage}>
+                {error}
+              </div>
+            )}
+
             <div className={styles.formGroup}>
               <label htmlFor="email" className={styles.label}>Email</label>
               <div className={styles.inputWrapper}>
@@ -132,8 +196,12 @@ export default function LoginPage() {
               </label>
             </div>
 
-            <button type="submit" className={styles.submitButton}>
-              Đăng nhập
+            <button 
+              type="submit" 
+              className={styles.submitButton}
+              disabled={loading}
+            >
+              {loading ? 'Đang đăng nhập...' : 'Đăng nhập'}
             </button>
 
             <div className={styles.support}>

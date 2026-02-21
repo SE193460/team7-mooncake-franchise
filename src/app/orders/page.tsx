@@ -1,12 +1,12 @@
 "use client";
 
 import { useEffect } from "react";
-import { getOrders } from "../../services/orderService";
+import { getOrders, Order } from "../../services/orderService";
 
 export default function OrdersPage() {
   useEffect(() => {
-    getOrders().then(res => {
-      console.log(res.data);
+    getOrders().then((orders: Order[]) => {
+      console.log(orders);
     });
   }, []);
 

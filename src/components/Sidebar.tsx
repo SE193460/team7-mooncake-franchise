@@ -2,12 +2,20 @@
 
 import Link from 'next/link';
 import Image from 'next/image';
+import { useEffect, useState } from 'react';
+import authService, { User } from '../services/authService';
 
 interface SidebarProps {
     activePage?: string;
 }
 
 export default function Sidebar({ activePage = 'dashboard' }: SidebarProps) {
+    const [currentUser, setCurrentUser] = useState<User | null>(null);
+
+    useEffect(() => {
+        const user = authService.getCurrentUser();
+        setCurrentUser(user);
+    }, []);
     const menuItems = [
         { id: 'dashboard', label: 'Bảng điều khiển', icon: '📊', href: '/store' },
         { id: 'order', label: 'Đặt Hàng', icon: '🛒', href: '/store/order' },
@@ -102,18 +110,19 @@ export default function Sidebar({ activePage = 'dashboard' }: SidebarProps) {
                             fontWeight: '600',
                         }}
                     >
-                        N
+                        {currentUser?.username?.charAt(0).toUpperCase() || 'U'}
                     </div>
                     <div>
                         <div style={{ fontSize: '14px', fontWeight: '500', color: 'var(--text-white)' }}>
-                            Nguyễn Văn A
+                            {currentUser?.username || 'User'}
                         </div>
                         <div style={{ fontSize: '12px', color: 'rgba(255, 255, 255, 0.7)' }}>
-                            store1@franchise.com
+                            {currentUser?.email || ''}
                         </div>
                     </div>
                 </div>
                 <button
+                    onClick={() => authService.logout()}
                     style={{
                         display: 'flex',
                         alignItems: 'center',
@@ -135,7 +144,7 @@ export default function Sidebar({ activePage = 'dashboard' }: SidebarProps) {
                         e.currentTarget.style.backgroundColor = 'transparent';
                     }}
                 >
-                    <span>↩</span>
+                    <span>🚪</span>
                     <span>Đăng Xuất</span>
                 </button>
             </div>
