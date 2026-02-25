@@ -28,11 +28,14 @@ export default function Sidebar({ activePage = 'dashboard' }: SidebarProps) {
         <aside
             style={{
                 width: '280px',
-                minHeight: '100vh',
+                height: '100vh',
+                position: 'sticky',
+                top: 0,
                 backgroundColor: 'var(--sidebar-bg)',
                 display: 'flex',
                 flexDirection: 'column',
                 borderRight: '1px solid var(--border-color)',
+                overflowY: 'auto',
             }}
         >
             {/* Logo and Brand */}

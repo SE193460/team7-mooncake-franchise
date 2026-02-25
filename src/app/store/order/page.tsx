@@ -64,6 +64,12 @@ export default function CreateOrderPage() {
         );
     };
 
+    const updateProductMultipleFields = (id: number, updates: Partial<ProductRow>) => {
+        setProducts(
+            products.map((p) => (p.id === id ? { ...p, ...updates } : p))
+        );
+    };
+
     const handleSubmit = async () => {
         // Validation
         if (!deliveryDate) {
@@ -232,9 +238,11 @@ export default function CreateOrderPage() {
                                         const selectedOption = e.target.selectedOptions[0];
                                         const productId = selectedOption.getAttribute('data-id') || '';
                                         const productUnit = selectedOption.getAttribute('data-unit') || 'hộp';
-                                        updateProduct(product.id, 'product', e.target.value);
-                                        updateProduct(product.id, 'productId', productId);
-                                        updateProduct(product.id, 'unit', productUnit);
+                                        updateProductMultipleFields(product.id, {
+                                            product: e.target.value,
+                                            productId: productId,
+                                            unit: productUnit,
+                                        });
                                     }}
                                     disabled={loadingProducts}
                                     style={{
@@ -253,12 +261,12 @@ export default function CreateOrderPage() {
                                     </option>
                                     {availableProducts.map((prod) => (
                                         <option 
-                                            key={prod.product_id} 
-                                            value={prod.product_name}
-                                            data-id={prod.product_id}
-                                            data-unit={prod.unit || 'hộp'}
+                                            key={prod.id} 
+                                            value={prod.name}
+                                            data-id={prod.id}
+                                            data-unit={prod.uom || 'hộp'}
                                         >
-                                            {prod.product_name}
+                                            {prod.name}
                                         </option>
                                     ))}
                                 </select>
@@ -307,15 +315,17 @@ export default function CreateOrderPage() {
                                 <input
                                     type="text"
                                     value={product.unit}
-                                    onChange={(e) => updateProduct(product.id, 'unit', e.target.value)}
-                                    placeholder="vd: hộp, kg"
+                                    readOnly
+                                    placeholder="—"
                                     style={{
                                         width: '100%',
                                         padding: '10px 12px',
                                         border: '1px solid #e5e7eb',
                                         borderRadius: '8px',
                                         fontSize: '14px',
-                                        backgroundColor: product.unit ? '#f9fafb' : 'white',
+                                        backgroundColor: '#f9fafb',
+                                        color: 'var(--text-secondary)',
+                                        cursor: 'not-allowed',
                                     }}
                                 />
                             </div>
@@ -337,27 +347,38 @@ export default function CreateOrderPage() {
                     ))}
 
                     {/* Add Product Button */}
-                    <button
-                        onClick={addProduct}
-                        style={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            gap: '8px',
-                            width: '100%',
-                            padding: '12px',
-                            border: '1px dashed var(--border-color)',
-                            borderRadius: '8px',
-                            backgroundColor: 'transparent',
-                            color: 'var(--text-secondary)',
-                            fontSize: '14px',
-                            cursor: 'pointer',
-                            marginTop: '8px',
-                        }}
-                    >
-                        <span>+</span>
-                        <span>Thêm Sản Phẩm</span>
-                    </button>
+                    <div style={{ display: 'flex', justifyContent: 'center', marginTop: '8px' }}>
+                        <button
+                            onClick={addProduct}
+                            style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                gap: '8px',
+                                padding: '12px 24px',
+                                border: '1px dashed var(--border-color)',
+                                borderRadius: '8px',
+                                backgroundColor: 'transparent',
+                                color: 'var(--text-secondary)',
+                                fontSize: '14px',
+                                cursor: 'pointer',
+                                transition: 'all 0.2s ease',
+                            }}
+                            onMouseEnter={(e) => {
+                                e.currentTarget.style.borderColor = 'var(--primary-orange)';
+                                e.currentTarget.style.color = 'var(--primary-orange)';
+                                e.currentTarget.style.backgroundColor = 'rgba(233, 114, 35, 0.05)';
+                            }}
+                            onMouseLeave={(e) => {
+                                e.currentTarget.style.borderColor = 'var(--border-color)';
+                                e.currentTarget.style.color = 'var(--text-secondary)';
+                                e.currentTarget.style.backgroundColor = 'transparent';
+                            }}
+                        >
+                            <span>+</span>
+                            <span>Thêm Sản Phẩm</span>
+                        </button>
+                    </div>
                 </div>
 
                 {/* Delivery Information Section */}

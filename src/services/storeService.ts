@@ -40,24 +40,42 @@ export interface ApiOrder {
     order_code: string;
     status: string;
     created_at: string;
+    desired_date: string;
+    note: string | null;
     delivered_at: string | null;
-    product_count: number;
+    total_items: string;
+    product_names: string;
 }
 
 export interface Order {
     id: string;
+    orderCode: string;
     products: string;
     status: 'pending' | 'ready' | 'preparing' | 'delivered' | 'completed';
     statusLabel: string;
     createdDate: string;
+    desiredDate: string;
     deliveryDate: string;
+    note: string;
 }
 
 export interface Product {
-    product_id: number;
+    id: string;
+    name: string;
+    uom: string;
+    sku: string;
+    price: string;
+    description: string;
+}
+
+export interface InventoryItem {
+    inventory_item_id: string;
+    product_id: string;
+    product_code: string;
     product_name: string;
-    category?: string;
-    unit?: string;
+    category_name: string;
+    quantity: string;
+    expiry_date: string | null;
 }
 
 export interface CreateOrderRequest {
@@ -102,13 +120,16 @@ const convertApiOrderToOrder = (apiOrder: ApiOrder): Order => {
 
     return {
         id: apiOrder.order_id,
-        products: `${apiOrder.product_count} sản phẩm`,
+        orderCode: apiOrder.order_code,
+        products: apiOrder.product_names || `${apiOrder.total_items} sản phẩm`,
         status: mappedStatus.status,
         statusLabel: mappedStatus.label,
         createdDate: new Date(apiOrder.created_at).toLocaleDateString('vi-VN'),
+        desiredDate: new Date(apiOrder.desired_date).toLocaleDateString('vi-VN'),
         deliveryDate: apiOrder.delivered_at 
             ? new Date(apiOrder.delivered_at).toLocaleDateString('vi-VN')
             : '',
+        note: apiOrder.note || '',
     };
 };
 
@@ -170,13 +191,11 @@ const storeService = {
             // Transform data to match API format
             const apiRequestData = {
                 desired_date: orderData.deliveryDate,
+                note: orderData.notes || '',
                 items: orderData.products.map(p => ({
                     product_id: parseInt(p.productId) || 0, // Convert to integer
-                    product_name: p.productName,
                     qty: parseInt(String(p.quantity)) || 0, // Ensure integer
-                    unit: p.unit,
                 })),
-                notes: orderData.notes || '',
             };
             
             console.log('Sending order request:', JSON.stringify(apiRequestData, null, 2));
@@ -215,13 +234,7 @@ const storeService = {
     // Get available products for ordering
     getProducts: async (): Promise<Product[]> => {
         try {
-            // Try to get products from the API
-            // The exact endpoint may vary, common possibilities:
-            // - /GetProducts
-            // - /ViewProducts  
-            // - /products
-            // - /franchiseStaff_products
-            const response = await fetchClient.get<ApiResponse<Product[]>>("/GetProducts");
+            const response = await fetchClient.get<ApiResponse<Product[]>>("/products");
             console.log('Raw products response:', response);
             
             const products = (response as ApiResponse<Product[]>).data;
@@ -235,6 +248,26 @@ const storeService = {
         } catch (error) {
             console.error("Error fetching products:", error);
             // Return empty array instead of throwing to allow page to render
+            return [];
+        }
+    },
+
+    // Get inventory storage for franchise store
+    getInventoryStorage: async (): Promise<InventoryItem[]> => {
+        try {
+            const response = await fetchClient.get<ApiResponse<InventoryItem[]>>("/franchise/inventory/storage");
+            console.log('Raw inventory storage response:', response);
+            
+            const items = (response as ApiResponse<InventoryItem[]>).data;
+            
+            if (!items || !Array.isArray(items)) {
+                console.warn('Invalid inventory storage response, returning empty array');
+                return [];
+            }
+            
+            return items;
+        } catch (error) {
+            console.error("Error fetching inventory storage:", error);
             return [];
         }
     },
