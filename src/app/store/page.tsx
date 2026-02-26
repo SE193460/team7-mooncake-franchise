@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import Sidebar from '../../components/Sidebar';
 import StatusCard from '../../components/StatusCard';
 import OrdersTable from '../../components/OrdersTable';
+import storeService, { DashboardStats, Order } from '../../services/storeService';
 
 export default function StoreDashboard() {
     const router = useRouter();
@@ -92,13 +93,18 @@ export default function StoreDashboard() {
                 <OrdersTable
                     orders={orders?.map((o) => ({
                         id: o.order_code,
+                        orderCode: o.order_code,
                         products: `${o.product_count} sản phẩm`,
                         status: o.status,
                         statusLabel: o.status,
                         createdDate: new Date(o.created_at).toLocaleDateString(),
+                        desiredDate: o.desired_date
+                            ? new Date(o.desired_date).toLocaleDateString()
+                            : '',
                         deliveryDate: o.delivered_at
                             ? new Date(o.delivered_at).toLocaleDateString()
                             : '',
+                        note: o.note ?? '',
                     }))}
                 />
             </main>

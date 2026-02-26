@@ -1,10 +1,13 @@
 interface Order {
     id: string;
+    orderCode: string;
     products: string;
-    status: 'pending' | 'ready' | 'delivered';
+    status: 'pending' | 'ready' | 'preparing' | 'delivered' | 'completed';
     statusLabel: string;
     createdDate: string;
+    desiredDate: string;
     deliveryDate: string;
+    note: string;
 }
 
 interface OrdersTableProps {
@@ -20,6 +23,21 @@ export default function OrdersTable({ orders }: OrdersTableProps) {
                     color: 'var(--status-yellow-text)',
                 };
             case 'ready':
+                return {
+                    backgroundColor: 'var(--status-blue)',
+                    color: 'var(--status-blue-text)',
+                };
+            case 'preparing':
+                return {
+                    backgroundColor: 'var(--status-orange)',
+                    color: 'var(--status-orange-text)',
+                };
+            case 'delivered':
+                return {
+                    backgroundColor: 'var(--status-purple)',
+                    color: 'var(--status-purple-text)',
+                };
+            case 'completed':
                 return {
                     backgroundColor: 'var(--status-green)',
                     color: 'var(--status-green-text)',
@@ -66,12 +84,13 @@ export default function OrdersTable({ orders }: OrdersTableProps) {
                             <th
                                 style={{
                                     textAlign: 'left',
-                                    padding: '12px 0',
+                                    padding: '12px 8px 12px 0',
                                     fontSize: '12px',
                                     fontWeight: '600',
                                     color: 'var(--text-secondary)',
                                     textTransform: 'uppercase',
                                     letterSpacing: '0.5px',
+                                    width: '80px',
                                 }}
                             >
                                 Mã Đơn
@@ -79,7 +98,7 @@ export default function OrdersTable({ orders }: OrdersTableProps) {
                             <th
                                 style={{
                                     textAlign: 'left',
-                                    padding: '12px 0',
+                                    padding: '12px 8px',
                                     fontSize: '12px',
                                     fontWeight: '600',
                                     color: 'var(--text-secondary)',
@@ -92,12 +111,13 @@ export default function OrdersTable({ orders }: OrdersTableProps) {
                             <th
                                 style={{
                                     textAlign: 'left',
-                                    padding: '12px 0',
+                                    padding: '12px 8px',
                                     fontSize: '12px',
                                     fontWeight: '600',
                                     color: 'var(--text-secondary)',
                                     textTransform: 'uppercase',
                                     letterSpacing: '0.5px',
+                                    width: '130px',
                                 }}
                             >
                                 Trạng Thái
@@ -105,12 +125,13 @@ export default function OrdersTable({ orders }: OrdersTableProps) {
                             <th
                                 style={{
                                     textAlign: 'left',
-                                    padding: '12px 0',
+                                    padding: '12px 8px',
                                     fontSize: '12px',
                                     fontWeight: '600',
                                     color: 'var(--text-secondary)',
                                     textTransform: 'uppercase',
                                     letterSpacing: '0.5px',
+                                    width: '100px',
                                 }}
                             >
                                 Ngày Tạo
@@ -118,12 +139,13 @@ export default function OrdersTable({ orders }: OrdersTableProps) {
                             <th
                                 style={{
                                     textAlign: 'left',
-                                    padding: '12px 0',
+                                    padding: '12px 8px',
                                     fontSize: '12px',
                                     fontWeight: '600',
                                     color: 'var(--text-secondary)',
                                     textTransform: 'uppercase',
                                     letterSpacing: '0.5px',
+                                    width: '110px',
                                 }}
                             >
                                 Ngày Giao
@@ -131,16 +153,16 @@ export default function OrdersTable({ orders }: OrdersTableProps) {
                         </tr>
                     </thead>
                     <tbody>
-                        {orders?.map((order) => (
-                            <tr key={order.id} style={{ borderBottom: '1px solid var(--table-border)' }}>
-                                <td style={{ padding: '16px 0', fontSize: '14px', fontWeight: '500', color: 'var(--text-primary)' }}>
-                                    <span style={{ color: 'var(--primary-orange)', marginRight: '8px' }}>📎</span>
-                                    {order.id}
+                        {orders?.map((order, index) => (
+                            <tr key={order.id || `order-${index}`} style={{ borderBottom: '1px solid var(--table-border)' }}>
+                                <td style={{ padding: '16px 8px 16px 0', fontSize: '14px', color: 'var(--text-primary)' }}>
+                                    <span style={{ marginRight: '8px' }}>📦</span>
+                                    <span style={{ fontWeight: '500' }}>{order.id}</span>
                                 </td>
-                                <td style={{ padding: '16px 0', fontSize: '14px', color: 'var(--text-secondary)' }}>
+                                <td style={{ padding: '16px 8px', fontSize: '14px', color: 'var(--text-primary)' }}>
                                     {order.products}
                                 </td>
-                                <td style={{ padding: '16px 0' }}>
+                                <td style={{ padding: '16px 8px' }}>
                                     <span
                                         style={{
                                             ...getStatusStyle(order.status),
@@ -149,16 +171,17 @@ export default function OrdersTable({ orders }: OrdersTableProps) {
                                             fontSize: '12px',
                                             fontWeight: '500',
                                             display: 'inline-block',
+                                            whiteSpace: 'nowrap',
                                         }}
                                     >
                                         {order.statusLabel}
                                     </span>
                                 </td>
-                                <td style={{ padding: '16px 0', fontSize: '14px', color: 'var(--text-secondary)' }}>
+                                <td style={{ padding: '16px 8px', fontSize: '14px', color: 'var(--text-secondary)' }}>
                                     {order.createdDate}
                                 </td>
-                                <td style={{ padding: '16px 0', fontSize: '14px', color: 'var(--text-secondary)' }}>
-                                    {order.deliveryDate || '—'}
+                                <td style={{ padding: '16px 8px', fontSize: '14px', color: 'var(--text-secondary)' }}>
+                                    {order.desiredDate}
                                 </td>
                             </tr>
                         ))}

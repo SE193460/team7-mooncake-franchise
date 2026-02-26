@@ -1,12 +1,20 @@
 'use client';
 
 import Link from 'next/link';
+import { useEffect, useState } from 'react';
+import authService, { User } from '../services/authService';
 
 interface KitchenSidebarProps {
     activePage?: string;
 }
 
 export default function KitchenSidebar({ activePage = 'dashboard' }: KitchenSidebarProps) {
+    const [currentUser, setCurrentUser] = useState<User | null>(null);
+
+    useEffect(() => {
+        const user = authService.getCurrentUser();
+        setCurrentUser(user);
+    }, []);
     const menuItems = [
         { id: 'dashboard', label: 'Dashboard', icon: '📊', href: '/kitchen' },
         { id: 'new-orders', label: 'Đơn Hàng Mới', icon: '📋', href: '/kitchen/orders' },
@@ -106,33 +114,43 @@ export default function KitchenSidebar({ activePage = 'dashboard' }: KitchenSide
                             fontWeight: '600',
                         }}
                     >
-                        L
+                        {currentUser?.username?.charAt(0).toUpperCase() || 'K'}
                     </div>
                     <div>
                         <div style={{ fontWeight: '500', fontSize: '14px', color: 'white' }}>
-                            Lê Văn C
+                            {currentUser?.username || 'Kitchen User'}
                         </div>
                         <div style={{ fontSize: '11px', color: 'rgba(255,255,255,0.6)' }}>
-                            kitchen@franchise.com
+                            {currentUser?.email || ''}
                         </div>
                     </div>
                 </div>
-                <Link
-                    href="/auth/login"
+                <button
+                    onClick={() => authService.logout()}
                     style={{
                         display: 'flex',
                         alignItems: 'center',
                         gap: '8px',
                         padding: '8px 12px',
                         color: 'rgba(255,255,255,0.7)',
-                        textDecoration: 'none',
+                        background: 'transparent',
+                        border: 'none',
                         fontSize: '14px',
+                        cursor: 'pointer',
+                        width: '100%',
+                        textAlign: 'left',
                         transition: 'all 0.2s ease',
                     }}
+                    onMouseEnter={(e) => {
+                        e.currentTarget.style.color = 'white';
+                    }}
+                    onMouseLeave={(e) => {
+                        e.currentTarget.style.color = 'rgba(255,255,255,0.7)';
+                    }}
                 >
-                    <span>↪</span>
+                    <span>🚪</span>
                     <span>Đăng Xuất</span>
-                </Link>
+                </button>
             </div>
         </aside>
     );

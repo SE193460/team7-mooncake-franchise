@@ -1,26 +1,54 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import Sidebar from '../../../components/Sidebar';
+import storeService, { Product } from '../../../services/storeService';
 
 interface ProductRow {
     id: number;
+    productId: string;
     product: string;
     quantity: number;
     unit: string;
 }
 
 export default function CreateOrderPage() {
+    const router = useRouter();
     const [products, setProducts] = useState<ProductRow[]>([
-        { id: 1, product: '', quantity: 0, unit: '' },
+        { id: 1, productId: '', product: '', quantity: 0, unit: '' },
     ]);
+    const [availableProducts, setAvailableProducts] = useState<Product[]>([]);
     const [deliveryDate, setDeliveryDate] = useState('');
     const [notes, setNotes] = useState('');
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState<string | null>(null);
+    const [loadingProducts, setLoadingProducts] = useState(true);
+
+    // Fetch available products on component mount
+    useEffect(() => {
+        const fetchProducts = async () => {
+            try {
+                setLoadingProducts(true);
+                const productList = await storeService.getProducts();
+                console.log('Loaded products:', productList);
+                setAvailableProducts(productList);
+            } catch (err) {
+                console.error('Failed to load products:', err);
+                // Don't show error to user, just log it
+                // Will fall back to showing "No products available"
+            } finally {
+                setLoadingProducts(false);
+            }
+        };
+
+        fetchProducts();
+    }, []);
 
     const addProduct = () => {
         setProducts([
             ...products,
-            { id: products.length + 1, product: '', quantity: 0, unit: '' },
+            { id: products.length + 1, productId: '', product: '', quantity: 0, unit: '' },
         ]);
     };
 
@@ -34,6 +62,79 @@ export default function CreateOrderPage() {
         setProducts(
             products.map((p) => (p.id === id ? { ...p, [field]: value } : p))
         );
+    };
+
+    const updateProductMultipleFields = (id: number, updates: Partial<ProductRow>) => {
+        setProducts(
+            products.map((p) => (p.id === id ? { ...p, ...updates } : p))
+        );
+    };
+
+    const handleSubmit = async () => {
+        // Validation
+        if (!deliveryDate) {
+            setError('Vui lòng chọn ngày giao hàng');
+            return;
+        }
+
+        const invalidProducts = products.filter(p => !p.product || !p.quantity || !p.unit || !p.productId);
+        if (invalidProducts.length > 0) {
+            setError('Vui lòng điền đầy đủ thông tin cho tất cả sản phẩm (phải chọn loại bánh từ dropdown)');
+            return;
+        }
+
+        // Validate quantities
+        const zeroQuantity = products.filter(p => p.quantity <= 0);
+        if (zeroQuantity.length > 0) {
+            setError('Số lượng phải lớn hơn 0');
+            return;
+        }
+
+        try {
+            setLoading(true);
+            setError(null);
+
+            const orderData = {
+                products: products.map(p => ({
+                    productId: p.productId,
+                    productName: p.product,
+                    quantity: p.quantity,
+                    unit: p.unit,
+                })),
+                deliveryDate,
+                notes,
+            };
+
+            console.log('Order data before sending:', JSON.stringify(orderData, null, 2));
+            const response = await storeService.createOrder(orderData);
+            console.log('Order creation response:', response);
+            
+            // Success - redirect to confirm page or dashboard
+            alert('Đơn hàng đã được tạo thành công!');
+            router.push('/store/confirm');
+        } catch (err: any) {
+            console.error('Error creating order:', err);
+            
+            // Extract error message from different possible structures
+            let errorMessage = 'Không thể tạo đơn hàng. Vui lòng thử lại.';
+            
+            if (err.response?.data?.message) {
+                errorMessage = err.response.data.message;
+            } else if (err.response?.data?.error_code) {
+                errorMessage = `Lỗi: ${err.response.data.error_code}`;
+            } else if (err.message) {
+                errorMessage = err.message;
+            }
+            
+            console.log('Setting error message:', errorMessage);
+            setError(errorMessage);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleCancel = () => {
+        router.push('/store');
     };
 
     return (
@@ -86,6 +187,28 @@ export default function CreateOrderPage() {
                         <h2 style={{ fontSize: '16px', fontWeight: '600' }}>Danh Sách Bánh Trung Thu</h2>
                     </div>
 
+                    {/* Loading or No Products Message */}
+                    {!loadingProducts && availableProducts.length === 0 && (
+                        <div
+                            style={{
+                                padding: '20px',
+                                backgroundColor: '#fff7ed',
+                                border: '1px solid #fed7aa',
+                                borderRadius: '8px',
+                                marginBottom: '16px',
+                                textAlign: 'center',
+                                color: '#c2410c',
+                            }}
+                        >
+                            <p style={{ margin: 0, fontSize: '14px' }}>
+                                ⚠️ Không thể tải danh sách sản phẩm. Vui lòng kiểm tra kết nối API hoặc liên hệ quản trị viên.
+                            </p>
+                            <p style={{ margin: '8px 0 0 0', fontSize: '12px', color: '#92400e' }}>
+                                API endpoint: <code>/GetProducts</code> (có thể cần cấu hình)
+                            </p>
+                        </div>
+                    )}
+
                     {/* Product Rows */}
                     {products.map((product, index) => (
                         <div
@@ -111,21 +234,41 @@ export default function CreateOrderPage() {
                                 </label>
                                 <select
                                     value={product.product}
-                                    onChange={(e) => updateProduct(product.id, 'product', e.target.value)}
+                                    onChange={(e) => {
+                                        const selectedOption = e.target.selectedOptions[0];
+                                        const productId = selectedOption.getAttribute('data-id') || '';
+                                        const productUnit = selectedOption.getAttribute('data-unit') || 'hộp';
+                                        updateProductMultipleFields(product.id, {
+                                            product: e.target.value,
+                                            productId: productId,
+                                            unit: productUnit,
+                                        });
+                                    }}
+                                    disabled={loadingProducts}
                                     style={{
                                         width: '100%',
                                         padding: '10px 12px',
-                                        border: '1px solid var(--border-color)',
+                                        border: '1px solid #e5e7eb',
                                         borderRadius: '8px',
                                         fontSize: '14px',
-                                        backgroundColor: 'white',
+                                        backgroundColor: loadingProducts ? '#f3f4f6' : 'white',
                                         color: product.product ? 'var(--text-primary)' : 'var(--text-secondary)',
+                                        cursor: loadingProducts ? 'not-allowed' : 'pointer',
                                     }}
                                 >
-                                    <option value="">Chọn loại bánh</option>
-                                    <option value="banh-deo">Bánh dẻo</option>
-                                    <option value="banh-nuong">Bánh nướng</option>
-                                    <option value="banh-thap-cam">Bánh thập cẩm</option>
+                                    <option value="">
+                                        {loadingProducts ? 'Đang tải...' : availableProducts.length > 0 ? 'Chọn loại bánh' : 'Không có sản phẩm'}
+                                    </option>
+                                    {availableProducts.map((prod) => (
+                                        <option 
+                                            key={prod.id} 
+                                            value={prod.name}
+                                            data-id={prod.id}
+                                            data-unit={prod.uom || 'hộp'}
+                                        >
+                                            {prod.name}
+                                        </option>
+                                    ))}
                                 </select>
                             </div>
 
@@ -146,10 +289,12 @@ export default function CreateOrderPage() {
                                     onChange={(e) =>
                                         updateProduct(product.id, 'quantity', parseInt(e.target.value) || 0)
                                     }
+                                    min="1"
+                                    placeholder="0"
                                     style={{
                                         width: '100%',
                                         padding: '10px 12px',
-                                        border: '1px solid var(--border-color)',
+                                        border: '1px solid #e5e7eb',
                                         borderRadius: '8px',
                                         fontSize: '14px',
                                     }}
@@ -170,14 +315,17 @@ export default function CreateOrderPage() {
                                 <input
                                     type="text"
                                     value={product.unit}
-                                    onChange={(e) => updateProduct(product.id, 'unit', e.target.value)}
-                                    placeholder=""
+                                    readOnly
+                                    placeholder="—"
                                     style={{
                                         width: '100%',
                                         padding: '10px 12px',
-                                        border: '1px solid var(--border-color)',
+                                        border: '1px solid #e5e7eb',
                                         borderRadius: '8px',
                                         fontSize: '14px',
+                                        backgroundColor: '#f9fafb',
+                                        color: 'var(--text-secondary)',
+                                        cursor: 'not-allowed',
                                     }}
                                 />
                             </div>
@@ -199,27 +347,38 @@ export default function CreateOrderPage() {
                     ))}
 
                     {/* Add Product Button */}
-                    <button
-                        onClick={addProduct}
-                        style={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            gap: '8px',
-                            width: '100%',
-                            padding: '12px',
-                            border: '1px dashed var(--border-color)',
-                            borderRadius: '8px',
-                            backgroundColor: 'transparent',
-                            color: 'var(--text-secondary)',
-                            fontSize: '14px',
-                            cursor: 'pointer',
-                            marginTop: '8px',
-                        }}
-                    >
-                        <span>+</span>
-                        <span>Thêm Sản Phẩm</span>
-                    </button>
+                    <div style={{ display: 'flex', justifyContent: 'center', marginTop: '8px' }}>
+                        <button
+                            onClick={addProduct}
+                            style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                gap: '8px',
+                                padding: '12px 24px',
+                                border: '1px dashed var(--border-color)',
+                                borderRadius: '8px',
+                                backgroundColor: 'transparent',
+                                color: 'var(--text-secondary)',
+                                fontSize: '14px',
+                                cursor: 'pointer',
+                                transition: 'all 0.2s ease',
+                            }}
+                            onMouseEnter={(e) => {
+                                e.currentTarget.style.borderColor = 'var(--primary-orange)';
+                                e.currentTarget.style.color = 'var(--primary-orange)';
+                                e.currentTarget.style.backgroundColor = 'rgba(233, 114, 35, 0.05)';
+                            }}
+                            onMouseLeave={(e) => {
+                                e.currentTarget.style.borderColor = 'var(--border-color)';
+                                e.currentTarget.style.color = 'var(--text-secondary)';
+                                e.currentTarget.style.backgroundColor = 'transparent';
+                            }}
+                        >
+                            <span>+</span>
+                            <span>Thêm Sản Phẩm</span>
+                        </button>
+                    </div>
                 </div>
 
                 {/* Delivery Information Section */}
@@ -288,8 +447,25 @@ export default function CreateOrderPage() {
                 </div>
 
                 {/* Action Buttons */}
+                {error && (
+                    <div
+                        style={{
+                            padding: '12px 16px',
+                            backgroundColor: '#fee',
+                            color: '#c00',
+                            borderRadius: '8px',
+                            marginBottom: '16px',
+                            fontSize: '14px',
+                        }}
+                    >
+                        {error}
+                    </div>
+                )}
+                
                 <div style={{ display: 'flex', gap: '12px' }}>
                     <button
+                        onClick={handleCancel}
+                        disabled={loading}
                         style={{
                             padding: '10px 24px',
                             border: '1px solid var(--border-color)',
@@ -297,12 +473,15 @@ export default function CreateOrderPage() {
                             backgroundColor: 'white',
                             color: 'var(--text-primary)',
                             fontSize: '14px',
-                            cursor: 'pointer',
+                            cursor: loading ? 'not-allowed' : 'pointer',
+                            opacity: loading ? 0.6 : 1,
                         }}
                     >
                         Hủy
                     </button>
                     <button
+                        onClick={handleSubmit}
+                        disabled={loading}
                         style={{
                             display: 'flex',
                             alignItems: 'center',
@@ -314,11 +493,12 @@ export default function CreateOrderPage() {
                             color: 'white',
                             fontSize: '14px',
                             fontWeight: '500',
-                            cursor: 'pointer',
+                            cursor: loading ? 'not-allowed' : 'pointer',
+                            opacity: loading ? 0.6 : 1,
                         }}
                     >
                         <span>🛒</span>
-                        <span>Gửi Đơn Hàng</span>
+                        <span>{loading ? 'Đang gửi...' : 'Gửi Đơn Hàng'}</span>
                     </button>
                 </div>
             </main>
