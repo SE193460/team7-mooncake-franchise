@@ -2,7 +2,7 @@ interface StatusCardProps {
     icon: string;
     count: number;
     label: string;
-    subLabel: string;
+    subLabel?: string;
     highlighted?: boolean;
 }
 
@@ -50,14 +50,16 @@ export default function StatusCard({
                 >
                     {count}
                 </div>
-                <div
-                    style={{
-                        fontSize: '11px',
-                        color: 'var(--text-secondary)',
-                    }}
-                >
-                    {subLabel}
-                </div>
+                {subLabel && (
+                    <div
+                        style={{
+                            fontSize: '11px',
+                            color: 'var(--text-secondary)',
+                        }}
+                    >
+                        {subLabel}
+                    </div>
+                )}
             </div>
             <div
                 style={{

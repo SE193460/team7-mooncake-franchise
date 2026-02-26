@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Sidebar from '../../components/Sidebar';
 import StatusCard from '../../components/StatusCard';
@@ -9,62 +9,45 @@ import storeService, { DashboardStats, Order } from '../../services/storeService
 
 export default function StoreDashboard() {
     const router = useRouter();
-    const [dashboardStats, setDashboardStats] = useState<DashboardStats>({
-        pendingOrders: 0,
-        approvedOrders: 0,
-        processingOrders: 0,
-        fulfilledOrders: 0,
-        totalOrders: 0,
-    });
-    const [orders, setOrders] = useState<Order[]>([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
+    const [cards, setCards] = useState<any>(null);
+    const [orders, setOrders] = useState<any[]>([]);
 
     useEffect(() => {
-        fetchDashboardData();
-    }, []);
+        const token = localStorage.getItem('token');
+        if (!token) return;
 
-    const fetchDashboardData = async () => {
-        try {
-            setLoading(true);
-            // Only call dashboard API - it returns both stats and recent orders
-            const dashboardData = await storeService.getDashboard();
-            
-            console.log('Dashboard data received:', dashboardData);
-            
-            // Set stats and recent orders (only 5 most recent)
-            setDashboardStats(dashboardData.stats);
-            setOrders(dashboardData.recentOrders);
-        } catch (err) {
-            console.error('Error fetching dashboard data:', err);
-            setError('Không thể tải dữ liệu. Vui lòng thử lại.');
-        } finally {
-            setLoading(false);
-        }
-    };
+        fetch('https://franchisemooncake.onrender.com/api/franchiseStaff_dashboard', {
+            headers: {
+                Authorization: `Bearer ${token}`,
+            },
+        })
+            .then(res => res.json())
+            .then(result => {
+                console.log("DASHBOARD:", result);
+
+                const dashboard = result.data;
+
+                setCards(dashboard.cards);
+               
+                setOrders(dashboard.recent_orders);
+                console.log("ORDERS:", dashboard.recent_orders);
+            })
+            .catch(console.error);
+    }, []);
 
     return (
         <div style={{ display: 'flex', minHeight: '100vh' }}>
             <Sidebar activePage="dashboard" />
 
-            <main style={{ flex: 1, padding: '32px 40px', backgroundColor: 'var(--main-bg)' }}>
-                {/* Header */}
+            <main style={{ flex: 1, padding: '32px 40px' }}>
+                <h1>Tổng Quan Cửa Hàng</h1>
                 <div
                     style={{
                         display: 'flex',
-                        justifyContent: 'space-between',
-                        alignItems: 'flex-start',
+                        justifyContent: 'flex-end',
                         marginBottom: '24px',
                     }}
                 >
-                    <div>
-                        <h1 style={{ fontSize: '24px', fontWeight: '600', marginBottom: '4px' }}>
-                            Tổng Quan Cửa Hàng
-                        </h1>
-                        <p style={{ fontSize: '14px', color: 'var(--text-secondary)', marginTop: '4px' }}>
-                            Quản lý đơn hàng bánh Trung Thu và theo dõi giao hàng
-                        </p>
-                    </div>
                     <button
                         onClick={() => router.push('/store/order')}
                         style={{
@@ -98,75 +81,32 @@ export default function StoreDashboard() {
                     </button>
                 </div>
 
-                {loading ? (
-                    <div style={{ textAlign: 'center', padding: '40px' }}>
-                        <p>Đang tải dữ liệu...</p>
-                    </div>
-                ) : error ? (
-                    <div style={{ 
-                        textAlign: 'center', 
-                        padding: '40px',
-                        backgroundColor: '#fee',
-                        borderRadius: '8px',
-                        color: '#c00',
-                    }}>
-                        <p>{error}</p>
-                        <button 
-                            onClick={fetchDashboardData}
-                            style={{
-                                marginTop: '16px',
-                                padding: '8px 16px',
-                                backgroundColor: 'var(--primary-orange)',
-                                color: 'white',
-                                border: 'none',
-                                borderRadius: '6px',
-                                cursor: 'pointer',
-                            }}
-                        >
-                            Thử lại
-                        </button>
-                    </div>
-                ) : (
-                    <>
-                        {/* Status Cards */}
-                        <div
-                            style={{
-                                display: 'flex',
-                                gap: '16px',
-                                marginBottom: '32px',
-                            }}
-                        >
-                            <StatusCard
-                                icon="🛒"
-                                count={dashboardStats.pendingOrders || 0}
-                                label="Chờ Xử Lý"
-                                subLabel="Đang chờ xác nhận"
-                            />
-                            <StatusCard
-                                icon="✅"
-                                count={dashboardStats.approvedOrders || 0}
-                                label="Đã Chấp Nhận"
-                                subLabel="Đã xác nhận đơn hàng"
-                            />
-                            <StatusCard
-                                icon="📦"
-                                count={dashboardStats.processingOrders || 0}
-                                label="Đang Xử Lý"
-                                subLabel="Đang chuẩn bị hàng"
-                                highlighted={true}
-                            />
-                            <StatusCard
-                                icon="🎉"
-                                count={dashboardStats.fulfilledOrders || 0}
-                                label="Hoàn Thành"
-                                subLabel="Đã giao thành công"
-                            />
-                        </div>
+                {/* Status Cards */}
+                <div style={{ display: 'flex', gap: '16px', marginBottom: '32px' }}>
+                    <StatusCard icon="🛒" count={cards?.pending ?? 0} label="Chờ Xử Lý" />
+                    <StatusCard icon="📦" count={cards?.approved ?? 0} label="Đã Chấp Nhận" />
+                    <StatusCard icon="⚙️" count={cards?.processing ?? 0} label="Đang Xử Lý" />
+                    <StatusCard icon="✅" count={cards?.fulfilled ?? 0} label="Hoàn Thành" />
+                </div>
 
-                        {/* Orders Table */}
-                        <OrdersTable orders={orders} />
-                    </>
-                )}
+                {/* Orders Table */}
+                <OrdersTable
+                    orders={orders?.map((o) => ({
+                        id: o.order_code,
+                        orderCode: o.order_code,
+                        products: `${o.product_count} sản phẩm`,
+                        status: o.status,
+                        statusLabel: o.status,
+                        createdDate: new Date(o.created_at).toLocaleDateString(),
+                        desiredDate: o.desired_date
+                            ? new Date(o.desired_date).toLocaleDateString()
+                            : '',
+                        deliveryDate: o.delivered_at
+                            ? new Date(o.delivered_at).toLocaleDateString()
+                            : '',
+                        note: o.note ?? '',
+                    }))}
+                />
             </main>
         </div>
     );

@@ -106,7 +106,7 @@ export default function OrdersTable({ orders }: OrdersTableProps) {
                                     letterSpacing: '0.5px',
                                 }}
                             >
-                                Sản Phẩm
+                                Số Sản Phẩm
                             </th>
                             <th
                                 style={{
@@ -153,51 +153,38 @@ export default function OrdersTable({ orders }: OrdersTableProps) {
                         </tr>
                     </thead>
                     <tbody>
-                        {orders.length === 0 ? (
-                            <tr>
-                                <td colSpan={5} style={{ 
-                                    padding: '24px', 
-                                    textAlign: 'center', 
-                                    color: 'var(--text-secondary)',
-                                    fontSize: '14px'
-                                }}>
-                                    Chưa có đơn hàng nào
+                        {orders?.map((order, index) => (
+                            <tr key={order.id || `order-${index}`} style={{ borderBottom: '1px solid var(--table-border)' }}>
+                                <td style={{ padding: '16px 8px 16px 0', fontSize: '14px', color: 'var(--text-primary)' }}>
+                                    <span style={{ marginRight: '8px' }}>📦</span>
+                                    <span style={{ fontWeight: '500' }}>{order.id}</span>
+                                </td>
+                                <td style={{ padding: '16px 8px', fontSize: '14px', color: 'var(--text-primary)' }}>
+                                    {order.products}
+                                </td>
+                                <td style={{ padding: '16px 8px' }}>
+                                    <span
+                                        style={{
+                                            ...getStatusStyle(order.status),
+                                            padding: '6px 14px',
+                                            borderRadius: '20px',
+                                            fontSize: '12px',
+                                            fontWeight: '500',
+                                            display: 'inline-block',
+                                            whiteSpace: 'nowrap',
+                                        }}
+                                    >
+                                        {order.statusLabel}
+                                    </span>
+                                </td>
+                                <td style={{ padding: '16px 8px', fontSize: '14px', color: 'var(--text-secondary)' }}>
+                                    {order.createdDate}
+                                </td>
+                                <td style={{ padding: '16px 8px', fontSize: '14px', color: 'var(--text-secondary)' }}>
+                                    {order.desiredDate}
                                 </td>
                             </tr>
-                        ) : (
-                            orders.map((order, index) => (
-                                <tr key={order.id || `order-${index}`} style={{ borderBottom: '1px solid var(--table-border)' }}>
-                                    <td style={{ padding: '16px 8px 16px 0', fontSize: '14px', color: 'var(--text-primary)' }}>
-                                        <span style={{ marginRight: '8px' }}>📦</span>
-                                        <span style={{ fontWeight: '500' }}>{order.id}</span>
-                                    </td>
-                                    <td style={{ padding: '16px 8px', fontSize: '14px', color: 'var(--text-primary)' }}>
-                                        {order.products}
-                                    </td>
-                                    <td style={{ padding: '16px 8px' }}>
-                                        <span
-                                            style={{
-                                                ...getStatusStyle(order.status),
-                                                padding: '6px 14px',
-                                                borderRadius: '20px',
-                                                fontSize: '12px',
-                                                fontWeight: '500',
-                                                display: 'inline-block',
-                                                whiteSpace: 'nowrap',
-                                            }}
-                                        >
-                                            {order.statusLabel}
-                                        </span>
-                                    </td>
-                                    <td style={{ padding: '16px 8px', fontSize: '14px', color: 'var(--text-secondary)' }}>
-                                        {order.createdDate}
-                                    </td>
-                                    <td style={{ padding: '16px 8px', fontSize: '14px', color: 'var(--text-secondary)' }}>
-                                        {order.desiredDate}
-                                    </td>
-                                </tr>
-                            ))
-                        )}
+                        ))}
                     </tbody>
                 </table>
             </div>
