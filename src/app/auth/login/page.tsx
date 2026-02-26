@@ -12,13 +12,43 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    // Handle login logic here
-    console.log({ email, password, rememberMe });
-    // Redirect to store page after login
-    router.push('/store');
-  };
+  const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
+
+  try {
+    const res = await fetch("https://franchisemooncake.onrender.com/api/auth/login", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        email,
+        password,
+      }),
+    });
+
+    const data = await res.json();
+    console.log("LOGIN RESPONSE:", data);
+
+    // 👇 SỬA FIELD TOKEN THEO BACKEND
+    const token = data.token || data.data?.token;
+
+    if (!token) {
+      alert("Login không trả token");
+      return;
+    }
+
+    // ✅ LƯU TOKEN Ở ĐÂY
+    localStorage.setItem("token", token);
+
+    // chuyển trang
+    router.push("/store");
+
+  } catch (err) {
+    console.error(err);
+    alert("Login lỗi");
+  }
+};
 
   return (
     <div className={styles.container}>

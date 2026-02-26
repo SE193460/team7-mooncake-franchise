@@ -87,7 +87,7 @@ export default function OrdersTable({ orders }: OrdersTableProps) {
                                     letterSpacing: '0.5px',
                                 }}
                             >
-                                Sản Phẩm
+                                Số Sản Phẩm
                             </th>
                             <th
                                 style={{
@@ -131,7 +131,7 @@ export default function OrdersTable({ orders }: OrdersTableProps) {
                         </tr>
                     </thead>
                     <tbody>
-                        {orders.map((order) => (
+                        {orders?.map((order) => (
                             <tr key={order.id} style={{ borderBottom: '1px solid var(--table-border)' }}>
                                 <td style={{ padding: '16px 0', fontSize: '14px', fontWeight: '500', color: 'var(--text-primary)' }}>
                                     <span style={{ color: 'var(--primary-orange)', marginRight: '8px' }}>📎</span>
