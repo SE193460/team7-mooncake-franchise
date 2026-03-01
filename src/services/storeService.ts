@@ -126,7 +126,7 @@ const convertApiOrderToOrder = (apiOrder: ApiOrder): Order => {
         statusLabel: mappedStatus.label,
         createdDate: new Date(apiOrder.created_at).toLocaleDateString('vi-VN'),
         desiredDate: new Date(apiOrder.desired_date).toLocaleDateString('vi-VN'),
-        deliveryDate: apiOrder.delivered_at 
+        deliveryDate: apiOrder.delivered_at
             ? new Date(apiOrder.delivered_at).toLocaleDateString('vi-VN')
             : '',
         note: apiOrder.note || '',
@@ -140,9 +140,9 @@ const storeService = {
         try {
             const response = await fetchClient.get<ApiResponse<DashboardResponse>>("/franchiseStaff_dashboard");
             console.log('Raw dashboard response:', response);
-            
+
             const dashboardData = (response as ApiResponse<DashboardResponse>).data;
-            
+
             if (!dashboardData || !dashboardData.cards) {
                 throw new Error('Invalid dashboard response structure');
             }
@@ -157,13 +157,13 @@ const storeService = {
                 fulfilledOrders: cards.fulfilled || 0,
                 totalOrders: (cards.pending || 0) + (cards.approved || 0) + (cards.processing || 0) + (cards.fulfilled || 0),
             };
-            
+
             // Convert recent_orders
             const recentOrders = (dashboardData.recent_orders || []).map(convertApiOrderToOrder);
-            
+
             console.log('Parsed dashboard stats:', stats);
             console.log('Recent orders:', recentOrders);
-            
+
             return {
                 stats,
                 recentOrders,
@@ -197,7 +197,7 @@ const storeService = {
                     qty: parseInt(String(p.quantity)) || 0, // Ensure integer
                 })),
             };
-            
+
             console.log('Sending order request:', JSON.stringify(apiRequestData, null, 2));
             const data = await fetchClient.post<CreateOrderResponse>("/CreateOrders", apiRequestData);
             return data;
@@ -212,18 +212,18 @@ const storeService = {
         try {
             const response = await fetchClient.get<ApiResponse<ApiOrder[]>>("/ViewOrders");
             console.log('Raw orders response:', response);
-            
+
             const apiOrders = (response as ApiResponse<ApiOrder[]>).data;
-            
+
             if (!apiOrders || !Array.isArray(apiOrders)) {
                 console.warn('Invalid orders response, returning empty array');
                 return [];
             }
-            
+
             // Convert API orders to UI orders
             const orders = apiOrders.map(convertApiOrderToOrder);
             console.log('Converted orders:', orders);
-            
+
             return orders;
         } catch (error) {
             console.error("Error fetching orders:", error);
@@ -236,14 +236,14 @@ const storeService = {
         try {
             const response = await fetchClient.get<ApiResponse<Product[]>>("/products");
             console.log('Raw products response:', response);
-            
+
             const products = (response as ApiResponse<Product[]>).data;
-            
+
             if (!products || !Array.isArray(products)) {
                 console.warn('Invalid products response, returning empty array');
                 return [];
             }
-            
+
             return products;
         } catch (error) {
             console.error("Error fetching products:", error);
@@ -255,17 +255,22 @@ const storeService = {
     // Get inventory storage for franchise store
     getInventoryStorage: async (): Promise<InventoryItem[]> => {
         try {
-            const response = await fetchClient.get<ApiResponse<InventoryItem[]>>("/franchise/inventory/storage");
-            console.log('Raw inventory storage response:', response);
-            
-            const items = (response as ApiResponse<InventoryItem[]>).data;
-            
-            if (!items || !Array.isArray(items)) {
-                console.warn('Invalid inventory storage response, returning empty array');
-                return [];
+            const res = await fetch(
+                "https://franchisemooncake.onrender.com/api/franchise/inventory/storage",
+                {
+                    headers: {
+                        Authorization: `Bearer ${localStorage.getItem("token")}`,
+                    },
+                }
+            );
+
+            const data = await res.json();
+console.log('apine:', data);
+            if (!data.success) {
+                throw new Error(data.message || "Failed to load inventory");
             }
-            
-            return items;
+
+            return data.data; // 🔥 chỉ trả array
         } catch (error) {
             console.error("Error fetching inventory storage:", error);
             return [];
