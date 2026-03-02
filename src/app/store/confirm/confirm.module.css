@@ -231,6 +231,45 @@
   margin: 0;
 }
 
+/* Loading State */
+.loadingState {
+  padding: 60px 20px;
+  text-align: center;
+  color: #6b7280;
+}
+
+.loadingState p {
+  font-size: 15px;
+  margin: 0;
+}
+
+/* Error State */
+.errorState {
+  padding: 60px 20px;
+  text-align: center;
+  color: #ef4444;
+}
+
+.errorState p {
+  font-size: 15px;
+  margin: 0 0 16px 0;
+}
+
+.retryButton {
+  background-color: #8B4513;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 8px 16px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.retryButton:hover {
+  background-color: #6d3410;
+}
+
 /* Modal Styles */
 .modalOverlay {
   position: fixed;
