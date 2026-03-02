@@ -43,8 +43,9 @@ export interface ApiOrder {
     desired_date: string;
     note: string | null;
     delivered_at: string | null;
-    total_items: string;
-    product_names: string;
+    total_items?: string;
+    product_count?: number;
+    product_names?: string;
 }
 
 export interface Order {
@@ -121,7 +122,7 @@ const convertApiOrderToOrder = (apiOrder: ApiOrder): Order => {
     return {
         id: apiOrder.order_id,
         orderCode: apiOrder.order_code,
-        products: apiOrder.product_names || `${apiOrder.total_items} sản phẩm`,
+        products: `${apiOrder.product_count || apiOrder.total_items || 0} sản phẩm`,
         status: mappedStatus.status,
         statusLabel: mappedStatus.label,
         createdDate: new Date(apiOrder.created_at).toLocaleDateString('vi-VN'),
