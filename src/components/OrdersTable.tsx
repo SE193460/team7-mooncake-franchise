@@ -77,75 +77,76 @@ export default function OrdersTable({ orders }: OrdersTableProps) {
                 </button>
             </div>
 
-            <div style={{ backgroundColor: 'var(--card-bg)', borderRadius: '12px', padding: '20px', boxShadow: '0 1px 3px rgba(0, 0, 0, 0.05)' }}>
+            <div style={{ backgroundColor: 'var(--card-bg)', borderRadius: '12px', padding: '24px', boxShadow: '0 1px 3px rgba(0, 0, 0, 0.05)' }}>
                 <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                     <thead>
-                        <tr style={{ borderBottom: '1px solid var(--table-border)' }}>
+                        <tr style={{ borderBottom: '2px solid var(--table-border)' }}>
                             <th
                                 style={{
                                     textAlign: 'left',
-                                    padding: '12px 8px 12px 0',
+                                    padding: '14px 16px',
                                     fontSize: '12px',
                                     fontWeight: '600',
                                     color: 'var(--text-secondary)',
                                     textTransform: 'uppercase',
                                     letterSpacing: '0.5px',
-                                    width: '80px',
+                                    width: '120px',
                                 }}
                             >
                                 Mã Đơn
                             </th>
                             <th
                                 style={{
-                                    textAlign: 'left',
-                                    padding: '12px 8px',
+                                    textAlign: 'center',
+                                    padding: '14px 16px',
                                     fontSize: '12px',
                                     fontWeight: '600',
                                     color: 'var(--text-secondary)',
                                     textTransform: 'uppercase',
                                     letterSpacing: '0.5px',
+                                    width: '140px',
                                 }}
                             >
-                                Sản Phẩm
+                                Số Lượng
                             </th>
                             <th
                                 style={{
-                                    textAlign: 'left',
-                                    padding: '12px 8px',
+                                    textAlign: 'center',
+                                    padding: '14px 16px',
                                     fontSize: '12px',
                                     fontWeight: '600',
                                     color: 'var(--text-secondary)',
                                     textTransform: 'uppercase',
                                     letterSpacing: '0.5px',
-                                    width: '130px',
+                                    width: '160px',
                                 }}
                             >
                                 Trạng Thái
                             </th>
                             <th
                                 style={{
-                                    textAlign: 'left',
-                                    padding: '12px 8px',
+                                    textAlign: 'center',
+                                    padding: '14px 16px',
                                     fontSize: '12px',
                                     fontWeight: '600',
                                     color: 'var(--text-secondary)',
                                     textTransform: 'uppercase',
                                     letterSpacing: '0.5px',
-                                    width: '100px',
+                                    width: '120px',
                                 }}
                             >
                                 Ngày Tạo
                             </th>
                             <th
                                 style={{
-                                    textAlign: 'left',
-                                    padding: '12px 8px',
+                                    textAlign: 'center',
+                                    padding: '14px 16px',
                                     fontSize: '12px',
                                     fontWeight: '600',
                                     color: 'var(--text-secondary)',
                                     textTransform: 'uppercase',
                                     letterSpacing: '0.5px',
-                                    width: '110px',
+                                    width: '120px',
                                 }}
                             >
                                 Ngày Giao
@@ -156,7 +157,7 @@ export default function OrdersTable({ orders }: OrdersTableProps) {
                         {orders.length === 0 ? (
                             <tr>
                                 <td colSpan={5} style={{ 
-                                    padding: '24px', 
+                                    padding: '40px', 
                                     textAlign: 'center', 
                                     color: 'var(--text-secondary)',
                                     fontSize: '14px'
@@ -166,33 +167,44 @@ export default function OrdersTable({ orders }: OrdersTableProps) {
                             </tr>
                         ) : (
                             orders.map((order, index) => (
-                                <tr key={order.id || `order-${index}`} style={{ borderBottom: '1px solid var(--table-border)' }}>
-                                    <td style={{ padding: '16px 8px 16px 0', fontSize: '14px', color: 'var(--text-primary)' }}>
-                                        <span style={{ marginRight: '8px' }}>📦</span>
-                                        <span style={{ fontWeight: '500' }}>{order.id}</span>
+                                <tr 
+                                    key={order.id || `order-${index}`} 
+                                    style={{ 
+                                        borderBottom: index !== orders.length - 1 ? '1px solid var(--table-border)' : 'none',
+                                        transition: 'background-color 0.2s ease',
+                                    }}
+                                    onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgba(255, 107, 53, 0.02)'}
+                                    onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+                                >
+                                    <td style={{ padding: '18px 16px', fontSize: '14px', color: 'var(--text-primary)' }}>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                            <span>📦</span>
+                                            <span style={{ fontWeight: '600' }}>{order.id}</span>
+                                        </div>
                                     </td>
-                                    <td style={{ padding: '16px 8px', fontSize: '14px', color: 'var(--text-primary)' }}>
+                                    <td style={{ padding: '18px 16px', fontSize: '14px', color: 'var(--text-primary)', textAlign: 'center', fontWeight: '500' }}>
                                         {order.products}
                                     </td>
-                                    <td style={{ padding: '16px 8px' }}>
+                                    <td style={{ padding: '18px 16px', textAlign: 'center' }}>
                                         <span
                                             style={{
                                                 ...getStatusStyle(order.status),
-                                                padding: '6px 14px',
+                                                padding: '8px 16px',
                                                 borderRadius: '20px',
                                                 fontSize: '12px',
-                                                fontWeight: '500',
+                                                fontWeight: '600',
                                                 display: 'inline-block',
                                                 whiteSpace: 'nowrap',
+                                                minWidth: '110px',
                                             }}
                                         >
                                             {order.statusLabel}
                                         </span>
                                     </td>
-                                    <td style={{ padding: '16px 8px', fontSize: '14px', color: 'var(--text-secondary)' }}>
+                                    <td style={{ padding: '18px 16px', fontSize: '14px', color: 'var(--text-secondary)', textAlign: 'center' }}>
                                         {order.createdDate}
                                     </td>
-                                    <td style={{ padding: '16px 8px', fontSize: '14px', color: 'var(--text-secondary)' }}>
+                                    <td style={{ padding: '18px 16px', fontSize: '14px', color: 'var(--text-secondary)', textAlign: 'center' }}>
                                         {order.desiredDate}
                                     </td>
                                 </tr>

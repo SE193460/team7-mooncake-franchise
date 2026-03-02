@@ -21,7 +21,35 @@ export default function StoreDashboard() {
     const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
-        fetchDashboardData();
+        let isMounted = true;
+
+        const fetchData = async () => {
+            try {
+                setLoading(true);
+                const dashboardData = await storeService.getDashboard();
+                
+                if (isMounted) {
+                    console.log('Dashboard data received:', dashboardData);
+                    setDashboardStats(dashboardData.stats);
+                    setOrders(dashboardData.recentOrders);
+                }
+            } catch (err) {
+                if (isMounted) {
+                    console.error('Error fetching dashboard data:', err);
+                    setError('Không thể tải dữ liệu. Vui lòng thử lại.');
+                }
+            } finally {
+                if (isMounted) {
+                    setLoading(false);
+                }
+            }
+        };
+
+        fetchData();
+
+        return () => {
+            isMounted = false;
+        };
     }, []);
 
     const fetchDashboardData = async () => {
