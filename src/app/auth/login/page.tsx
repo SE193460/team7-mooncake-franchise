@@ -44,8 +44,29 @@ export default function LoginPage() {
     // ✅ LƯU TOKEN Ở ĐÂY
     localStorage.setItem("token", token);
 
-    // chuyển trang
-    router.push("/store");
+    // Decode JWT để lấy role (hoặc gọi API /auth/me)
+    try {
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      const role = payload.role;
+      
+      console.log("USER ROLE:", role);
+
+      // Redirect dựa trên role
+      if (role === 'franchise_staff') {
+        router.push("/store");
+      } else if (role === 'kitchen_staff') {
+        router.push("/kitchen");
+      } else if (role === 'manager') {
+        router.push("/manager");
+      } else if (role === 'admin') {
+        router.push("/manager"); // hoặc trang admin riêng nếu có
+      } else {
+        alert("Role không được hỗ trợ: " + role);
+      }
+    } catch (err) {
+      console.error("Error decoding token:", err);
+      router.push("/store"); // fallback
+    }
 
   } catch (err) {
     console.error(err);

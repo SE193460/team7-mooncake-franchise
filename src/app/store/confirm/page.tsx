@@ -169,7 +169,7 @@ export default function OrderConfirmationPage() {
                   <td>
                     <div className={styles.orderIdCell}>
                       <span className={styles.orderIcon}>📦</span>
-                      <span className={styles.orderId}>{order.orderCode}</span>
+                      <span className={styles.orderId}>{order.id}</span>
                     </div>
                   </td>
                   <td>
