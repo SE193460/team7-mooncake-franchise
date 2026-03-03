@@ -1,47 +1,71 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Sidebar from '../../../components/Sidebar';
+import storeService, { ConfirmOrder } from '../../../services/storeService';
 import styles from './confirm.module.css';
 
 interface Order {
   id: string;
-  storeName: string;
+  orderCode: string;
   products: string;
   createdDate: string;
   deliveryDate: string;
+  confirmedDate: string;
   status: string;
   isConfirmed: boolean;
 }
 
 export default function OrderConfirmationPage() {
-  const [orders, setOrders] = useState<Order[]>([
-    {
-      id: 'ORD-003',
-      storeName: 'Bánh Trung Thu Bánh Hương Xưa',
-      products: '2 sản phẩm',
-      createdDate: '06/01/2026',
-      deliveryDate: '12/01/2026', 
-      status: 'Đã giao',
-      isConfirmed: false,
-    },
-    {
-      id: 'ORD-006',
-      storeName: 'Bánh Hương Lúa Vàng',
-      products: '1 sản phẩm',
-      createdDate: '03/01/2026',
-      deliveryDate: '03/01/2026',
-      status: 'Đã giao',
-      isConfirmed: false,
-    },
-  ]);
-
-  const [selectedFilter, setSelectedFilter] = useState('Tất cả');
+  const [orders, setOrders] = useState<Order[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [selectedFilter, setSelectedFilter] = useState<'all' | 'delivered' | 'confirmed'>('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [showFeedbackModal, setShowFeedbackModal] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [feedback, setFeedback] = useState('');
   const [rating, setRating] = useState(5);
+  const [submitting, setSubmitting] = useState(false);
+
+  // Convert API data to UI format
+  const convertApiOrderToUI = (apiOrder: ConfirmOrder): Order => {
+    return {
+      id: apiOrder.order_id,
+      orderCode: apiOrder.order_code,
+      products: '', // API doesn't return product info in this endpoint
+      createdDate: new Date(apiOrder.created_at).toLocaleDateString('vi-VN'),
+      deliveryDate: apiOrder.delivered_at 
+        ? new Date(apiOrder.delivered_at).toLocaleDateString('vi-VN') 
+        : '',
+      confirmedDate: apiOrder.received_confirmed_at
+        ? new Date(apiOrder.received_confirmed_at).toLocaleDateString('vi-VN')
+        : '',
+      status: apiOrder.status === 'fulfilled' ? 'Đã giao' : 'Đã xác nhận',
+      isConfirmed: apiOrder.status === 'confirmed',
+    };
+  };
+
+  // Fetch orders from API
+  const fetchOrders = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const apiOrders = await storeService.getConfirmOrders(selectedFilter, searchQuery);
+      const uiOrders = apiOrders.map(convertApiOrderToUI);
+      setOrders(uiOrders);
+    } catch (err) {
+      console.error('Error fetching orders:', err);
+      setError('Không thể tải danh sách đơn hàng');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Fetch orders on mount and when filter/search changes
+  useEffect(() => {
+    fetchOrders();
+  }, [selectedFilter, searchQuery]);
 
   const getStatusClass = (status: string) => {
     if (status === 'Đã giao') return styles.statusDelivered;
@@ -56,31 +80,35 @@ export default function OrderConfirmationPage() {
     setShowFeedbackModal(true);
   };
 
-  const handleSubmitFeedback = () => {
-    if (selectedOrder) {
-      setOrders(orders.map(order => 
-        order.id === selectedOrder.id 
-          ? { ...order, status: 'Đã xác nhận', isConfirmed: true }
-          : order
-      ));
+  const handleSubmitFeedback = async () => {
+    if (!selectedOrder) return;
+
+    try {
+      setSubmitting(true);
       
-      // Here you would send the feedback to the server
-      console.log('Feedback submitted:', {
-        orderId: selectedOrder.id,
+      // Call API to confirm receipt
+      await storeService.confirmReceipt(
+        selectedOrder.id,
         rating,
         feedback
-      });
+      );
+
+      // Refresh orders list
+      await fetchOrders();
       
       setShowFeedbackModal(false);
       setSelectedOrder(null);
+      setFeedback('');
+      setRating(5);
+    } catch (err) {
+      console.error('Error confirming receipt:', err);
+      alert('Không thể xác nhận đơn hàng. Vui lòng thử lại!');
+    } finally {
+      setSubmitting(false);
     }
   };
 
-  const filteredOrders = orders.filter(order => {
-    const matchesSearch = order.id.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesFilter = selectedFilter === 'Tất cả' || order.status === selectedFilter;
-    return matchesSearch && matchesFilter;
-  });
+  const filteredOrders = orders;
 
   return (
     <div className={styles.pageContainer}>
@@ -104,16 +132,26 @@ export default function OrderConfirmationPage() {
           </div>
           <select
             value={selectedFilter}
-            onChange={(e) => setSelectedFilter(e.target.value)}
+            onChange={(e) => setSelectedFilter(e.target.value as 'all' | 'delivered' | 'confirmed')}
             className={styles.filterSelect}
           >
-            <option>Tất cả</option>
-            <option>Đã giao</option>
-            <option>Đã xác nhận</option>
+            <option value="all">Tất cả</option>
+            <option value="delivered">Đã giao</option>
+            <option value="confirmed">Đã xác nhận</option>
           </select>
         </div>
 
-        <div className={styles.tableContainer}>
+        {loading ? (
+          <div className={styles.loadingState}>
+            <p>Đang tải...</p>
+          </div>
+        ) : error ? (
+          <div className={styles.errorState}>
+            <p>{error}</p>
+            <button onClick={fetchOrders} className={styles.retryButton}>Thử lại</button>
+          </div>
+        ) : (
+          <div className={styles.tableContainer}>
           <table className={styles.table}>
             <thead>
               <tr>
@@ -136,8 +174,7 @@ export default function OrderConfirmationPage() {
                   </td>
                   <td>
                     <div className={styles.productCell}>
-                      <div className={styles.productCount}>{order.products}</div>
-                      <div className={styles.storeName}>{order.storeName}</div>
+                      <div className={styles.productCount}>{order.products || 'N/A'}</div>
                     </div>
                   </td>
                   <td>
@@ -146,7 +183,7 @@ export default function OrderConfirmationPage() {
                     </span>
                   </td>
                   <td className={styles.dateCell}>{order.createdDate}</td>
-                  <td className={styles.dateCell}>{order.deliveryDate}</td>
+                  <td className={styles.dateCell}>{order.deliveryDate || order.confirmedDate}</td>
                   <td>
                     {order.status === 'Đã giao' && !order.isConfirmed ? (
                       <button 
@@ -171,6 +208,7 @@ export default function OrderConfirmationPage() {
             </div>
           )}
         </div>
+        )}
       </div>
 
       {/* Feedback Modal */}
@@ -227,14 +265,16 @@ export default function OrderConfirmationPage() {
               <button 
                 className={styles.cancelButton}
                 onClick={() => setShowFeedbackModal(false)}
+                disabled={submitting}
               >
                 Hủy
               </button>
               <button 
                 className={styles.submitButton}
                 onClick={handleSubmitFeedback}
+                disabled={submitting}
               >
-                Xác Nhận & Gửi Đánh Giá
+                {submitting ? 'Đang xử lý...' : 'Xác Nhận & Gửi Đánh Giá'}
               </button>
             </div>
           </div>

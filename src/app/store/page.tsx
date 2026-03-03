@@ -27,9 +27,14 @@ export default function StoreDashboard() {
 
                 const dashboard = result.data;
 
-                setCards(dashboard.cards);
+                if (!dashboard) {
+                    console.error("Dashboard data is null");
+                    return;
+                }
+
+                setCards(dashboard.cards || {});
                
-                setOrders(dashboard.recent_orders);
+                setOrders(dashboard.recent_orders || []);
                 console.log("ORDERS:", dashboard.recent_orders);
             })
             .catch(console.error);
@@ -92,7 +97,7 @@ export default function StoreDashboard() {
                 {/* Orders Table */}
                 <OrdersTable
                     orders={orders?.map((o) => ({
-                        id: o.order_code,
+                        id: o.order_id,
                         orderCode: o.order_code,
                         products: `${o.product_count} sản phẩm`,
                         status: o.status,
