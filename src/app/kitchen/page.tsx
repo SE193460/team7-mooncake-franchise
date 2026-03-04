@@ -215,9 +215,9 @@ export default function KitchenDashboard() {
                         </div>
 
                         {/* Warning Items */}
-                        {dashboardData?.low_stock_alerts?.map((item: any) => (
+                        {dashboardData?.expiring_materials?.map((item: any) => (
                             <div
-                                key={item.id}
+                                key={item.material_id}
                                 style={{
                                     padding: '16px',
                                     backgroundColor: '#fafafa',
@@ -230,14 +230,21 @@ export default function KitchenDashboard() {
                             >
                                 <div>
                                     <div style={{ fontWeight: '600', fontSize: '15px', color: 'var(--text-primary)', marginBottom: '4px' }}>
-                                        {item.name}
+                                        {item.material_name}
                                     </div>
                                     <div style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>
-                                        {item.warning}
+                                        {item.days_left} ngày còn lại
                                     </div>
                                 </div>
                                 <div style={{ fontSize: '14px', color: '#dc2626', fontWeight: '500' }}>
-                                    HSD: {item.expiryDate}
+                                    {(() => {
+                                        const d = new Date(item.expiry_date);
+                                        const formatted =
+                                            d.getDate().toString().padStart(2, '0') + '/' +
+                                            (d.getMonth() + 1).toString().padStart(2, '0') + '/' +
+                                            d.getFullYear();
+                                        return `HSD: ${formatted}`;
+                                    })()}
                                 </div>
                             </div>
                         ))}
