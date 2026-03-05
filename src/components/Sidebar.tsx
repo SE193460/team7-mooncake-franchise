@@ -7,22 +7,79 @@ import authService, { User } from '../services/authService';
 
 interface SidebarProps {
     activePage?: string;
+    type?: 'franchise' | 'kitchen' | 'manager' | 'admin';
 }
 
-export default function Sidebar({ activePage = 'dashboard' }: SidebarProps) {
+export default function Sidebar({ activePage = 'dashboard', type = 'franchise' }: SidebarProps) {
     const [currentUser, setCurrentUser] = useState<User | null>(null);
 
     useEffect(() => {
         const user = authService.getCurrentUser();
         setCurrentUser(user);
+        
+        // Nếu không có username từ localStorage, fetch từ API
+        if (!user?.username) {
+            authService.getUserProfile().then((profile) => {
+                const updatedUser: User = {
+                    user_id: profile.user_id,
+                    username: profile.username,
+                    email: profile.email,
+                    role: profile.role,
+                    status: profile.status,
+                    franchise_store_id: profile.franchise?.franchise_store_id || null,
+                    central_kitchen_id: profile.central_kitchen || null,
+                };
+                setCurrentUser(updatedUser);
+                // Cập nhật localStorage
+                localStorage.setItem('user', JSON.stringify(updatedUser));
+            }).catch((error) => {
+                console.error('Failed to fetch user profile:', error);
+            });
+        }
     }, []);
-    const menuItems = [
+
+    const franchiseMenuItems = [
         { id: 'dashboard', label: 'Bảng điều khiển', icon: '📊', href: '/store' },
         { id: 'order', label: 'Đặt Hàng', icon: '🛒', href: '/store/order' },
         { id: 'tracking', label: 'Theo Dõi Đơn', icon: '🚚', href: '/store/tracking' },
         { id: 'confirm', label: 'Xác Nhận Nhận Hàng', icon: '📦', href: '/store/confirm' },
         { id: 'storage', label: 'Kho Lưu Trữ', icon: '🏪', href: '/store/storage' },
     ];
+
+    const kitchenMenuItems = [
+        { id: 'dashboard', label: 'Bảng điều khiển', icon: '📊', href: '/kitchen' },
+        { id: 'ingredients', label: 'Nguyên Liệu & HSD', icon: '📦', href: '/kitchen/ingredients' },
+    ];
+
+    const managerMenuItems = [
+        { id: 'dashboard', label: 'Bảng điều khiển', icon: '📊', href: '/manager' },
+        { id: 'inventory', label: 'Tồn Kho Tổng', icon: '📦', href: '/manager/inventory' },
+    ];
+
+    const adminMenuItems = [
+        { id: 'dashboard', label: 'Dashboard', icon: '📊', href: '/admin' },
+        { id: 'users', label: 'Quản Lý Users', icon: '👥', href: '/admin/users' },
+        { id: 'categories', label: 'Dữ Liệu Danh Mục', icon: '📋', href: '/admin/categories' },
+        { id: 'settings', label: 'Cài Đặt Hệ Thống', icon: '⚙️', href: '/admin/settings' },
+    ];
+
+    const menuItems = type === 'kitchen' ? kitchenMenuItems : 
+                      type === 'manager' ? managerMenuItems : 
+                      type === 'admin' ? adminMenuItems : 
+                      franchiseMenuItems;
+    const homeHref = type === 'kitchen' ? '/kitchen' : 
+                     type === 'manager' ? '/manager' : 
+                     type === 'admin' ? '/admin' : 
+                     '/store';
+    const profileHref = '/profile'; // Profile chung cho tất cả roles
+    const brandTitle = type === 'kitchen' ? 'Mooncake Kitchen' : 
+                       type === 'manager' ? 'Mooncake Manager' : 
+                       type === 'admin' ? 'Admin Panel' : 
+                       'Mooncake Franchise';
+    const brandSubtitle = type === 'kitchen' ? 'Bếp Trung Tâm' : 
+                          type === 'manager' ? 'Quản Lý' : 
+                          type === 'admin' ? 'Quản Trị Viên' : 
+                          'Cửa hàng';
 
     return (
         <aside
@@ -46,11 +103,11 @@ export default function Sidebar({ activePage = 'dashboard' }: SidebarProps) {
                     background: 'linear-gradient(180deg, var(--sidebar-header-bg) 0%, var(--sidebar-bg) 100%)',
                 }}
             >
-                <Link href="/store" style={{ display: 'flex', alignItems: 'center', gap: '12px', textDecoration: 'none' }}>
+                <Link href={homeHref} style={{ display: 'flex', alignItems: 'center', gap: '12px', textDecoration: 'none' }}>
                     <div style={{ flexShrink: 0, width: '44px', height: '44px', position: 'relative', borderRadius: '6px', overflow: 'hidden' }}>
                         <Image
                             src="/logo.png"
-                            alt="Mooncake Franchise"
+                            alt={brandTitle}
                             fill
                             sizes="44px"
                             style={{ objectFit: 'contain' }}
@@ -58,9 +115,9 @@ export default function Sidebar({ activePage = 'dashboard' }: SidebarProps) {
                     </div>
                     <div>
                         <div style={{ fontWeight: '600', fontSize: '18px', color: 'var(--text-white)' }}>
-                            Mooncake Franchise
+                            {brandTitle}
                         </div>
-                        <div style={{ fontSize: '13px', color: 'rgba(255, 255, 255, 0.7)' }}>Cửa hàng</div>
+                        <div style={{ fontSize: '13px', color: 'rgba(255, 255, 255, 0.7)' }}>{brandSubtitle}</div>
                     </div>
                 </Link>
             </div>
@@ -98,7 +155,25 @@ export default function Sidebar({ activePage = 'dashboard' }: SidebarProps) {
                     borderTop: '1px solid var(--border-color)',
                 }}
             >
-                <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '14px' }}>
+                <Link 
+                    href={profileHref}
+                    style={{ 
+                        display: 'flex', 
+                        alignItems: 'center', 
+                        gap: '12px', 
+                        marginBottom: '14px',
+                        textDecoration: 'none',
+                        padding: '8px',
+                        borderRadius: '8px',
+                        transition: 'background-color 0.2s',
+                    }}
+                    onMouseEnter={(e) => {
+                        e.currentTarget.style.backgroundColor = 'rgba(255, 107, 53, 0.1)';
+                    }}
+                    onMouseLeave={(e) => {
+                        e.currentTarget.style.backgroundColor = 'transparent';
+                    }}
+                >
                     <div
                         style={{
                             width: '40px',
@@ -123,7 +198,7 @@ export default function Sidebar({ activePage = 'dashboard' }: SidebarProps) {
                             {currentUser?.email || ''}
                         </div>
                     </div>
-                </div>
+                </Link>
                 <button
                     onClick={() => authService.logout()}
                     style={{
