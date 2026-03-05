@@ -1,6 +1,6 @@
 'use client';
 
-import KitchenSidebar from '../../components/KitchenSidebar';
+import Sidebar from '../../components/Sidebar';
 import KitchenStatusCard from '../../components/KitchenStatusCard';
 import { useEffect, useState } from "react";
 
@@ -69,7 +69,7 @@ export default function KitchenDashboard() {
 
     return (
         <div style={{ display: 'flex', minHeight: '100vh', backgroundColor: '#fafafa' }}>
-            <KitchenSidebar activePage="dashboard" />
+            <Sidebar activePage="dashboard" type="kitchen" />
 
             {/* Main Content */}
             <main style={{ flex: 1, padding: '32px 40px' }}>
@@ -143,9 +143,9 @@ export default function KitchenDashboard() {
                         </div>
 
                         {/* Order Items */}
-                        {dashboardData?.pending_orders?.map((order: any) => (
+                        {dashboardData?.pending_orders?.map((order: any, index: number) => (
                             <div
-                                key={order.id}
+                                key={order.order_code || `order-${index}`}
                                 style={{
                                     padding: '16px',
                                     backgroundColor: '#fafafa',
@@ -215,9 +215,9 @@ export default function KitchenDashboard() {
                         </div>
 
                         {/* Warning Items */}
-                        {dashboardData?.low_stock_alerts?.map((item: any) => (
+                        {dashboardData?.low_stock_alerts?.map((item: any, index: number) => (
                             <div
-                                key={item.id}
+                                key={`alert-${item.id || index}`}
                                 style={{
                                     padding: '16px',
                                     backgroundColor: '#fafafa',

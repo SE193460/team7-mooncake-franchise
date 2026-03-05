@@ -1,6 +1,6 @@
 'use client';
 
-import KitchenSidebar from '../../../components/KitchenSidebar';
+import Sidebar from '../../../components/Sidebar';
 
 // Calendar icon for expiring items
 const CalendarIcon = () => (
@@ -121,7 +121,7 @@ const getDaysLeftColor = (days: number) => {
 export default function IngredientsPage() {
     return (
         <div style={{ display: 'flex', minHeight: '100vh', backgroundColor: '#fafafa' }}>
-            <KitchenSidebar activePage="ingredients" />
+            <Sidebar activePage="ingredients" type="kitchen" />
 
             {/* Main Content */}
             <main style={{ flex: 1, padding: '32px 40px' }}>

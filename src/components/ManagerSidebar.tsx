@@ -2,18 +2,37 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import authService, { User } from '../services/authService';
 
 export default function ManagerSidebar() {
   const pathname = usePathname();
-  const [currentUser] = useState<User | null>(() => {
-    // Lazy initialization - only runs once
-    if (typeof window !== 'undefined') {
-      return authService.getCurrentUser();
+  const [currentUser, setCurrentUser] = useState<User | null>(null);
+
+  useEffect(() => {
+    const user = authService.getCurrentUser();
+    setCurrentUser(user);
+    
+    // Nếu không có username từ localStorage, fetch từ API
+    if (!user?.username) {
+      authService.getUserProfile().then((profile) => {
+        const updatedUser: User = {
+          user_id: profile.user_id,
+          username: profile.username,
+          email: profile.email,
+          role: profile.role,
+          status: profile.status,
+          franchise_store_id: profile.franchise?.franchise_store_id || null,
+          central_kitchen_id: profile.central_kitchen || null,
+        };
+        setCurrentUser(updatedUser);
+        // Cập nhật localStorage
+        localStorage.setItem('user', JSON.stringify(updatedUser));
+      }).catch((error) => {
+        console.error('Failed to fetch user profile:', error);
+      });
     }
-    return null;
-  });
+  }, []);
 
   const menuItems = [
     { name: "Bảng điều khiển", href: "/manager", icon: "dashboard" },
@@ -157,7 +176,26 @@ export default function ManagerSidebar() {
           borderTop: "1px solid rgba(255,255,255,0.1)",
         }}
       >
-        <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+        <Link 
+          href="/profile"
+          style={{ 
+            display: 'flex', 
+            alignItems: 'center', 
+            gap: '12px', 
+            marginBottom: '14px',
+            textDecoration: 'none',
+            padding: '8px',
+            borderRadius: '8px',
+            transition: 'background-color 0.2s',
+            color: 'white',
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.backgroundColor = 'rgba(155, 89, 182, 0.3)';
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.backgroundColor = 'transparent';
+          }}
+        >
           <div
             style={{
               width: "36px",
@@ -179,7 +217,7 @@ export default function ManagerSidebar() {
               {currentUser?.email || ''}
             </div>
           </div>
-        </div>
+        </Link>
         <button
           onClick={() => authService.logout()}
           style={{
