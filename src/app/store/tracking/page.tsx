@@ -69,11 +69,12 @@ export default function OrderTrackingPage() {
 
   const getStatusClass = (status: string) => {
     if (status === 'pending' || status === 'Chờ xử lý') return styles.statusPending;
-    if (status === 'ready' || status === 'Đã chấp nhận') return styles.statusReady;
-    if (status === 'preparing' || status === 'Đang chuẩn bị') return styles.statusPreparing;
+    if (status === 'ready' || status === 'approved' || status === 'Đã chấp nhận') return styles.statusReady;
+    if (status === 'preparing' || status === 'processing' || status === 'Đang chuẩn bị') return styles.statusPreparing;
     if (status === 'delivered' || status === 'Đã Giao') return styles.statusDelivered;
-    if (status === 'completed' || status === 'Đã hoàn thành') return styles.statusCompleted;
-    return '';
+    if (status === 'completed' || status === 'fulfilled' || status === 'Đã hoàn thành') return styles.statusCompleted;
+    if (status === 'cancelled' || status === 'rejected' || status === 'Đã hủy') return styles.statusCancelled;
+    return styles.statusCancelled;
   };
 
   const getStatusDisplay = (order: Order) => {

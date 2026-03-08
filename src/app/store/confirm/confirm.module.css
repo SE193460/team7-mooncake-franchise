@@ -171,13 +171,13 @@
 }
 
 .statusDelivered {
-  background: #dbeafe;
-  color: #1e40af;
+  background: var(--status-purple);
+  color: var(--status-purple-text);
 }
 
 .statusConfirmed {
-  background: #d1fae5;
-  color: #059669;
+  background: var(--status-green);
+  color: var(--status-green-text);
 }
 
 .dateCell {

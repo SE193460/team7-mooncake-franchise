@@ -36,6 +36,18 @@ export default function Sidebar({ activePage = 'dashboard', type = 'franchise' }
                 console.error('Failed to fetch user profile:', error);
             });
         }
+
+        // Listen for user updates từ Profile page
+        const handleUserUpdate = (event: CustomEvent) => {
+            setCurrentUser(event.detail);
+        };
+
+        window.addEventListener('userUpdated', handleUserUpdate as EventListener);
+
+        // Cleanup listener khi component unmount
+        return () => {
+            window.removeEventListener('userUpdated', handleUserUpdate as EventListener);
+        };
     }, []);
 
     const franchiseMenuItems = [
@@ -48,6 +60,8 @@ export default function Sidebar({ activePage = 'dashboard', type = 'franchise' }
 
     const kitchenMenuItems = [
         { id: 'dashboard', label: 'Bảng điều khiển', icon: '📊', href: '/kitchen' },
+        { id: 'new-orders', label: 'Đơn Hàng Mới', icon: '📋', href: '/kitchen/orders' },
+        { id: 'update-status', label: 'Cập Nhật Trạng Thái', icon: '🔄', href: '/kitchen/status' },
         { id: 'ingredients', label: 'Nguyên Liệu & HSD', icon: '📦', href: '/kitchen/ingredients' },
     ];
 

@@ -32,6 +32,18 @@ export default function ManagerSidebar() {
         console.error('Failed to fetch user profile:', error);
       });
     }
+
+    // Listen for user updates từ Profile page
+    const handleUserUpdate = (event: CustomEvent) => {
+      setCurrentUser(event.detail);
+    };
+
+    window.addEventListener('userUpdated', handleUserUpdate as EventListener);
+
+    // Cleanup listener khi component unmount
+    return () => {
+      window.removeEventListener('userUpdated', handleUserUpdate as EventListener);
+    };
   }, []);
 
   const menuItems = [

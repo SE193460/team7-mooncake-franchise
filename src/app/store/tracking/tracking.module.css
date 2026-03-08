@@ -171,28 +171,48 @@
 }
 
 .statusPending {
-  background: #fef3c7;
-  color: #b45309;
+  background: var(--status-yellow);
+  color: var(--status-yellow-text);
 }
 
 .statusReady {
-  background: #dbeafe;
-  color: #1e40af;
+  background: var(--status-blue);
+  color: var(--status-blue-text);
 }
 
 .statusPreparing {
-  background: #fed7aa;
-  color: #c2410c;
+  background: var(--status-orange);
+  color: var(--status-orange-text);
+}
+
+.statusProcessing {
+  background: var(--status-orange);
+  color: var(--status-orange-text);
 }
 
 .statusDelivered {
-  background: #e9d5ff;
-  color: #7e22ce;
+  background: var(--status-purple);
+  color: var(--status-purple-text);
 }
 
 .statusCompleted {
-  background: #d1fae5;
-  color: #059669;
+  background: var(--status-green);
+  color: var(--status-green-text);
+}
+
+.statusFulfilled {
+  background: var(--status-green);
+  color: var(--status-green-text);
+}
+
+.statusCancelled {
+  background: var(--status-gray);
+  color: var(--status-gray-text);
+}
+
+.statusRejected {
+  background: var(--status-gray);
+  color: var(--status-gray-text);
 }
 
 .dateCell {
@@ -295,40 +315,6 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-}
-
-.statusBadge {
-  display: inline-flex;
-  padding: 8px 16px;
-  border-radius: 20px;
-  font-size: 13px;
-  font-weight: 600;
-  white-space: nowrap;
-}
-
-.statusPending {
-  background: #fef3c7;
-  color: #b45309;
-}
-
-.statusReady {
-  background: #dbeafe;
-  color: #1e40af;
-}
-
-.statusPreparing {
-  background: #fed7aa;
-  color: #c2410c;
-}
-
-.statusDelivered {
-  background: #e9d5ff;
-  color: #7e22ce;
-}
-
-.statusCompleted {
-  background: #d1fae5;
-  color: #059669;
 }
 
 .timeline {
