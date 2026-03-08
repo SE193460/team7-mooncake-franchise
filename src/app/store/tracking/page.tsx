@@ -7,6 +7,7 @@ import storeService from '../../../services/storeService';
 
 interface Order {
   id: string;
+  orderCode: string;
   storeName?: string;
   products: string;
   createdDate: string;

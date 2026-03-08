@@ -43,8 +43,9 @@ export interface ApiOrder {
     desired_date: string;
     note: string | null;
     delivered_at: string | null;
-    total_items: string;
-    product_names: string;
+    total_items?: string;
+    product_count?: number;
+    product_names?: string;
 }
 
 export interface Order {
@@ -105,6 +106,31 @@ export interface UserProfile {
     central_kitchen_id: string | null;
 }
 
+// Confirm Receipt API Interfaces
+export interface ConfirmOrder {
+    order_id: string;
+    order_code: string;
+    status: string;
+    created_at: string;
+    delivered_at: string | null;
+    received_confirmed_at: string | null;
+}
+
+export interface ConfirmOrdersResponse {
+    success: boolean;
+    data: ConfirmOrder[];
+}
+
+export interface ConfirmReceiptRequest {
+    rating: number;
+    comment: string;
+}
+
+export interface ConfirmReceiptResponse {
+    success: boolean;
+    message?: string;
+}
+
 // Helper function to convert API order to UI order
 const convertApiOrderToOrder = (apiOrder: ApiOrder): Order => {
     const statusMap: Record<string, { status: Order['status']; label: string }> = {
@@ -121,7 +147,7 @@ const convertApiOrderToOrder = (apiOrder: ApiOrder): Order => {
     return {
         id: apiOrder.order_id,
         orderCode: apiOrder.order_code,
-        products: apiOrder.product_names || `${apiOrder.total_items} sản phẩm`,
+        products: `${apiOrder.product_count || apiOrder.total_items || 0} sản phẩm`,
         status: mappedStatus.status,
         statusLabel: mappedStatus.label,
         createdDate: new Date(apiOrder.created_at).toLocaleDateString('vi-VN'),
@@ -274,6 +300,70 @@ console.log('apine:', data);
         } catch (error) {
             console.error("Error fetching inventory storage:", error);
             return [];
+        }
+    },
+
+    // Get orders for receive confirmation page
+    getConfirmOrders: async (
+        filter: 'all' | 'delivered' | 'confirmed' = 'all',
+        keyword?: string,
+        page: number = 1,
+        limit: number = 20
+    ): Promise<ConfirmOrder[]> => {
+        try {
+            const params = new URLSearchParams({
+                filter,
+                page: page.toString(),
+                limit: limit.toString(),
+            });
+
+            if (keyword) {
+                params.append('keyword', keyword);
+            }
+
+            const response = await fetchClient.get<ConfirmOrdersResponse>(
+                `/franchise/orders/receive-confirm?${params.toString()}`
+            );
+
+            console.log('Confirm orders response:', response);
+
+            if (!response.success || !response.data) {
+                console.warn('Invalid confirm orders response');
+                return [];
+            }
+
+            return response.data;
+        } catch (error) {
+            console.error("Error fetching confirm orders:", error);
+            return [];
+        }
+    },
+
+    // Confirm receipt of order
+    confirmReceipt: async (
+        orderId: string,
+        rating: number,
+        comment: string
+    ): Promise<ConfirmReceiptResponse> => {
+        try {
+            const requestBody: ConfirmReceiptRequest = {
+                rating,
+                comment,
+            };
+
+            console.log(`Confirming receipt for order ${orderId}:`, requestBody);
+
+            const response = await fetchClient.post<ConfirmReceiptResponse>(
+                `/orders/${orderId}/confirm-receipt`,
+                requestBody
+            );
+
+            console.log('Confirm receipt response:', response);
+
+            return response;
+        } catch (error) {
+            console.error("Error confirming receipt:", error);
+            throw error;
         }
     },
 };
