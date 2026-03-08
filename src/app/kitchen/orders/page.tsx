@@ -232,7 +232,7 @@ export default function NewOrdersPage() {
                                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '20px' }}>
                                         <div>
                                             <h3 style={{ fontSize: '20px', fontWeight: '600', marginBottom: '4px', color: 'var(--text-primary)' }}>
-                                                {order.order_code}
+                                                ORD-{order.order_id}
                                             </h3>
                                             <p style={{ fontSize: '14px', color: 'var(--text-secondary)' }}>
                                                 {order.store_name}
@@ -498,7 +498,7 @@ export default function NewOrdersPage() {
                                     {/* Order Info */}
                                     <div style={{ marginBottom: '24px' }}>
                                         <h3 style={{ fontSize: '18px', fontWeight: '600', color: 'var(--text-primary)', marginBottom: '4px' }}>
-                                            {selectedOrder.order.order_code}
+                                            ORD-{selectedOrder.order.order_id}
                                         </h3>
                                         <p style={{ fontSize: '14px', color: 'var(--text-secondary)' }}>
                                             {selectedOrder.order.store_name}

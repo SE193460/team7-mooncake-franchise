@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from "react";
-import KitchenSidebar from '../../../components/KitchenSidebar';
+import Sidebar from '../../../components/Sidebar';
 
 // Calendar icon for expiring items
 const CalendarIcon = () => (
@@ -59,7 +59,7 @@ export default function ProductStoragePage() {
 
     return (
         <div style={{ display: 'flex', minHeight: '100vh', backgroundColor: '#fafafa' }}>
-            <KitchenSidebar activePage="product-storage" />
+            <Sidebar activePage="product-storage" type="kitchen" />
 
             {/* Main Content */}
             <main style={{ flex: 1, padding: '32px 40px' }}>
