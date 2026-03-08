@@ -23,11 +23,13 @@ export default function OrdersTable({ orders }: OrdersTableProps) {
                     color: 'var(--status-yellow-text)',
                 };
             case 'ready':
+            case 'approved':
                 return {
                     backgroundColor: 'var(--status-blue)',
                     color: 'var(--status-blue-text)',
                 };
             case 'preparing':
+            case 'processing':
                 return {
                     backgroundColor: 'var(--status-orange)',
                     color: 'var(--status-orange-text)',
@@ -38,14 +40,21 @@ export default function OrdersTable({ orders }: OrdersTableProps) {
                     color: 'var(--status-purple-text)',
                 };
             case 'completed':
+            case 'fulfilled':
                 return {
                     backgroundColor: 'var(--status-green)',
                     color: 'var(--status-green-text)',
                 };
+            case 'cancelled':
+            case 'rejected':
+                return {
+                    backgroundColor: 'var(--status-gray)',
+                    color: 'var(--status-gray-text)',
+                };
             default:
                 return {
-                    backgroundColor: '#f3f4f6',
-                    color: 'var(--text-secondary)',
+                    backgroundColor: 'var(--status-gray)',
+                    color: 'var(--status-gray-text)',
                 };
         }
     };

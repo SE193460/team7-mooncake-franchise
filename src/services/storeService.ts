@@ -108,12 +108,12 @@ export interface UserProfile {
 
 // Confirm Receipt API Interfaces
 export interface ConfirmOrder {
-    order_id: string;
+    order_id: number;
     order_code: string;
     status: string;
-    created_at: string;
-    delivered_at: string | null;
-    received_confirmed_at: string | null;
+    delivered_at: string;
+    product_name: string;
+    qty: number;
 }
 
 export interface ConfirmOrdersResponse {
@@ -140,6 +140,9 @@ const convertApiOrderToOrder = (apiOrder: ApiOrder): Order => {
         'ready': { status: 'ready', label: 'Sẵn Sàng Giao' },
         'delivered': { status: 'delivered', label: 'Đã Giao' },
         'fulfilled': { status: 'completed', label: 'Hoàn Thành' },
+        'completed': { status: 'completed', label: 'Hoàn Thành' },
+        'cancelled': { status: 'pending', label: 'Đã Hủy' },
+        'rejected': { status: 'pending', label: 'Đã Từ Chối' },
     };
 
     const mappedStatus = statusMap[apiOrder.status] || { status: 'pending', label: apiOrder.status };
@@ -311,18 +314,8 @@ console.log('apine:', data);
         limit: number = 20
     ): Promise<ConfirmOrder[]> => {
         try {
-            const params = new URLSearchParams({
-                filter,
-                page: page.toString(),
-                limit: limit.toString(),
-            });
-
-            if (keyword) {
-                params.append('keyword', keyword);
-            }
-
             const response = await fetchClient.get<ConfirmOrdersResponse>(
-                `/franchise/orders/receive-confirm?${params.toString()}`
+                `/orders/delivered`
             );
 
             console.log('Confirm orders response:', response);

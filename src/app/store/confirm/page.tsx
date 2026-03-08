@@ -20,8 +20,6 @@ export default function OrderConfirmationPage() {
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [selectedFilter, setSelectedFilter] = useState<'all' | 'delivered' | 'confirmed'>('all');
-  const [searchQuery, setSearchQuery] = useState('');
   const [showFeedbackModal, setShowFeedbackModal] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [feedback, setFeedback] = useState('');
@@ -31,18 +29,16 @@ export default function OrderConfirmationPage() {
   // Convert API data to UI format
   const convertApiOrderToUI = (apiOrder: ConfirmOrder): Order => {
     return {
-      id: apiOrder.order_id,
+      id: String(apiOrder.order_id),
       orderCode: apiOrder.order_code,
-      products: '', // API doesn't return product info in this endpoint
-      createdDate: new Date(apiOrder.created_at).toLocaleDateString('vi-VN'),
+      products: `${apiOrder.product_name} (${apiOrder.qty})`,
+      createdDate: '',
       deliveryDate: apiOrder.delivered_at 
         ? new Date(apiOrder.delivered_at).toLocaleDateString('vi-VN') 
         : '',
-      confirmedDate: apiOrder.received_confirmed_at
-        ? new Date(apiOrder.received_confirmed_at).toLocaleDateString('vi-VN')
-        : '',
-      status: apiOrder.status === 'fulfilled' ? 'Đã giao' : 'Đã xác nhận',
-      isConfirmed: apiOrder.status === 'confirmed',
+      confirmedDate: '',
+      status: 'Đã giao',
+      isConfirmed: false,
     };
   };
 
@@ -51,7 +47,7 @@ export default function OrderConfirmationPage() {
     try {
       setLoading(true);
       setError(null);
-      const apiOrders = await storeService.getConfirmOrders(selectedFilter, searchQuery);
+      const apiOrders = await storeService.getConfirmOrders();
       const uiOrders = apiOrders.map(convertApiOrderToUI);
       setOrders(uiOrders);
     } catch (err) {
@@ -62,10 +58,10 @@ export default function OrderConfirmationPage() {
     }
   };
 
-  // Fetch orders on mount and when filter/search changes
+  // Fetch orders on mount
   useEffect(() => {
     fetchOrders();
-  }, [selectedFilter, searchQuery]);
+  }, []);
 
   const getStatusClass = (status: string) => {
     if (status === 'Đã giao') return styles.statusDelivered;
@@ -108,8 +104,6 @@ export default function OrderConfirmationPage() {
     }
   };
 
-  const filteredOrders = orders;
-
   return (
     <div className={styles.pageContainer}>
       <Sidebar activePage="confirm" />
@@ -117,28 +111,6 @@ export default function OrderConfirmationPage() {
         <div className={styles.header}>
           <h1 className={styles.title}>Xác Nhận Nhận Hàng</h1>
           <p className={styles.subtitle}>Xác nhận đơn hàng đã nhận và viết đánh giá</p>
-        </div>
-
-        <div className={styles.filterBar}>
-          <div className={styles.searchBox}>
-            <span className={styles.searchIcon}>🔍</span>
-            <input
-              type="text"
-              placeholder="Tìm kiếm theo mã đơn hàng..."
-              className={styles.searchInput}
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
-          </div>
-          <select
-            value={selectedFilter}
-            onChange={(e) => setSelectedFilter(e.target.value as 'all' | 'delivered' | 'confirmed')}
-            className={styles.filterSelect}
-          >
-            <option value="all">Tất cả</option>
-            <option value="delivered">Đã giao</option>
-            <option value="confirmed">Đã xác nhận</option>
-          </select>
         </div>
 
         {loading ? (
@@ -158,13 +130,12 @@ export default function OrderConfirmationPage() {
                 <th>Mã đơn hàng</th>
                 <th>Sản phẩm</th>
                 <th>Trạng thái</th>
-                <th>Ngày tạo</th>
                 <th>Ngày giao</th>
                 <th>Thao tác</th>
               </tr>
             </thead>
             <tbody>
-              {filteredOrders.map((order) => (
+              {orders.map((order) => (
                 <tr key={order.id}>
                   <td>
                     <div className={styles.orderIdCell}>
@@ -174,7 +145,7 @@ export default function OrderConfirmationPage() {
                   </td>
                   <td>
                     <div className={styles.productCell}>
-                      <div className={styles.productCount}>{order.products || 'N/A'}</div>
+                      <div className={styles.productCount}>{order.products}</div>
                     </div>
                   </td>
                   <td>
@@ -182,8 +153,7 @@ export default function OrderConfirmationPage() {
                       {order.status}
                     </span>
                   </td>
-                  <td className={styles.dateCell}>{order.createdDate}</td>
-                  <td className={styles.dateCell}>{order.deliveryDate || order.confirmedDate}</td>
+                  <td className={styles.dateCell}>{order.deliveryDate}</td>
                   <td>
                     {order.status === 'Đã giao' && !order.isConfirmed ? (
                       <button 
@@ -201,7 +171,7 @@ export default function OrderConfirmationPage() {
             </tbody>
           </table>
 
-          {filteredOrders.length === 0 && (
+          {orders.length === 0 && (
             <div className={styles.emptyState}>
               <span className={styles.emptyIcon}>📭</span>
               <p>Không có đơn hàng nào cần xác nhận</p>

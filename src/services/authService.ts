@@ -135,6 +135,7 @@ const authService = {
     // Update user profile
     updateProfile: async (data: UpdateProfileRequest): Promise<User> => {
         try {
+            // Đổi thành PUT nếu BE yêu cầu: fetchClient.put
             const response = await fetchClient.patch<{
                 success: boolean;
                 data: User;
@@ -150,6 +151,11 @@ const authService = {
             if (currentUser) {
                 const updatedUser = { ...currentUser, username: response.data.username };
                 localStorage.setItem("user", JSON.stringify(updatedUser));
+                
+                // Dispatch custom event để notify Sidebar
+                window.dispatchEvent(new CustomEvent('userUpdated', { 
+                    detail: updatedUser 
+                }));
             }
 
             return response.data;
