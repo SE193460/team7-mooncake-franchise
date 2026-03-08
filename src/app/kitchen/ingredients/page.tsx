@@ -127,7 +127,7 @@ export default function IngredientsPage() {
                         <div
                             style={{
                                 display: 'grid',
-                                gridTemplateColumns: '2fr 1fr 1fr 1.2fr 1fr',
+                                gridTemplateColumns: '2fr 1.8fr 1.2fr 1.4fr',
                                 padding: '16px 24px',
                                 borderBottom: '1px solid #e5e7eb',
                                 backgroundColor: '#fafafa',
@@ -140,13 +140,10 @@ export default function IngredientsPage() {
                                 Tồn Kho
                             </span>
                             <span style={{ fontSize: '12px', fontWeight: '600', color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                                Mức Tối Thiểu
+                                Đơn vị
                             </span>
                             <span style={{ fontSize: '12px', fontWeight: '600', color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
                                 Hạn Sử Dụng
-                            </span>
-                            <span style={{ fontSize: '12px', fontWeight: '600', color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.05em', textAlign: 'right' }}>
-                                Thao Tác
                             </span>
                         </div>
 
@@ -158,7 +155,7 @@ export default function IngredientsPage() {
                                     key={item.inventory_item_id}
                                     style={{
                                         display: 'grid',
-                                        gridTemplateColumns: '2fr 1fr 1fr 1.2fr 1fr',
+                                        gridTemplateColumns: '2fr 1.8fr 1.2fr 1.4fr',
                                         padding: '16px 24px',
                                         borderBottom: index < inventoryItems.length - 1 ? '1px solid #f3f4f6' : 'none',
                                         alignItems: 'center',
