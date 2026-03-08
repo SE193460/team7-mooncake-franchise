@@ -1,115 +1,25 @@
 'use client';
 
+import { useEffect, useState } from "react";
 import Sidebar from '../../../components/Sidebar';
 
 // Calendar icon for expiring items
 const CalendarIcon = () => (
     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#d97706" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
-        <line x1="16" y1="2" x2="16" y2="6"/>
-        <line x1="8" y1="2" x2="8" y2="6"/>
-        <line x1="3" y1="10" x2="21" y2="10"/>
+        <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+        <line x1="16" y1="2" x2="16" y2="6" />
+        <line x1="8" y1="2" x2="8" y2="6" />
+        <line x1="3" y1="10" x2="21" y2="10" />
     </svg>
 );
 
 // Plus icon for import button
 const PlusIcon = () => (
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <line x1="12" y1="5" x2="12" y2="19"/>
-        <line x1="5" y1="12" x2="19" y2="12"/>
+        <line x1="12" y1="5" x2="12" y2="19" />
+        <line x1="5" y1="12" x2="19" y2="12" />
     </svg>
 );
-
-// Mock data for expiring items
-const expiringItems = [
-    { id: 1, name: 'Bánh Nướng Hạt Sen', expiryDate: '25/1/2026' },
-    { id: 2, name: 'Bánh Trung Thu Jambon', expiryDate: '20/1/2026' },
-    { id: 3, name: 'Bánh Nướng Vi Cá', expiryDate: '18/1/2026' },
-];
-
-// Mock data for inventory list
-const inventoryItems = [
-    {
-        id: 1,
-        name: 'Bánh Trung Thu Thập Cẩm',
-        category: 'Bánh Nướng',
-        stock: 500,
-        unit: 'hộp',
-        minStock: 200,
-        expiryDate: '15/2/2026',
-        daysLeft: 28,
-    },
-    {
-        id: 2,
-        name: 'Bánh Dẻo Đậu Xanh',
-        category: 'Bánh Dẻo',
-        stock: 150,
-        unit: 'hộp',
-        minStock: 100,
-        expiryDate: '10/2/2026',
-        daysLeft: 23,
-    },
-    {
-        id: 3,
-        name: 'Bánh Nướng Trà Xanh',
-        category: 'Bánh Nướng',
-        stock: 80,
-        unit: 'hộp',
-        minStock: 50,
-        expiryDate: '20/2/2026',
-        daysLeft: 33,
-    },
-    {
-        id: 4,
-        name: 'Bánh Dẻo Sữa Dừa',
-        category: 'Bánh Dẻo',
-        stock: 200,
-        unit: 'hộp',
-        minStock: 100,
-        expiryDate: '8/2/2026',
-        daysLeft: 21,
-    },
-    {
-        id: 5,
-        name: 'Bánh Nướng Hạt Sen',
-        category: 'Bánh Nướng',
-        stock: 45,
-        unit: 'hộp',
-        minStock: 40,
-        expiryDate: '25/1/2026',
-        daysLeft: 7,
-    },
-    {
-        id: 6,
-        name: 'Bánh Trung Thu Jambon',
-        category: 'Bánh Mặn',
-        stock: 30,
-        unit: 'hộp',
-        minStock: 25,
-        expiryDate: '20/1/2026',
-        daysLeft: 2,
-    },
-    {
-        id: 7,
-        name: 'Bánh Dẻo Khoai Môn',
-        category: 'Bánh Dẻo',
-        stock: 120,
-        unit: 'hộp',
-        minStock: 80,
-        expiryDate: '12/2/2026',
-        daysLeft: 25,
-    },
-    {
-        id: 8,
-        name: 'Bánh Nướng Vi Cá',
-        category: 'Bánh Cao Cấp',
-        stock: 20,
-        unit: 'hộp',
-        minStock: 15,
-        expiryDate: '18/1/2026',
-        daysLeft: 0,
-    },
-];
 
 // Function to get badge color based on days left
 const getDaysLeftColor = (days: number) => {
@@ -119,6 +29,36 @@ const getDaysLeftColor = (days: number) => {
 };
 
 export default function IngredientsPage() {
+    const [inventoryItems, setInventoryItems] = useState<any[]>([]);
+    const [expiringItems, setExpiringItems] = useState<any[]>([]);
+
+    useEffect(() => {
+        const fetchInventory = async () => {
+            try {
+                const token = localStorage.getItem('token');
+
+                const res = await fetch(
+                    'https://franchisemooncake.onrender.com/api/central-kitchen/materials-inventory',
+                    {
+                        headers: {
+                            Authorization: `Bearer ${token}`,
+                        },
+                    }
+                );
+
+                const result = await res.json();
+
+                if (result.success) {
+                    setInventoryItems(result.data.inventory_items);
+                    setExpiringItems(result.data.expiring_materials);
+                }
+            } catch (error) {
+                console.error('Error fetching inventory:', error);
+            }
+        };
+
+        fetchInventory();
+    }, []);
     return (
         <div style={{ display: 'flex', minHeight: '100vh', backgroundColor: '#fafafa' }}>
             <Sidebar activePage="ingredients" type="kitchen" />
@@ -154,7 +94,7 @@ export default function IngredientsPage() {
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                         {expiringItems.map((item) => (
                             <div
-                                key={item.id}
+                                key={item.material_id}
                                 style={{
                                     display: 'flex',
                                     justifyContent: 'space-between',
@@ -162,8 +102,8 @@ export default function IngredientsPage() {
                                     padding: '8px 0',
                                 }}
                             >
-                                <span style={{ color: '#374151', fontSize: '14px' }}>{item.name}</span>
-                                <span style={{ color: '#6b7280', fontSize: '14px' }}>{item.expiryDate}</span>
+                                <span style={{ color: '#374151', fontSize: '14px' }}>{item.material_name}</span>
+                                <span style={{ color: '#6b7280', fontSize: '14px' }}>{new Date(item.expiry_date).toLocaleDateString('vi-VN')}</span>
                             </div>
                         ))}
                     </div>
@@ -187,7 +127,7 @@ export default function IngredientsPage() {
                         <div
                             style={{
                                 display: 'grid',
-                                gridTemplateColumns: '2fr 1fr 1fr 1.2fr 1fr',
+                                gridTemplateColumns: '2fr 1.8fr 1.2fr 1.4fr',
                                 padding: '16px 24px',
                                 borderBottom: '1px solid #e5e7eb',
                                 backgroundColor: '#fafafa',
@@ -200,25 +140,22 @@ export default function IngredientsPage() {
                                 Tồn Kho
                             </span>
                             <span style={{ fontSize: '12px', fontWeight: '600', color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                                Mức Tối Thiểu
+                                Đơn vị
                             </span>
                             <span style={{ fontSize: '12px', fontWeight: '600', color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
                                 Hạn Sử Dụng
-                            </span>
-                            <span style={{ fontSize: '12px', fontWeight: '600', color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.05em', textAlign: 'right' }}>
-                                Thao Tác
                             </span>
                         </div>
 
                         {/* Table Body */}
                         {inventoryItems.map((item, index) => {
-                            const daysColor = getDaysLeftColor(item.daysLeft);
+                            const daysColor = getDaysLeftColor(item.days_left);
                             return (
                                 <div
-                                    key={item.id}
+                                    key={item.inventory_item_id}
                                     style={{
                                         display: 'grid',
-                                        gridTemplateColumns: '2fr 1fr 1fr 1.2fr 1fr',
+                                        gridTemplateColumns: '2fr 1.8fr 1.2fr 1.4fr',
                                         padding: '16px 24px',
                                         borderBottom: index < inventoryItems.length - 1 ? '1px solid #f3f4f6' : 'none',
                                         alignItems: 'center',
@@ -227,7 +164,7 @@ export default function IngredientsPage() {
                                     {/* Product Name */}
                                     <div>
                                         <div style={{ fontWeight: '500', color: '#1f2937', fontSize: '14px' }}>
-                                            {item.name}
+                                            {item.material_name}
                                         </div>
                                         <div style={{ color: '#9ca3af', fontSize: '12px', marginTop: '2px' }}>
                                             {item.category}
@@ -237,7 +174,7 @@ export default function IngredientsPage() {
                                     {/* Stock */}
                                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                                         <span style={{ color: '#1f2937', fontSize: '14px', fontWeight: '500' }}>
-                                            {item.stock} {item.unit}
+                                            {item.on_hand_qty} {item.uom}
                                         </span>
                                         <span
                                             style={{
@@ -255,13 +192,13 @@ export default function IngredientsPage() {
 
                                     {/* Minimum Stock */}
                                     <div style={{ color: '#6b7280', fontSize: '14px' }}>
-                                        {item.minStock} {item.unit}
+                                        {item.minStock} {item.uom}
                                     </div>
 
                                     {/* Expiry Date */}
                                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                                         <span style={{ color: '#1f2937', fontSize: '14px' }}>
-                                            {item.expiryDate}
+                                            {new Date(item.expiry_date).toLocaleDateString('vi-VN')}
                                         </span>
                                         <span
                                             style={{
@@ -273,12 +210,12 @@ export default function IngredientsPage() {
                                                 fontWeight: '500',
                                             }}
                                         >
-                                            {item.daysLeft} ngày
+                                            {item.days_left} ngày
                                         </span>
                                     </div>
 
                                     {/* Actions */}
-                                    <div style={{ textAlign: 'right' }}>
+                                    {/* <div style={{ textAlign: 'right' }}>
                                         <button
                                             style={{
                                                 display: 'inline-flex',
@@ -306,7 +243,7 @@ export default function IngredientsPage() {
                                             <PlusIcon />
                                             Nhập Kho
                                         </button>
-                                    </div>
+                                    </div> */}
                                 </div>
                             );
                         })}

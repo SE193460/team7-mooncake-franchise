@@ -20,6 +20,7 @@ export default function KitchenSidebar({ activePage = 'dashboard' }: KitchenSide
         { id: 'new-orders', label: 'Đơn Hàng Mới', icon: '📋', href: '/kitchen/orders' },
         { id: 'update-status', label: 'Cập Nhật Trạng Thái', icon: '🔄', href: '/kitchen/status' },
         { id: 'ingredients', label: 'Nguyên Liệu & Hạn SD', icon: '📦', href: '/kitchen/ingredients' },
+        { id: 'product-storage', label: 'Kho Thành Phẩm', icon: '🏪', href: '/kitchen/product-storage' },
     ];
 
     return (
