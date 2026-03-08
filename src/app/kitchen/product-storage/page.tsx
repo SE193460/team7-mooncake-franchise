@@ -33,7 +33,7 @@ export default function ProductStoragePage() {
 
                 // Assuming the endpoint for products inventory exists
                 const res = await fetch(
-                    'https://franchisemooncake.onrender.com/api/central-kitchen/products-inventory',
+                    'https://franchisemooncake.onrender.com/api/centralKitchen/product-inventory',
                     {
                         headers: {
                             Authorization: `Bearer ${token}`,
@@ -44,7 +44,7 @@ export default function ProductStoragePage() {
                 const result = await res.json();
 
                 if (result.success) {
-                    setInventoryItems(result.data.inventory_items || []);
+                    setInventoryItems(result.data || []);
                     setExpiringItems(result.data.expiring_products || []);
                 }
             } catch (error) {
