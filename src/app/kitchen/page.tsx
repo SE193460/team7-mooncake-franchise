@@ -145,7 +145,7 @@ export default function KitchenDashboard() {
                         {/* Order Items */}
                         {dashboardData?.pending_orders?.map((order: any, index: number) => (
                             <div
-                                key={order.order_code || `order-${index}`}
+                                key={order.order_id || order.order_code || `order-${index}`}
                                 style={{
                                     padding: '16px',
                                     backgroundColor: '#fafafa',
@@ -158,7 +158,7 @@ export default function KitchenDashboard() {
                             >
                                 <div>
                                     <div style={{ fontWeight: '600', fontSize: '15px', color: 'var(--text-primary)', marginBottom: '4px' }}>
-                                        {order.order_code}
+                                        ORD-{order.order_id || order.order_code}
                                     </div>
                                     <div style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>
                                         {order.store_name}
