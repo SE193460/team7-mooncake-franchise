@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
+import { toast } from 'react-toastify';
 import styles from './login.module.css';
 import authService from '../../../services/authService';
 
@@ -38,7 +39,7 @@ export default function LoginPage() {
     const user = data.user || data.data?.user;
 
     if (!token) {
-      alert("Login không trả token");
+      toast.error("Login không trả token");
       return;
     }
 
@@ -65,7 +66,7 @@ export default function LoginPage() {
       } else if (role === 'admin') {
         router.push("/admin");
       } else {
-        alert("Role không được hỗ trợ: " + role);
+        toast.error("Role không được hỗ trợ: " + role);
       }
     } catch (err) {
       console.error("Error decoding token:", err);
@@ -74,7 +75,7 @@ export default function LoginPage() {
 
   } catch (err) {
     console.error(err);
-    alert("Login lỗi");
+    toast.error("Login lỗi");
   }
 };
 

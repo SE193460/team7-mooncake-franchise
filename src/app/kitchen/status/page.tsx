@@ -2,6 +2,7 @@
 
 import Sidebar from '../../../components/Sidebar';
 import { useEffect, useState } from 'react';
+import { toast } from 'react-toastify';
 
 interface OrderItem {
     productName: string;
@@ -139,7 +140,7 @@ export default function UpdateStatusPage() {
                         ? { ...order, status: 'ready' as const }
                         : order
                 ));
-                alert('Đơn hàng đã được đánh dấu là Sẵn Sàng Giao!');
+                toast.success('Đơn hàng đã được đánh dấu là Sẵn Sàng Giao!');
             }
         } catch (error) {
             console.error('Error updating order status:', error);
@@ -149,7 +150,7 @@ export default function UpdateStatusPage() {
                     ? { ...order, status: 'ready' as const }
                     : order
             ));
-            alert('Đơn hàng đã được đánh dấu là Sẵn Sàng Giao!');
+            toast.success('Đơn hàng đã được đánh dấu là Sẵn Sàng Giao!');
         }
     };
 

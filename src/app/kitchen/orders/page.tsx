@@ -2,6 +2,7 @@
 
 import Sidebar from '../../../components/Sidebar';
 import { useEffect, useState } from 'react';
+import { toast } from 'react-toastify';
 
 interface OrderItem {
     product_name: string;
@@ -74,7 +75,12 @@ export default function NewOrdersPage() {
                     setTotal(result.data.total);
                 }
             } else {
-                console.error('Failed to fetch orders:', response.statusText);
+                const errorData = await response.json().catch(() => ({}));
+                console.error('Failed to fetch orders:', {
+                    status: response.status,
+                    statusText: response.statusText,
+                    error: errorData.message || errorData
+                });
             }
         } catch (error) {
             console.error('Error fetching orders:', error);
@@ -100,14 +106,14 @@ export default function NewOrdersPage() {
             if (response.ok) {
                 // Refresh the order list
                 fetchNewOrders();
-                alert('Đơn hàng đã được chấp nhận!');
+                toast.success('Đơn hàng đã được chấp nhận!');
             } else {
                 const error = await response.json();
-                alert(error.message || 'Có lỗi xảy ra khi chấp nhận đơn hàng');
+                toast.error(error.message || 'Có lỗi xảy ra khi chấp nhận đơn hàng');
             }
         } catch (error) {
             console.error('Error accepting order:', error);
-            alert('Có lỗi xảy ra khi chấp nhận đơn hàng');
+            toast.error('Có lỗi xảy ra khi chấp nhận đơn hàng');
         }
     };
 
@@ -128,14 +134,14 @@ export default function NewOrdersPage() {
             if (response.ok) {
                 // Refresh the order list
                 fetchNewOrders();
-                alert('Đơn hàng đã bị từ chối!');
+                toast.success('Đơn hàng đã bị từ chối!');
             } else {
                 const error = await response.json();
-                alert(error.message || 'Có lỗi xảy ra khi từ chối đơn hàng');
+                toast.error(error.message || 'Có lỗi xảy ra khi từ chối đơn hàng');
             }
         } catch (error) {
             console.error('Error rejecting order:', error);
-            alert('Có lỗi xảy ra khi từ chối đơn hàng');
+            toast.error('Có lỗi xảy ra khi từ chối đơn hàng');
         }
     };
 
@@ -160,12 +166,12 @@ export default function NewOrdersPage() {
                     setSelectedOrder(result.data);
                 }
             } else {
-                alert('Không thể tải chi tiết đơn hàng');
+                toast.error('Không thể tải chi tiết đơn hàng');
                 setShowModal(false);
             }
         } catch (error) {
             console.error('Error fetching order details:', error);
-            alert('Có lỗi xảy ra khi xem chi tiết đơn hàng');
+            toast.error('Có lỗi xảy ra khi xem chi tiết đơn hàng');
             setShowModal(false);
         } finally {
             setLoadingDetail(false);
@@ -182,12 +188,12 @@ export default function NewOrdersPage() {
     };
 
     return (
-        <div style={{ display: 'flex', minHeight: '100vh' }}>
+        <div suppressHydrationWarning style={{ display: 'flex', minHeight: '100vh' }}>
             <Sidebar activePage="new-orders" type="kitchen" />
             
             <main style={{ flex: 1, padding: '32px' }}>
-                <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
-                    <div style={{ marginBottom: '32px' }}>
+                <div suppressHydrationWarning style={{ maxWidth: '1200px', margin: '0 auto' }}>
+                    <div suppressHydrationWarning style={{ marginBottom: '32px' }}>
                         <h1 style={{ fontSize: '28px', fontWeight: '600', marginBottom: '8px', color: 'var(--text-primary)' }}>
                             Đơn Hàng Mới
                         </h1>
@@ -197,7 +203,7 @@ export default function NewOrdersPage() {
                     </div>
 
                     {loading ? (
-                        <div style={{ textAlign: 'center', padding: '40px', color: 'var(--text-secondary)' }}>
+                        <div suppressHydrationWarning style={{ textAlign: 'center', padding: '40px', color: 'var(--text-secondary)' }}>
                             Đang tải đơn hàng...
                         </div>
                     ) : orders.length === 0 ? (
@@ -533,6 +539,25 @@ export default function NewOrdersPage() {
                                                 </div>
                                             </div>
                                         ))}
+                                    </div>
+
+                                    {/* Total Amount */}
+                                    <div 
+                                        style={{ 
+                                            padding: '16px', 
+                                            backgroundColor: '#f9fafb',
+                                            borderRadius: '8px',
+                                            marginBottom: '24px'
+                                        }}
+                                    >
+                                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                            <span style={{ fontSize: '16px', fontWeight: '600', color: 'var(--text-primary)' }}>
+                                                Tổng tiền:
+                                            </span>
+                                            <span style={{ fontSize: '18px', fontWeight: '700', color: 'var(--primary-orange)' }}>
+                                                {selectedOrder.items.reduce((sum, item) => sum + item.line_total, 0).toLocaleString('vi-VN')} VNĐ
+                                            </span>
+                                        </div>
                                     </div>
 
                                     {/* Footer Info */}
