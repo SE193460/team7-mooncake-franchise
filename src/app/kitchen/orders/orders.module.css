@@ -1,0 +1,577 @@
+/* Container and Layout */
+.container {
+    display: flex;
+    min-height: 100vh;
+}
+
+.main {
+    flex: 1;
+    padding: 32px;
+}
+
+.content {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+/* Header */
+.header {
+    margin-bottom: 32px;
+}
+
+.title {
+    font-size: 28px;
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: var(--text-primary);
+}
+
+.subtitle {
+    color: var(--text-secondary);
+    font-size: 14px;
+}
+
+/* Loading State */
+.loading {
+    text-align: center;
+    padding: 40px;
+    color: var(--text-secondary);
+}
+
+/* Empty State */
+.emptyState {
+    text-align: center;
+    padding: 60px 20px;
+    background-color: white;
+    border-radius: 12px;
+    border: 1px solid var(--border-color);
+}
+
+.emptyIcon {
+    font-size: 48px;
+    margin-bottom: 16px;
+}
+
+.emptyTitle {
+    font-size: 18px;
+    font-weight: 500;
+    margin-bottom: 8px;
+    color: var(--text-primary);
+}
+
+.emptyText {
+    color: var(--text-secondary);
+    font-size: 14px;
+}
+
+/* Orders List */
+.ordersList {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+/* Order Card */
+.orderCard {
+    background-color: white;
+    border-radius: 12px;
+    border: 1px solid var(--table-border);
+    padding: 24px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.orderHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 20px;
+}
+
+.orderInfo h3 {
+    font-size: 20px;
+    font-weight: 600;
+    margin-bottom: 4px;
+    color: var(--text-primary);
+}
+
+.orderInfo p {
+    font-size: 14px;
+    color: var(--text-secondary);
+}
+
+.statusBadge {
+    padding: 6px 12px;
+    background-color: var(--status-yellow);
+    color: var(--status-yellow-text);
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 500;
+}
+
+/* Items Section */
+.itemsSection {
+    margin-bottom: 20px;
+}
+
+.itemsTitle {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    margin-bottom: 12px;
+}
+
+.itemRow {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px 0;
+}
+
+.itemRow:not(:last-child) {
+    border-bottom: 1px solid var(--table-border);
+}
+
+.itemName {
+    font-size: 14px;
+    color: var(--text-primary);
+}
+
+.itemQty {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text-primary);
+}
+
+/* Order Meta */
+.orderMeta {
+    display: flex;
+    justify-content: space-between;
+    padding: 12px 0;
+    border-top: 1px solid var(--table-border);
+    margin-bottom: 16px;
+}
+
+.metaItem {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.metaLabel {
+    font-size: 13px;
+    color: var(--text-secondary);
+}
+
+.metaValue {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text-primary);
+}
+
+/* Actions */
+.actions {
+    display: flex;
+    gap: 12px;
+    justify-content: flex-end;
+}
+
+.btnDetail {
+    padding: 10px 20px;
+    background-color: white;
+    border: 1px solid var(--table-border);
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text-primary);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.2s;
+}
+
+.btnDetail:hover {
+    border-color: var(--text-secondary);
+}
+
+.btnReject {
+    padding: 10px 20px;
+    background-color: white;
+    border: 1px solid #ef4444;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    color: #ef4444;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.2s;
+}
+
+.btnReject:hover {
+    background-color: #fef2f2;
+}
+
+.btnAccept {
+    padding: 10px 20px;
+    background-color: var(--primary-orange);
+    border: none;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    color: white;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.2s;
+}
+
+.btnAccept:hover {
+    background-color: var(--primary-orange-hover);
+}
+
+/* Pagination */
+.pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 16px;
+    margin-top: 32px;
+}
+
+.paginationBtn {
+    padding: 8px 16px;
+    background-color: white;
+    border: 1px solid var(--table-border);
+    border-radius: 8px;
+    font-size: 14px;
+    color: var(--text-primary);
+    cursor: pointer;
+}
+
+.paginationBtn:disabled {
+    background-color: #f3f4f6;
+    color: var(--text-secondary);
+    cursor: not-allowed;
+}
+
+.paginationInfo {
+    font-size: 14px;
+    color: var(--text-secondary);
+}
+
+/* Modal Overlay */
+.modalOverlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+
+.zIndex1001 {
+    z-index: 1001;
+}
+
+/* Modal Container */
+.modalContainer {
+    background-color: white;
+    border-radius: 12px;
+    padding: 0;
+    max-width: 500px;
+    width: 90%;
+    max-height: 80vh;
+    overflow: auto;
+    position: relative;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+}
+
+.modalContainerSmall {
+    max-width: 450px;
+    max-height: none;
+}
+
+/* Modal Header */
+.modalHeader {
+    padding: 20px 24px;
+    border-bottom: 1px solid var(--table-border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.modalTitle {
+    font-size: 20px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 0;
+}
+
+.modalClose {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    border: 1px solid var(--table-border);
+    background-color: white;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    color: var(--text-secondary);
+    transition: all 0.2s;
+}
+
+.modalClose:hover {
+    background-color: #f3f4f6;
+}
+
+/* Modal Body */
+.modalBody {
+    padding: 24px;
+}
+
+.modalLoading {
+    padding: 40px;
+    text-align: center;
+    color: var(--text-secondary);
+}
+
+/* Order Details */
+.detailRow {
+    display: flex;
+    justify-content: space-between;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--table-border);
+}
+
+.detailLabel {
+    font-size: 13px;
+    color: var(--text-secondary);
+}
+
+.detailValue {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text-primary);
+}
+
+/* Items Table */
+.itemsTable {
+    margin: 20px 0;
+}
+
+.itemsTableHeader {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    padding-bottom: 12px;
+    border-bottom: 2px solid var(--table-border);
+}
+
+.itemsTableRow {
+    padding: 12px 0;
+    border-bottom: 1px solid var(--table-border);
+}
+
+.itemsTableRow:last-child {
+    border-bottom: none;
+}
+
+/* Total */
+.totalSection {
+    margin-top: 20px;
+    padding-top: 20px;
+    border-top: 2px solid var(--table-border);
+    margin-bottom: 24px;
+}
+
+.totalRow {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.totalLabel {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.totalValue {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--primary-orange);
+}
+
+/* Footer Info */
+.footerInfo {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 0;
+    border-top: 1px solid var(--table-border);
+}
+
+.footerInfoItem {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.footerInfoLabel {
+    font-size: 13px;
+    color: var(--text-secondary);
+}
+
+.footerInfoValue {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text-primary);
+}
+
+.footerStatusBadge {
+    padding: 4px 12px;
+    background-color: var(--status-yellow);
+    color: var(--status-yellow-text);
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 500;
+    display: inline-block;
+}
+
+/* Reject Modal */
+.rejectText {
+    font-size: 14px;
+    color: var(--text-secondary);
+    margin-bottom: 16px;
+}
+
+.rejectTextarea {
+    width: 100%;
+    min-height: 120px;
+    padding: 12px;
+    border: 1px solid var(--table-border);
+    border-radius: 8px;
+    font-size: 14px;
+    font-family: inherit;
+    resize: vertical;
+    outline: none;
+}
+
+.rejectTextarea:focus {
+    border-color: var(--primary-orange);
+}
+
+/* Modal Footer */
+.modalFooter {
+    padding: 16px 24px;
+    border-top: 1px solid var(--table-border);
+    display: flex;
+    gap: 12px;
+    justify-content: flex-end;
+}
+
+.btnCancel {
+    padding: 10px 20px;
+    background-color: white;
+    border: 1px solid var(--table-border);
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text-primary);
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btnCancel:hover {
+    background-color: #f3f4f6;
+}
+
+.btnConfirmReject {
+    padding: 10px 20px;
+    background-color: #ef4444;
+    border: none;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    color: white;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btnConfirmReject:hover {
+    background-color: #dc2626;
+}
+
+/* Order Detail Modal Styles */
+.orderDetailInfo {
+    margin-bottom: 24px;
+}
+
+.orderDetailTitle {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 4px;
+}
+
+.orderDetailStore {
+    font-size: 14px;
+    color: var(--text-secondary);
+}
+
+.productsSection {
+    margin-bottom: 24px;
+}
+
+.productsSectionTitle {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    margin-bottom: 12px;
+}
+
+.productItem {
+    display: flex;
+    justify-content: space-between;
+    padding: 12px 0;
+}
+
+.productItem:not(:last-child) {
+    border-bottom: 1px solid var(--table-border);
+}
+
+.productInfo {
+    flex: 1;
+}
+
+.productName {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text-primary);
+    margin-bottom: 4px;
+}
+
+.productDetails {
+    font-size: 13px;
+    color: var(--text-secondary);
+}
+
+.productPrice {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-primary);
+    text-align: right;
+}
+
+/* Utility Classes */
+.textRight {
+    text-align: right;
+}

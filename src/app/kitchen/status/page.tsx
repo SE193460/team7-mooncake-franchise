@@ -4,159 +4,134 @@ import Sidebar from '../../../components/Sidebar';
 import { useEffect, useState } from 'react';
 import { toast } from 'react-toastify';
 
-interface OrderItem {
-    productName: string;
-    quantity: number;
-}
-
 interface Order {
-    id: string;
-    branchName: string;
-    items: OrderItem[];
-    acceptedDate: string;
-    status: 'preparing' | 'ready';
+    order_id: string;
+    order_code: string;
+    franchise_store_id: string;
+    store_name?: string;
+    central_kitchen_id: string;
+    status: string;
+    created_at?: string;
+    desired_date?: string;
+    fulfilled_at?: string;
+    // For processing orders
+    total_items?: string;
+    product_names?: string;
+    // For fulfilled orders
+    product_id?: string;
+    product_name?: string;
+    qty?: string;
+    uom?: string;
+    unit_price?: string;
 }
 
 type TabType = 'preparing' | 'ready';
 
 export default function UpdateStatusPage() {
     const [activeTab, setActiveTab] = useState<TabType>('preparing');
-    const [orders, setOrders] = useState<Order[]>([]);
+    const [preparingOrders, setPreparingOrders] = useState<Order[]>([]);
+    const [readyOrders, setReadyOrders] = useState<Order[]>([]);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        // Fetch orders from API
-        const fetchOrders = async () => {
-            try {
-                const token = localStorage.getItem('token');
-                // Replace with actual API endpoint
-                const response = await fetch('/api/kitchen/orders/status', {
+        fetchAllOrders();
+    }, []);
+
+    const fetchAllOrders = async () => {
+        try {
+            setLoading(true);
+            const token = localStorage.getItem('token');
+            
+            // Fetch processing orders
+            const processingResponse = await fetch(
+                'https://franchisemooncake.onrender.com/api/centralKitchen/orders/processing',
+                {
                     headers: {
-                        Authorization: `Bearer ${token}`,
+                        'Authorization': `Bearer ${token}`,
+                        'accept': 'application/json',
                     },
-                });
-                
-                if (response.ok) {
-                    const data = await response.json();
-                    setOrders(data);
-                } else {
-                    // Mock data for development
-                    setOrders([
-                        {
-                            id: 'ORD-002',
-                            branchName: 'Chi nhánh Quận 3',
-                            items: [
-                                { productName: 'Bánh Nướng Trà Xanh', quantity: 40 },
-                            ],
-                            acceptedDate: '8/1/2026',
-                            status: 'preparing',
+                }
+            );
+
+            if (processingResponse.ok) {
+                const result = await processingResponse.json();
+                if (result.success) {
+                    setPreparingOrders(result.data);
+                }
+            }
+
+            // Try to fetch ready-to-deliver orders (if endpoint exists)
+            try {
+                const readyResponse = await fetch(
+                    'https://franchisemooncake.onrender.com/api/centralKitchen/orders/fulfilled',
+                    {
+                        headers: {
+                            'Authorization': `Bearer ${token}`,
+                            'accept': 'application/json',
                         },
-                        {
-                            id: 'ORD-003',
-                            branchName: 'Chi nhánh Quận 1',
-                            items: [
-                                { productName: 'Bánh Dẻo Sữa Dừa', quantity: 25 },
-                                { productName: 'Bánh Nướng Hạt Sen', quantity: 15 },
-                            ],
-                            acceptedDate: '6/1/2026',
-                            status: 'ready',
-                        },
-                        {
-                            id: 'ORD-004',
-                            branchName: 'Chi nhánh Quận 7',
-                            items: [
-                                { productName: 'Bánh Trung Thu Thập Cẩm', quantity: 20 },
-                            ],
-                            acceptedDate: '5/1/2026',
-                            status: 'ready',
-                        },
-                        {
-                            id: 'ORD-005',
-                            branchName: 'Chi nhánh Quận 3',
-                            items: [
-                                { productName: 'Bánh Dẻo Đậu Xanh', quantity: 35 },
-                                { productName: 'Bánh Trung Thu Jambon', quantity: 10 },
-                            ],
-                            acceptedDate: '4/1/2026',
-                            status: 'ready',
-                        },
-                        {
-                            id: 'ORD-006',
-                            branchName: 'Chi nhánh Quận 1',
-                            items: [
-                                { productName: 'Bánh Nướng Trà Xanh', quantity: 20 },
-                            ],
-                            acceptedDate: '3/1/2026',
-                            status: 'ready',
-                        },
-                        {
-                            id: 'ORD-007',
-                            branchName: 'Chi nhánh Quận 7',
-                            items: [
-                                { productName: 'Bánh Nướng Hạt Sen', quantity: 30 },
-                                { productName: 'Bánh Dẻo Sữa Dừa', quantity: 25 },
-                            ],
-                            acceptedDate: '7/1/2026',
-                            status: 'ready',
-                        },
-                    ]);
+                    }
+                );
+
+                if (readyResponse.ok) {
+                    const result = await readyResponse.json();
+                    if (result.success) {
+                        setReadyOrders(result.data);
+                    }
                 }
             } catch (error) {
-                console.error('Error fetching orders:', error);
-                // Mock data for development
-                setOrders([
-                    {
-                        id: 'ORD-002',
-                        branchName: 'Chi nhánh Quận 3',
-                        items: [
-                            { productName: 'Bánh Nướng Trà Xanh', quantity: 40 },
-                        ],
-                        acceptedDate: '8/1/2026',
-                        status: 'preparing',
-                    },
-                ]);
-            } finally {
-                setLoading(false);
+                console.log('Ready orders endpoint not available yet');
             }
-        };
-
-        fetchOrders();
-    }, []);
+        } catch (error) {
+            console.error('Error fetching orders:', error);
+            toast.error('Có lỗi xảy ra khi tải đơn hàng');
+        } finally {
+            setLoading(false);
+        }
+    };
 
     const handleMarkAsReady = async (orderId: string) => {
         try {
             const token = localStorage.getItem('token');
-            const response = await fetch(`/api/kitchen/orders/${orderId}/ready`, {
-                method: 'POST',
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                },
-            });
+            const response = await fetch(
+                `https://franchisemooncake.onrender.com/api/centralKitchen/orders/${orderId}/ready-to-deliver`,
+                {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'accept': '*/*',
+                    },
+                }
+            );
 
             if (response.ok) {
-                // Update the order status
-                setOrders(orders.map(order => 
-                    order.id === orderId 
-                        ? { ...order, status: 'ready' as const }
-                        : order
-                ));
-                toast.success('Đơn hàng đã được đánh dấu là Sẵn Sàng Giao!');
+                const result = await response.json();
+                if (result.success) {
+                    toast.success('Đơn hàng đã được đánh dấu là Sẵn Sàng Giao!');
+                    // Refresh the order lists
+                    fetchAllOrders();
+                }
+            } else {
+                const error = await response.json();
+                toast.error(error.message || 'Có lỗi xảy ra khi cập nhật đơn hàng');
             }
         } catch (error) {
             console.error('Error updating order status:', error);
-            // Update locally for demo
-            setOrders(orders.map(order => 
-                order.id === orderId 
-                    ? { ...order, status: 'ready' as const }
-                    : order
-            ));
-            toast.success('Đơn hàng đã được đánh dấu là Sẵn Sàng Giao!');
+            toast.error('Có lỗi xảy ra khi cập nhật đơn hàng');
         }
     };
 
-    const filteredOrders = orders.filter(order => order.status === activeTab);
-    const preparingCount = orders.filter(o => o.status === 'preparing').length;
-    const readyCount = orders.filter(o => o.status === 'ready').length;
+    const formatDate = (dateString: string) => {
+        const date = new Date(dateString);
+        return date.toLocaleDateString('vi-VN', {
+            day: '2-digit',
+            month: '2-digit',
+            year: 'numeric',
+        });
+    };
+
+    const orders = activeTab === 'preparing' ? preparingOrders : readyOrders;
+    const preparingCount = preparingOrders.length;
+    const readyCount = readyOrders.length;
 
     return (
         <div style={{ display: 'flex', minHeight: '100vh' }}>
@@ -226,7 +201,7 @@ export default function UpdateStatusPage() {
                         <div style={{ textAlign: 'center', padding: '40px', color: 'var(--text-secondary)' }}>
                             Đang tải đơn hàng...
                         </div>
-                    ) : filteredOrders.length === 0 ? (
+                    ) : orders.length === 0 ? (
                         <div style={{ 
                             textAlign: 'center', 
                             padding: '60px 20px',
@@ -253,9 +228,9 @@ export default function UpdateStatusPage() {
                             gridTemplateColumns: 'repeat(auto-fill, minmax(380px, 1fr))', 
                             gap: '20px' 
                         }}>
-                            {filteredOrders.map((order) => (
+                            {orders.map((order, index) => (
                                 <div
-                                    key={order.id}
+                                    key={`${order.order_id}-${order.product_id || 'all'}-${index}`}
                                     style={{
                                         backgroundColor: 'white',
                                         borderRadius: '12px',
@@ -270,23 +245,25 @@ export default function UpdateStatusPage() {
                                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '16px' }}>
                                         <div>
                                             <h3 style={{ fontSize: '18px', fontWeight: '600', marginBottom: '4px', color: 'var(--text-primary)' }}>
-                                                {order.id}
+                                                ORD-{order.order_id}
                                             </h3>
-                                            <p style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>
-                                                {order.branchName}
-                                            </p>
+                                            {order.store_name && (
+                                                <p style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>
+                                                    {order.store_name}
+                                                </p>
+                                            )}
                                         </div>
                                         <span
                                             style={{
                                                 padding: '6px 12px',
-                                                backgroundColor: order.status === 'preparing' ? 'var(--status-blue)' : 'var(--status-green)',
-                                                color: order.status === 'preparing' ? 'var(--status-blue-text)' : 'var(--status-green-text)',
+                                                backgroundColor: activeTab === 'preparing' ? 'var(--status-blue)' : 'var(--status-green)',
+                                                color: activeTab === 'preparing' ? 'var(--status-blue-text)' : 'var(--status-green-text)',
                                                 borderRadius: '6px',
                                                 fontSize: '12px',
                                                 fontWeight: '500',
                                             }}
                                         >
-                                            {order.status === 'preparing' ? 'Đã Chấp Nhận' : 'Sẵn Sàng Giao'}
+                                            {activeTab === 'preparing' ? 'Đang Chuẩn Bị' : 'Sẵn Sàng Giao'}
                                         </span>
                                     </div>
 
@@ -294,33 +271,49 @@ export default function UpdateStatusPage() {
                                         <p style={{ fontSize: '12px', fontWeight: '600', color: 'var(--text-secondary)', marginBottom: '10px', textTransform: 'uppercase' }}>
                                             Sản phẩm
                                         </p>
-                                        {order.items.map((item, index) => (
+                                        {order.product_name ? (
                                             <div
-                                                key={index}
                                                 style={{
                                                     display: 'flex',
                                                     justifyContent: 'space-between',
                                                     padding: '8px 0',
-                                                    borderBottom: index < order.items.length - 1 ? '1px solid var(--table-border)' : 'none',
                                                 }}
                                             >
                                                 <span style={{ fontSize: '14px', color: 'var(--text-primary)' }}>
-                                                    {item.productName}
+                                                    {order.product_name}
                                                 </span>
                                                 <span style={{ fontSize: '14px', fontWeight: '500', color: 'var(--text-primary)' }}>
-                                                    {item.quantity} hộp
+                                                    {order.qty && parseFloat(order.qty).toLocaleString('vi-VN')} {order.uom}
                                                 </span>
                                             </div>
-                                        ))}
+                                        ) : (
+                                            <div style={{ padding: '8px 0' }}>
+                                                <span style={{ fontSize: '14px', color: 'var(--text-primary)' }}>
+                                                    {order.product_names}
+                                                </span>
+                                            </div>
+                                        )}
                                     </div>
 
                                     <div style={{ marginTop: 'auto' }}>
-                                        <p style={{ fontSize: '13px', color: 'var(--text-secondary)', marginBottom: '12px' }}>
-                                            Chấp nhận: {order.acceptedDate}
-                                        </p>
-                                        {order.status === 'preparing' && (
+                                        {order.created_at && (
+                                            <p style={{ fontSize: '13px', color: 'var(--text-secondary)', marginBottom: '4px' }}>
+                                                Ngày đặt: {formatDate(order.created_at)}
+                                            </p>
+                                        )}
+                                        {order.desired_date && (
+                                            <p style={{ fontSize: '13px', color: 'var(--text-secondary)', marginBottom: '12px' }}>
+                                                Ngày mong muốn: {formatDate(order.desired_date)}
+                                            </p>
+                                        )}
+                                        {order.fulfilled_at && (
+                                            <p style={{ fontSize: '13px', color: 'var(--text-secondary)', marginBottom: '12px' }}>
+                                                Hoàn thành: {formatDate(order.fulfilled_at)}
+                                            </p>
+                                        )}
+                                        {activeTab === 'preparing' && (
                                             <button
-                                                onClick={() => handleMarkAsReady(order.id)}
+                                                onClick={() => handleMarkAsReady(order.order_id)}
                                                 style={{
                                                     width: '100%',
                                                     padding: '12px',

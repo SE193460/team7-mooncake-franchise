@@ -12,6 +12,21 @@ export default function StoreDashboard() {
     const [cards, setCards] = useState<any>(null);
     const [orders, setOrders] = useState<any[]>([]);
 
+    const getStatusLabel = (status: string): string => {
+        const statusMap: { [key: string]: string } = {
+            'pending': 'Chờ Xử Lý',
+            'approved': 'Đã Chấp Nhận',
+            'processing': 'Đang Chuẩn Bị',
+            'ready': 'Sẵn Sàng Giao',
+            'delivered': 'Đã Giao',
+            'fulfilled': 'Hoàn Thành',
+            'completed': 'Hoàn Thành',
+            'cancelled': 'Đã Hủy',
+            'rejected': 'Đã Từ Chối',
+        };
+        return statusMap[status] || status;
+    };
+
     useEffect(() => {
         const token = localStorage.getItem('token');
         if (!token) return;
@@ -90,7 +105,7 @@ export default function StoreDashboard() {
                 <div style={{ display: 'flex', gap: '16px', marginBottom: '32px' }}>
                     <StatusCard icon="🛒" count={cards?.pending ?? 0} label="Chờ Xử Lý" />
                     <StatusCard icon="📦" count={cards?.approved ?? 0} label="Đã Chấp Nhận" />
-                    <StatusCard icon="⚙️" count={cards?.processing ?? 0} label="Đang Xử Lý" />
+                    <StatusCard icon="⚙️" count={cards?.processing ?? 0} label="Đang Chuẩn Bị" />
                     <StatusCard icon="✅" count={cards?.fulfilled ?? 0} label="Hoàn Thành" />
                 </div>
 
@@ -101,7 +116,7 @@ export default function StoreDashboard() {
                         orderCode: o.order_code,
                         products: `${o.product_count} sản phẩm`,
                         status: o.status,
-                        statusLabel: o.status,
+                        statusLabel: getStatusLabel(o.status),
                         createdDate: new Date(o.created_at).toLocaleDateString(),
                         desiredDate: o.desired_date
                             ? new Date(o.desired_date).toLocaleDateString()
