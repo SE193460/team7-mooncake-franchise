@@ -1,9 +1,11 @@
 interface StatusCardProps {
-    icon: string;
+    icon: string | React.ReactNode;
     count: number;
     label: string;
     subLabel?: string;
     highlighted?: boolean;
+    iconColor?: string;
+    variant?: 'default' | 'kitchen'; // Thêm variant để hỗ trợ style kitchen
 }
 
 export default function StatusCard({
@@ -12,30 +14,37 @@ export default function StatusCard({
     label,
     subLabel,
     highlighted = false,
+    iconColor,
+    variant = 'default',
 }: StatusCardProps) {
+    const isKitchenVariant = variant === 'kitchen';
+    
     return (
         <div
             style={{
                 flex: 1,
                 padding: '20px',
-                backgroundColor: 'var(--card-bg)',
+                backgroundColor: isKitchenVariant 
+                    ? (highlighted ? '#fffbeb' : 'white')
+                    : 'var(--card-bg)',
                 border: highlighted
-                    ? '2px solid var(--card-highlight-border)'
-                    : '1px solid var(--table-border)',
+                    ? (isKitchenVariant ? '2px solid #fbbf24' : '2px solid var(--card-highlight-border)')
+                    : (isKitchenVariant ? '1px solid var(--border-color)' : '1px solid var(--table-border)'),
                 borderRadius: '12px',
                 display: 'flex',
                 justifyContent: 'space-between',
                 alignItems: 'flex-start',
-                boxShadow: '0 1px 3px rgba(0, 0, 0, 0.05)',
+                boxShadow: isKitchenVariant ? 'none' : '0 1px 3px rgba(0, 0, 0, 0.05)',
+                minWidth: isKitchenVariant ? '200px' : undefined,
             }}
         >
             <div>
                 <div
                     style={{
-                        fontSize: '12px',
+                        fontSize: isKitchenVariant ? '13px' : '12px',
                         color: 'var(--text-secondary)',
-                        marginBottom: '6px',
-                        fontWeight: '500',
+                        marginBottom: isKitchenVariant ? '8px' : '6px',
+                        fontWeight: isKitchenVariant ? 'normal' : '500',
                     }}
                 >
                     {label}
@@ -43,9 +52,9 @@ export default function StatusCard({
                 <div
                     style={{
                         fontSize: '32px',
-                        fontWeight: '700',
+                        fontWeight: isKitchenVariant ? '600' : '700',
                         color: 'var(--text-primary)',
-                        marginBottom: '6px',
+                        marginBottom: isKitchenVariant ? '4px' : '6px',
                     }}
                 >
                     {count}
@@ -53,7 +62,7 @@ export default function StatusCard({
                 {subLabel && (
                     <div
                         style={{
-                            fontSize: '11px',
+                            fontSize: isKitchenVariant ? '12px' : '11px',
                             color: 'var(--text-secondary)',
                         }}
                     >
@@ -63,14 +72,17 @@ export default function StatusCard({
             </div>
             <div
                 style={{
-                    width: '48px',
-                    height: '48px',
-                    borderRadius: '50%',
-                    backgroundColor: highlighted ? 'var(--primary-orange)' : '#F3F4F6',
+                    width: isKitchenVariant ? '44px' : '48px',
+                    height: isKitchenVariant ? '44px' : '48px',
+                    borderRadius: isKitchenVariant ? '10px' : '50%',
+                    backgroundColor: isKitchenVariant 
+                        ? '#f9fafb'
+                        : (highlighted ? 'var(--primary-orange)' : '#F3F4F6'),
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
                     fontSize: '20px',
+                    color: iconColor,
                 }}
             >
                 {icon}

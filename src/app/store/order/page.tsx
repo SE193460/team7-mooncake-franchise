@@ -5,6 +5,8 @@ import { useRouter } from 'next/navigation';
 import { toast } from 'react-toastify';
 import Sidebar from '../../../components/Sidebar';
 import storeService, { Product } from '../../../services/storeService';
+import ProductRowComponent from './ProductRowComponent';
+import styles from './order.module.css';
 
 interface ProductRow {
     id: number;
@@ -139,72 +141,36 @@ export default function CreateOrderPage() {
     };
 
     return (
-        <div style={{ display: 'flex', minHeight: '100vh' }}>
+        <div className={styles.container}>
             <Sidebar activePage="order" />
 
-            <main style={{ flex: 1, padding: '24px 32px', backgroundColor: 'var(--main-bg)' }}>
+            <main className={styles.main}>
                 {/* Header */}
-                <div style={{ marginBottom: '24px' }}>
-                    <h1 style={{ fontSize: '24px', fontWeight: '600', marginBottom: '4px' }}>
+                <div className={styles.header}>
+                    <h1 className={styles.title}>
                         Tạo Đơn Hàng Mới
                     </h1>
-                    <p style={{ fontSize: '14px', color: 'var(--text-secondary)' }}>
+                    <p className={styles.subtitle}>
                         Đặt bánh Trung Thu từ kho trung tâm
                     </p>
                 </div>
 
                 {/* Product List Section */}
-                <div
-                    style={{
-                        backgroundColor: '#fafafa',
-                        borderRadius: '12px',
-                        padding: '24px',
-                        marginBottom: '24px',
-                    }}
-                >
-                    <div
-                        style={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '8px',
-                            marginBottom: '20px',
-                        }}
-                    >
-                        <span
-                            style={{
-                                width: '28px',
-                                height: '28px',
-                                borderRadius: '50%',
-                                backgroundColor: 'var(--primary-orange)',
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                color: 'white',
-                                fontSize: '14px',
-                            }}
-                        >
+                <div className={styles.productListSection}>
+                    <div className={styles.sectionHeader}>
+                        <span className={styles.sectionIcon}>
                             🥮
                         </span>
-                        <h2 style={{ fontSize: '16px', fontWeight: '600' }}>Danh Sách Bánh Trung Thu</h2>
+                        <h2 className={styles.sectionTitle}>Danh Sách Bánh Trung Thu</h2>
                     </div>
 
                     {/* Loading or No Products Message */}
                     {!loadingProducts && availableProducts.length === 0 && (
-                        <div
-                            style={{
-                                padding: '20px',
-                                backgroundColor: '#fff7ed',
-                                border: '1px solid #fed7aa',
-                                borderRadius: '8px',
-                                marginBottom: '16px',
-                                textAlign: 'center',
-                                color: '#c2410c',
-                            }}
-                        >
-                            <p style={{ margin: 0, fontSize: '14px' }}>
+                        <div className={styles.warningBox}>
+                            <p className={styles.warningText}>
                                 ⚠️ Không thể tải danh sách sản phẩm. Vui lòng kiểm tra kết nối API hoặc liên hệ quản trị viên.
                             </p>
-                            <p style={{ margin: '8px 0 0 0', fontSize: '12px', color: '#92400e' }}>
+                            <p className={styles.warningSubtext}>
                                 API endpoint: <code>/GetProducts</code> (có thể cần cấu hình)
                             </p>
                         </div>
@@ -212,169 +178,24 @@ export default function CreateOrderPage() {
 
                     {/* Product Rows */}
                     {products.map((product, index) => (
-                        <div
+                        <ProductRowComponent
                             key={product.id}
-                            style={{
-                                display: 'grid',
-                                gridTemplateColumns: '1fr 120px 80px 40px',
-                                gap: '16px',
-                                marginBottom: '16px',
-                                alignItems: 'end',
-                            }}
-                        >
-                            <div>
-                                <label
-                                    style={{
-                                        display: 'block',
-                                        fontSize: '13px',
-                                        color: 'var(--text-secondary)',
-                                        marginBottom: '6px',
-                                    }}
-                                >
-                                    Sản phẩm {index + 1}
-                                </label>
-                                <select
-                                    value={product.product}
-                                    onChange={(e) => {
-                                        const selectedOption = e.target.selectedOptions[0];
-                                        const productId = selectedOption.getAttribute('data-id') || '';
-                                        const productUnit = selectedOption.getAttribute('data-unit') || 'hộp';
-                                        updateProductMultipleFields(product.id, {
-                                            product: e.target.value,
-                                            productId: productId,
-                                            unit: productUnit,
-                                        });
-                                    }}
-                                    disabled={loadingProducts}
-                                    style={{
-                                        width: '100%',
-                                        padding: '10px 12px',
-                                        border: '1px solid #e5e7eb',
-                                        borderRadius: '8px',
-                                        fontSize: '14px',
-                                        backgroundColor: loadingProducts ? '#f3f4f6' : 'white',
-                                        color: product.product ? 'var(--text-primary)' : 'var(--text-secondary)',
-                                        cursor: loadingProducts ? 'not-allowed' : 'pointer',
-                                    }}
-                                >
-                                    <option value="">
-                                        {loadingProducts ? 'Đang tải...' : availableProducts.length > 0 ? 'Chọn loại bánh' : 'Không có sản phẩm'}
-                                    </option>
-                                    {availableProducts.map((prod) => (
-                                        <option 
-                                            key={prod.id} 
-                                            value={prod.name}
-                                            data-id={prod.id}
-                                            data-unit={prod.uom || 'hộp'}
-                                        >
-                                            {prod.name}
-                                        </option>
-                                    ))}
-                                </select>
-                            </div>
-
-                            <div>
-                                <label
-                                    style={{
-                                        display: 'block',
-                                        fontSize: '13px',
-                                        color: 'var(--text-secondary)',
-                                        marginBottom: '6px',
-                                    }}
-                                >
-                                    Số lượng
-                                </label>
-                                <input
-                                    type="number"
-                                    value={product.quantity || ''}
-                                    onChange={(e) =>
-                                        updateProduct(product.id, 'quantity', parseInt(e.target.value) || 0)
-                                    }
-                                    min="1"
-                                    placeholder="0"
-                                    style={{
-                                        width: '100%',
-                                        padding: '10px 12px',
-                                        border: '1px solid #e5e7eb',
-                                        borderRadius: '8px',
-                                        fontSize: '14px',
-                                    }}
-                                />
-                            </div>
-
-                            <div>
-                                <label
-                                    style={{
-                                        display: 'block',
-                                        fontSize: '13px',
-                                        color: 'var(--text-secondary)',
-                                        marginBottom: '6px',
-                                    }}
-                                >
-                                    Đơn vị
-                                </label>
-                                <input
-                                    type="text"
-                                    value={product.unit}
-                                    readOnly
-                                    placeholder="—"
-                                    style={{
-                                        width: '100%',
-                                        padding: '10px 12px',
-                                        border: '1px solid #e5e7eb',
-                                        borderRadius: '8px',
-                                        fontSize: '14px',
-                                        backgroundColor: '#f9fafb',
-                                        color: 'var(--text-secondary)',
-                                        cursor: 'not-allowed',
-                                    }}
-                                />
-                            </div>
-
-                            <button
-                                onClick={() => removeProduct(product.id)}
-                                style={{
-                                    padding: '10px',
-                                    border: 'none',
-                                    background: 'transparent',
-                                    color: 'var(--text-secondary)',
-                                    cursor: 'pointer',
-                                    fontSize: '16px',
-                                }}
-                            >
-                                🗑
-                            </button>
-                        </div>
+                            product={product}
+                            index={index}
+                            availableProducts={availableProducts}
+                            loadingProducts={loadingProducts}
+                            canRemove={products.length > 1}
+                            onUpdate={updateProduct}
+                            onUpdateMultiple={updateProductMultipleFields}
+                            onRemove={removeProduct}
+                        />
                     ))}
 
                     {/* Add Product Button */}
-                    <div style={{ display: 'flex', justifyContent: 'center', marginTop: '8px' }}>
+                    <div className={styles.flexCenter}>
                         <button
                             onClick={addProduct}
-                            style={{
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                gap: '8px',
-                                padding: '12px 24px',
-                                border: '1px dashed var(--border-color)',
-                                borderRadius: '8px',
-                                backgroundColor: 'transparent',
-                                color: 'var(--text-secondary)',
-                                fontSize: '14px',
-                                cursor: 'pointer',
-                                transition: 'all 0.2s ease',
-                            }}
-                            onMouseEnter={(e) => {
-                                e.currentTarget.style.borderColor = 'var(--primary-orange)';
-                                e.currentTarget.style.color = 'var(--primary-orange)';
-                                e.currentTarget.style.backgroundColor = 'rgba(233, 114, 35, 0.05)';
-                            }}
-                            onMouseLeave={(e) => {
-                                e.currentTarget.style.borderColor = 'var(--border-color)';
-                                e.currentTarget.style.color = 'var(--text-secondary)';
-                                e.currentTarget.style.backgroundColor = 'transparent';
-                            }}
+                            className={styles.addProductBtn}
                         >
                             <span>+</span>
                             <span>Thêm Sản Phẩm</span>
@@ -383,123 +204,67 @@ export default function CreateOrderPage() {
                 </div>
 
                 {/* Delivery Information Section */}
-                <div
-                    style={{
-                        backgroundColor: '#fafafa',
-                        borderRadius: '12px',
-                        padding: '24px',
-                        marginBottom: '24px',
-                    }}
-                >
-                    <h2 style={{ fontSize: '16px', fontWeight: '600', marginBottom: '20px' }}>
-                        Thông Tin Giao Hàng
-                    </h2>
+                <div className={styles.deliverySection}>
+                    <h2 className={styles.sectionTitle}>Thông Tin Giao Hàng</h2>
 
-                    <div style={{ marginBottom: '16px' }}>
-                        <label
-                            style={{
-                                display: 'block',
-                                fontSize: '13px',
-                                color: 'var(--text-secondary)',
-                                marginBottom: '6px',
-                            }}
-                        >
+                    <div className={styles.dateField}>
+                        <label className={styles.fieldLabel}>
                             Ngày giao hàng mong muốn
                         </label>
                         <input
                             type="date"
                             value={deliveryDate}
                             onChange={(e) => setDeliveryDate(e.target.value)}
-                            style={{
-                                width: '100%',
-                                padding: '10px 12px',
-                                border: '1px solid var(--border-color)',
-                                borderRadius: '8px',
-                                fontSize: '14px',
-                            }}
+                            className={styles.dateInput}
                         />
                     </div>
 
-                    <div>
-                        <label
-                            style={{
-                                display: 'block',
-                                fontSize: '13px',
-                                color: 'var(--text-secondary)',
-                                marginBottom: '6px',
-                            }}
-                        >
+                    <div className={styles.notesField}>
+                        <label className={styles.fieldLabel}>
                             Ghi chú thêm
                         </label>
                         <textarea
                             value={notes}
                             onChange={(e) => setNotes(e.target.value)}
-                            rows={4}
-                            style={{
-                                width: '100%',
-                                padding: '10px 12px',
-                                border: '1px solid var(--border-color)',
-                                borderRadius: '8px',
-                                fontSize: '14px',
-                                resize: 'vertical',
-                            }}
+                            className={styles.notesTextarea}
+                            placeholder="Nhập ghi chú về đơn hàng (nếu có)..."
                         />
                     </div>
                 </div>
 
-                {/* Action Buttons */}
+                {/* Error Message */}
                 {error && (
-                    <div
-                        style={{
-                            padding: '12px 16px',
-                            backgroundColor: '#fee',
-                            color: '#c00',
-                            borderRadius: '8px',
-                            marginBottom: '16px',
-                            fontSize: '14px',
-                        }}
-                    >
-                        {error}
+                    <div className={styles.errorBox}>
+                        <span>⚠️</span>
+                        <span>{error}</span>
                     </div>
                 )}
                 
-                <div style={{ display: 'flex', gap: '12px' }}>
+                {/* Action Buttons */}
+                <div className={styles.actionButtons}>
                     <button
                         onClick={handleCancel}
                         disabled={loading}
-                        style={{
-                            padding: '10px 24px',
-                            border: '1px solid var(--border-color)',
-                            borderRadius: '8px',
-                            backgroundColor: 'white',
-                            color: 'var(--text-primary)',
-                            fontSize: '14px',
-                            cursor: loading ? 'not-allowed' : 'pointer',
-                            opacity: loading ? 0.6 : 1,
-                        }}
+                        className={styles.btnCancel}
                     >
                         Hủy
                     </button>
                     <button
                         onClick={handleSubmit}
                         disabled={loading}
-                        style={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '8px',
-                            padding: '10px 24px',
-                            border: 'none',
-                            borderRadius: '8px',
-                            backgroundColor: 'var(--primary-orange)',
-                            color: 'white',
-                            fontSize: '14px',
-                            fontWeight: '500',
-                            cursor: loading ? 'not-allowed' : 'pointer',
-                            opacity: loading ? 0.6 : 1,
-                        }}
+                        className={styles.btnSubmit}
                     >
-                        <span>🛒</span>
-                        <span>{loading ? 'Đang gửi...' : 'Gửi Đơn Hàng'}</span>
+                        {loading ? (
+                            <>
+                                <span>⏳</span>
+                                <span>Đang tạo...</span>
+                            </>
+                        ) : (
+                            <>
+                                <span>✔️</span>
+                                <span>Tạo Đơn Hàng</span>
+                            </>
+                        )}
                     </button>
                 </div>
             </main>

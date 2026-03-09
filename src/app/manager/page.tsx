@@ -1,6 +1,7 @@
 "use client";
 
-import ManagerSidebar from "../../components/ManagerSidebar";
+import Sidebar from "../../components/Sidebar";
+import styles from "./manager.module.css";
 
 export default function ManagerDashboard() {
   // Sample inventory data
@@ -64,104 +65,38 @@ export default function ManagerDashboard() {
   ).length;
 
   return (
-    <div style={{ display: "flex", minHeight: "100vh" }}>
-      <ManagerSidebar />
+    <div className={styles.container}>
+      <Sidebar type="manager" activePage="dashboard" />
 
       {/* Main Content */}
-      <div
-        style={{
-          flex: 1,
-          marginLeft: "240px",
-          padding: "32px 40px",
-          backgroundColor: "#fafafa",
-        }}
-      >
+      <div className={styles.mainContent}>
         {/* Page Header */}
-        <div style={{ marginBottom: "32px" }}>
-          <h1
-            style={{
-              fontSize: "28px",
-              fontWeight: "bold",
-              color: "#3d3530",
-              margin: 0,
-            }}
-          >
+        <div className={styles.pageHeader}>
+          <h1 className={styles.pageTitle}>
             Bảng Quản Lý
           </h1>
-          <p style={{ color: "#666", marginTop: "8px", fontSize: "14px" }}>
+          <p className={styles.pageSubtitle}>
             Tổng quan tồn kho và báo cáo
           </p>
         </div>
 
         {/* Status Cards */}
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(3, 1fr)",
-            gap: "24px",
-            marginBottom: "40px",
-          }}
-        >
+        <div className={styles.statusCards}>
           {/* Total Orders Card */}
-          <div
-            style={{
-              backgroundColor: "white",
-              borderRadius: "12px",
-              padding: "24px",
-              boxShadow: "0 1px 3px rgba(0,0,0,0.08)",
-              border: "1px solid #eee",
-            }}
-          >
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "flex-start",
-              }}
-            >
+          <div className={styles.card}>
+            <div className={styles.cardContent}>
               <div>
-                <p
-                  style={{
-                    fontSize: "14px",
-                    color: "#666",
-                    margin: 0,
-                    marginBottom: "8px",
-                  }}
-                >
+                <p className={styles.cardLabel}>
                   Tổng Đơn Hàng
                 </p>
-                <p
-                  style={{
-                    fontSize: "36px",
-                    fontWeight: "bold",
-                    color: "#3d3530",
-                    margin: 0,
-                  }}
-                >
+                <p className={styles.cardValue}>
                   8
                 </p>
-                <p
-                  style={{
-                    fontSize: "13px",
-                    color: "#999",
-                    margin: 0,
-                    marginTop: "4px",
-                  }}
-                >
+                <p className={styles.cardSubtext}>
                   Tháng này
                 </p>
               </div>
-              <div
-                style={{
-                  width: "48px",
-                  height: "48px",
-                  backgroundColor: "#fff5eb",
-                  borderRadius: "12px",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                }}
-              >
+              <div className={styles.cardIcon}>
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   width="24"
@@ -182,65 +117,20 @@ export default function ManagerDashboard() {
           </div>
 
           {/* Stock Warning Card */}
-          <div
-            style={{
-              backgroundColor: "white",
-              borderRadius: "12px",
-              padding: "24px",
-              boxShadow: "0 1px 3px rgba(0,0,0,0.08)",
-              border: "1px solid #eee",
-            }}
-          >
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "flex-start",
-              }}
-            >
+          <div className={styles.card}>
+            <div className={styles.cardContent}>
               <div>
-                <p
-                  style={{
-                    fontSize: "14px",
-                    color: "#666",
-                    margin: 0,
-                    marginBottom: "8px",
-                  }}
-                >
+                <p className={styles.cardLabel}>
                   Cảnh Báo Tồn Kho
                 </p>
-                <p
-                  style={{
-                    fontSize: "36px",
-                    fontWeight: "bold",
-                    color: "#3d3530",
-                    margin: 0,
-                  }}
-                >
+                <p className={styles.cardValue}>
                   0
                 </p>
-                <p
-                  style={{
-                    fontSize: "13px",
-                    color: "#999",
-                    margin: 0,
-                    marginTop: "4px",
-                  }}
-                >
+                <p className={styles.cardSubtext}>
                   Cần chú ý
                 </p>
               </div>
-              <div
-                style={{
-                  width: "48px",
-                  height: "48px",
-                  backgroundColor: "#fff5eb",
-                  borderRadius: "12px",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                }}
-              >
+              <div className={styles.cardIcon}>
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   width="24"
@@ -261,65 +151,20 @@ export default function ManagerDashboard() {
           </div>
 
           {/* Total Inventory Card */}
-          <div
-            style={{
-              backgroundColor: "white",
-              borderRadius: "12px",
-              padding: "24px",
-              boxShadow: "0 1px 3px rgba(0,0,0,0.08)",
-              border: "1px solid #eee",
-            }}
-          >
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "flex-start",
-              }}
-            >
+          <div className={styles.card}>
+            <div className={styles.cardContent}>
               <div>
-                <p
-                  style={{
-                    fontSize: "14px",
-                    color: "#666",
-                    margin: 0,
-                    marginBottom: "8px",
-                  }}
-                >
+                <p className={styles.cardLabel}>
                   Tổng Tồn Kho
                 </p>
-                <p
-                  style={{
-                    fontSize: "36px",
-                    fontWeight: "bold",
-                    color: "#3d3530",
-                    margin: 0,
-                  }}
-                >
+                <p className={styles.cardValue}>
                   {totalStock} hộp
                 </p>
-                <p
-                  style={{
-                    fontSize: "13px",
-                    color: "#999",
-                    margin: 0,
-                    marginTop: "4px",
-                  }}
-                >
+                <p className={styles.cardSubtext}>
                   Tất cả sản phẩm
                 </p>
               </div>
-              <div
-                style={{
-                  width: "48px",
-                  height: "48px",
-                  backgroundColor: "#fff5eb",
-                  borderRadius: "12px",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                }}
-              >
+              <div className={styles.cardIcon}>
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   width="24"
@@ -340,147 +185,46 @@ export default function ManagerDashboard() {
 
         {/* Inventory Status Table */}
         <div>
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-              marginBottom: "20px",
-            }}
-          >
-            <h2
-              style={{
-                fontSize: "18px",
-                fontWeight: "600",
-                color: "#3d3530",
-                margin: 0,
-              }}
-            >
+          <div className={styles.sectionHeader}>
+            <h2 className={styles.sectionTitle}>
               Tình Trạng Tồn Kho
             </h2>
-            <button
-              style={{
-                background: "none",
-                border: "none",
-                color: "#e67e22",
-                cursor: "pointer",
-                fontSize: "14px",
-                fontWeight: "500",
-              }}
-            >
+            <button className={styles.viewDetailsBtn}>
               Xem chi tiết
             </button>
           </div>
 
-          <div
-            style={{
-              backgroundColor: "white",
-              borderRadius: "12px",
-              overflow: "hidden",
-              boxShadow: "0 1px 3px rgba(0,0,0,0.08)",
-              border: "1px solid #eee",
-            }}
-          >
-            <table style={{ width: "100%", borderCollapse: "collapse" }}>
-              <thead>
-                <tr style={{ backgroundColor: "#fafafa" }}>
-                  <th
-                    style={{
-                      textAlign: "left",
-                      padding: "16px 24px",
-                      fontSize: "12px",
-                      fontWeight: "600",
-                      color: "#666",
-                      textTransform: "uppercase",
-                      letterSpacing: "0.5px",
-                    }}
-                  >
+          <div className={styles.tableContainer}>
+            <table className={styles.table}>
+              <thead className={styles.tableHead}>
+                <tr>
+                  <th className={styles.tableHeader}>
                     Sản phẩm
                   </th>
-                  <th
-                    style={{
-                      textAlign: "left",
-                      padding: "16px 24px",
-                      fontSize: "12px",
-                      fontWeight: "600",
-                      color: "#666",
-                      textTransform: "uppercase",
-                      letterSpacing: "0.5px",
-                    }}
-                  >
+                  <th className={styles.tableHeader}>
                     Loại
                   </th>
-                  <th
-                    style={{
-                      textAlign: "left",
-                      padding: "16px 24px",
-                      fontSize: "12px",
-                      fontWeight: "600",
-                      color: "#666",
-                      textTransform: "uppercase",
-                      letterSpacing: "0.5px",
-                    }}
-                  >
+                  <th className={styles.tableHeader}>
                     Tồn kho
                   </th>
-                  <th
-                    style={{
-                      textAlign: "left",
-                      padding: "16px 24px",
-                      fontSize: "12px",
-                      fontWeight: "600",
-                      color: "#666",
-                      textTransform: "uppercase",
-                      letterSpacing: "0.5px",
-                    }}
-                  >
+                  <th className={styles.tableHeader}>
                     Tối thiểu
                   </th>
                 </tr>
               </thead>
               <tbody>
                 {inventoryData.map((item, index) => (
-                  <tr
-                    key={index}
-                    style={{
-                      borderTop: "1px solid #f0f0f0",
-                    }}
-                  >
-                    <td
-                      style={{
-                        padding: "16px 24px",
-                        fontSize: "14px",
-                        color: "#3d3530",
-                        fontWeight: "500",
-                      }}
-                    >
+                  <tr key={index} className={styles.tableRow}>
+                    <td className={styles.tableCellName}>
                       {item.name}
                     </td>
-                    <td
-                      style={{
-                        padding: "16px 24px",
-                        fontSize: "14px",
-                        color: "#666",
-                      }}
-                    >
+                    <td className={styles.tableCellText}>
                       {item.type}
                     </td>
-                    <td
-                      style={{
-                        padding: "16px 24px",
-                        fontSize: "14px",
-                        color: "#3d3530",
-                      }}
-                    >
+                    <td className={styles.tableCellValue}>
                       {item.stock} hộp
                     </td>
-                    <td
-                      style={{
-                        padding: "16px 24px",
-                        fontSize: "14px",
-                        color: "#666",
-                      }}
-                    >
+                    <td className={styles.tableCellText}>
                       {item.minStock} hộp
                     </td>
                   </tr>
