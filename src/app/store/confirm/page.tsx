@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { toast } from 'react-toastify';
 import Sidebar from '../../../components/Sidebar';
 import storeService, { ConfirmOrder } from '../../../services/storeService';
 import styles from './confirm.module.css';
@@ -98,7 +99,7 @@ export default function OrderConfirmationPage() {
       setRating(5);
     } catch (err) {
       console.error('Error confirming receipt:', err);
-      alert('Không thể xác nhận đơn hàng. Vui lòng thử lại!');
+      toast.error('Không thể xác nhận đơn hàng. Vui lòng thử lại!');
     } finally {
       setSubmitting(false);
     }

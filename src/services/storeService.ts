@@ -228,7 +228,7 @@ const storeService = {
             };
 
             console.log('Sending order request:', JSON.stringify(apiRequestData, null, 2));
-            const data = await fetchClient.post<CreateOrderResponse>("/CreateOrders", apiRequestData);
+            const data = await fetchClient.post<CreateOrderResponse>("/orders", apiRequestData);
             return data;
         } catch (error) {
             console.error("Error creating order:", error);

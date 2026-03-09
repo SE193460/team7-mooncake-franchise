@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { toast } from 'react-toastify';
 import Sidebar from '../../../components/Sidebar';
 import storeService, { Product } from '../../../services/storeService';
 
@@ -110,8 +111,8 @@ export default function CreateOrderPage() {
             console.log('Order creation response:', response);
             
             // Success - redirect to confirm page or dashboard
-            alert('Đơn hàng đã được tạo thành công!');
-            router.push('/store/confirm');
+            toast.success('Đơn hàng đã được tạo thành công!');
+            router.push('/store/tracking');
         } catch (err: any) {
             console.error('Error creating order:', err);
             
