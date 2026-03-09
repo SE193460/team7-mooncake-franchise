@@ -43,6 +43,9 @@ export default function LoginPage() {
       return;
     }
 
+    // ✅ XÓA CÁC TOKEN CŨ/SAI (nếu có)
+    localStorage.removeItem("accessToken");
+    
     // ✅ LƯU TOKEN VÀ USER Ở ĐÂY
     localStorage.setItem("token", token);
     if (user) {
