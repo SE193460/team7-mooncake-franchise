@@ -1,7 +1,7 @@
 'use client';
 
 import Sidebar from '../../components/Sidebar';
-import KitchenStatusCard from '../../components/KitchenStatusCard';
+import StatusCard from '../../components/StatusCard';
 import { useEffect, useState } from "react";
 
 // Icons as SVG components for better visual match
@@ -85,26 +85,30 @@ export default function KitchenDashboard() {
 
                 {/* Status Cards */}
                 <div style={{ display: 'flex', gap: '20px', marginBottom: '32px' }}>
-                    <KitchenStatusCard
+                    <StatusCard
+                        variant="kitchen"
                         icon={<ClipboardIcon />}
                         count={dashboardData?.cards.pending || 1}
                         label="Đơn Chờ Xử Lý"
                         subLabel="Cần xác nhận"
                     />
-                    <KitchenStatusCard
+                    <StatusCard
+                        variant="kitchen"
                         icon={<PackageIcon />}
                         count={dashboardData?.cards.approved || 3}
                         label="Đang Chuẩn Bị"
                         subLabel="Đã chấp nhận"
                     />
-                    <KitchenStatusCard
+                    <StatusCard
+                        variant="kitchen"
                         icon={<CheckCircleIcon />}
                         count={dashboardData?.cards.processing || 5}
                         label="Sẵn Sàng Giao"
                         subLabel="Chờ điều phối"
                         highlighted={true}
                     />
-                    <KitchenStatusCard
+                    <StatusCard
+                        variant="kitchen"
                         icon={<AlertTriangleIcon />}
                         count={dashboardData?.cards.fulfilled || 2}
                         label="Cảnh Báo Tồn Kho"

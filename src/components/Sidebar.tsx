@@ -75,7 +75,6 @@ export default function Sidebar({ activePage = 'dashboard', type = 'franchise' }
         { id: 'dashboard', label: 'Dashboard', icon: '📊', href: '/admin' },
         { id: 'users', label: 'Quản Lý Users', icon: '👥', href: '/admin/users' },
         { id: 'categories', label: 'Dữ Liệu Danh Mục', icon: '📋', href: '/admin/categories' },
-        { id: 'settings', label: 'Cài Đặt Hệ Thống', icon: '⚙️', href: '/admin/settings' },
     ];
 
     const menuItems = type === 'kitchen' ? kitchenMenuItems : 

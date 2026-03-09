@@ -1,6 +1,7 @@
 "use client";
 
-import ManagerSidebar from "../../../components/ManagerSidebar";
+import Sidebar from "../../../components/Sidebar";
+import styles from "./inventory.module.css";
 
 export default function InventoryManagement() {
   // Sample inventory data with expiry dates and status
@@ -99,168 +100,59 @@ export default function InventoryManagement() {
   };
 
   return (
-    <div style={{ display: "flex", minHeight: "100vh" }}>
-      <ManagerSidebar />
+    <div className={styles.container}>
+      <Sidebar type="manager" activePage="inventory" />
 
       {/* Main Content */}
-      <div
-        style={{
-          flex: 1,
-          marginLeft: "240px",
-          padding: "32px 40px",
-          backgroundColor: "#fafafa",
-        }}
-      >
+      <div className={styles.mainContent}>
         {/* Page Header */}
-        <div style={{ marginBottom: "32px" }}>
-          <h1
-            style={{
-              fontSize: "28px",
-              fontWeight: "bold",
-              color: "#3d3530",
-              margin: 0,
-            }}
-          >
+        <div className={styles.pageHeader}>
+          <h1 className={styles.pageTitle}>
             Quản Lý Kho
           </h1>
-          <p style={{ color: "#666", marginTop: "8px", fontSize: "14px" }}>
+          <p className={styles.pageSubtitle}>
             Tổng quan tồn kho và cảnh báo
           </p>
         </div>
 
         {/* Status Cards */}
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(4, 1fr)",
-            gap: "20px",
-            marginBottom: "40px",
-          }}
-        >
+        <div className={styles.statusCards}>
           {/* Total Products Card */}
-          <div
-            style={{
-              backgroundColor: "white",
-              borderRadius: "12px",
-              padding: "24px",
-              boxShadow: "0 1px 3px rgba(0,0,0,0.08)",
-              border: "1px solid #eee",
-            }}
-          >
-            <p
-              style={{
-                fontSize: "14px",
-                color: "#666",
-                margin: 0,
-                marginBottom: "8px",
-              }}
-            >
+          <div className={styles.card}>
+            <p className={styles.cardLabel}>
               Tổng Sản Phẩm
             </p>
-            <p
-              style={{
-                fontSize: "32px",
-                fontWeight: "bold",
-                color: "#3d3530",
-                margin: 0,
-              }}
-            >
+            <p className={styles.cardValue}>
               {totalProducts}
             </p>
           </div>
 
           {/* Low Stock Card */}
-          <div
-            style={{
-              backgroundColor: "white",
-              borderRadius: "12px",
-              padding: "24px",
-              boxShadow: "0 1px 3px rgba(0,0,0,0.08)",
-              border: "1px solid #eee",
-            }}
-          >
-            <p
-              style={{
-                fontSize: "14px",
-                color: "#666",
-                margin: 0,
-                marginBottom: "8px",
-              }}
-            >
+          <div className={styles.card}>
+            <p className={styles.cardLabel}>
               Tồn Kho Thấp
             </p>
-            <p
-              style={{
-                fontSize: "32px",
-                fontWeight: "bold",
-                color: "#f97316",
-                margin: 0,
-              }}
-            >
+            <p className={styles.cardValue} style={{ color: "#f97316" }}>
               {lowStockCount}
             </p>
           </div>
 
           {/* Bánh Nướng Count Card */}
-          <div
-            style={{
-              backgroundColor: "white",
-              borderRadius: "12px",
-              padding: "24px",
-              boxShadow: "0 1px 3px rgba(0,0,0,0.08)",
-              border: "1px solid #eee",
-            }}
-          >
-            <p
-              style={{
-                fontSize: "14px",
-                color: "#666",
-                margin: 0,
-                marginBottom: "8px",
-              }}
-            >
+          <div className={styles.card}>
+            <p className={styles.cardLabel}>
               Bánh Nướng
             </p>
-            <p
-              style={{
-                fontSize: "32px",
-                fontWeight: "bold",
-                color: "#3d3530",
-                margin: 0,
-              }}
-            >
+            <p className={styles.cardValue}>
               {banhNuongCount}
             </p>
           </div>
 
           {/* Bánh Dẻo Count Card */}
-          <div
-            style={{
-              backgroundColor: "white",
-              borderRadius: "12px",
-              padding: "24px",
-              boxShadow: "0 1px 3px rgba(0,0,0,0.08)",
-              border: "1px solid #eee",
-            }}
-          >
-            <p
-              style={{
-                fontSize: "14px",
-                color: "#666",
-                margin: 0,
-                marginBottom: "8px",
-              }}
-            >
+          <div className={styles.card}>
+            <p className={styles.cardLabel}>
               Bánh Dẻo
             </p>
-            <p
-              style={{
-                fontSize: "32px",
-                fontWeight: "bold",
-                color: "#3d3530",
-                margin: 0,
-              }}
-            >
+            <p className={styles.cardValue}>
               {banhDeoCount}
             </p>
           </div>
@@ -268,28 +160,13 @@ export default function InventoryManagement() {
 
         {/* Inventory Details Section */}
         <div style={{ marginBottom: "24px" }}>
-          <h2
-            style={{
-              fontSize: "20px",
-              fontWeight: "600",
-              color: "#3d3530",
-              margin: 0,
-            }}
-          >
+          <h2 className={styles.sectionTitle}>
             Chi Tiết Tồn Kho
           </h2>
         </div>
 
         {/* Inventory Table */}
-        <div
-          style={{
-            backgroundColor: "white",
-            borderRadius: "12px",
-            boxShadow: "0 1px 3px rgba(0,0,0,0.08)",
-            border: "1px solid #eee",
-            overflow: "hidden",
-          }}
-        >
+        <div className={styles.tableContainer}>
           <table style={{ width: "100%", borderCollapse: "collapse" }}>
             <thead>
               <tr style={{ borderBottom: "1px solid #eee" }}>

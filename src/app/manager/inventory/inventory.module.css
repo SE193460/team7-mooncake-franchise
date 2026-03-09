@@ -1,0 +1,159 @@
+/* Manager Inventory Page Styles */
+
+.container {
+    display: flex;
+    min-height: 100vh;
+}
+
+.mainContent {
+    flex: 1;
+    margin-left: 240px;
+    padding: 32px 40px;
+    background-color: #fafafa;
+}
+
+.pageHeader {
+    margin-bottom: 32px;
+}
+
+.pageTitle {
+    font-size: 28px;
+    font-weight: bold;
+    color: #3d3530;
+    margin: 0;
+}
+
+.pageSubtitle {
+    color: #666;
+    margin-top: 8px;
+    font-size: 14px;
+}
+
+.statusCards {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 20px;
+    margin-bottom: 40px;
+}
+
+.card {
+    background-color: white;
+    border-radius: 12px;
+    padding: 24px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+    border: 1px solid #eee;
+}
+
+.cardLabel {
+    font-size: 14px;
+    color: #666;
+    margin: 0 0 12px 0;
+}
+
+.cardValue {
+    font-size: 32px;
+    font-weight: 600;
+    color: #3d3530;
+    margin: 0;
+}
+
+.sectionHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.sectionTitle {
+    font-size: 18px;
+    font-weight: 600;
+    color: #3d3530;
+    margin: 0;
+}
+
+.filterButtons {
+    display: flex;
+    gap: 8px;
+}
+
+.filterBtn {
+    padding: 8px 16px;
+    border: 1px solid #ddd;
+    background: white;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+    color: #666;
+    transition: all 0.2s;
+}
+
+.filterBtn:hover {
+    border-color: #e67e22;
+    color: #e67e22;
+}
+
+.filterBtnActive {
+    background: #e67e22;
+    color: white;
+    border-color: #e67e22;
+}
+
+.tableContainer {
+    background-color: white;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+    border: 1px solid #eee;
+}
+
+.table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.tableHead {
+    background-color: #fafafa;
+}
+
+.tableHeader {
+    text-align: left;
+    padding: 16px 24px;
+    font-size: 12px;
+    font-weight: 600;
+    color: #666;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.tableRow {
+    border-top: 1px solid #f0f0f0;
+}
+
+.tableCellName {
+    padding: 16px 24px;
+    font-size: 14px;
+    color: #3d3530;
+    font-weight: 500;
+}
+
+.tableCellText {
+    padding: 16px 24px;
+    font-size: 14px;
+    color: #666;
+}
+
+.tableCellValue {
+    padding: 16px 24px;
+    font-size: 14px;
+    color: #3d3530;
+}
+
+.statusBadge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 12px;
+    border-radius: 12px;
+    font-size: 13px;
+    font-weight: 500;
+}
