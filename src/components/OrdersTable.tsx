@@ -2,7 +2,7 @@ interface Order {
     id: string;
     orderCode: string;
     products: string;
-    status: 'pending' | 'ready' | 'preparing' | 'delivered' | 'completed';
+    status: 'pending' | 'processing' | 'fulfilled' | 'confirmed' | 'cancelled';
     statusLabel: string;
     createdDate: string;
     desiredDate: string;
@@ -22,34 +22,25 @@ export default function OrdersTable({ orders }: OrdersTableProps) {
                     backgroundColor: 'var(--status-yellow)',
                     color: 'var(--status-yellow-text)',
                 };
-            case 'ready':
-            case 'approved':
-                return {
-                    backgroundColor: 'var(--status-blue)',
-                    color: 'var(--status-blue-text)',
-                };
-            case 'preparing':
             case 'processing':
                 return {
                     backgroundColor: 'var(--status-orange)',
                     color: 'var(--status-orange-text)',
                 };
-            case 'delivered':
-                return {
-                    backgroundColor: 'var(--status-purple)',
-                    color: 'var(--status-purple-text)',
-                };
-            case 'completed':
             case 'fulfilled':
+                return {
+                    backgroundColor: 'var(--status-blue)',
+                    color: 'var(--status-blue-text)',
+                };
+            case 'confirmed':
                 return {
                     backgroundColor: 'var(--status-green)',
                     color: 'var(--status-green-text)',
                 };
             case 'cancelled':
-            case 'rejected':
                 return {
-                    backgroundColor: 'var(--status-gray)',
-                    color: 'var(--status-gray-text)',
+                    backgroundColor: 'var(--status-red)',
+                    color: 'var(--status-red-text)',
                 };
             default:
                 return {

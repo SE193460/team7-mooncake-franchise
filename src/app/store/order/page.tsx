@@ -21,6 +21,7 @@ export default function CreateOrderPage() {
     const [products, setProducts] = useState<ProductRow[]>([
         { id: 1, productId: '', product: '', quantity: 0, unit: '' },
     ]);
+    const [nextId, setNextId] = useState(2); // Counter cho ID tiếp theo
     const [availableProducts, setAvailableProducts] = useState<Product[]>([]);
     const [deliveryDate, setDeliveryDate] = useState('');
     const [notes, setNotes] = useState('');
@@ -51,8 +52,9 @@ export default function CreateOrderPage() {
     const addProduct = () => {
         setProducts([
             ...products,
-            { id: products.length + 1, productId: '', product: '', quantity: 0, unit: '' },
+            { id: nextId, productId: '', product: '', quantity: 0, unit: '' },
         ]);
+        setNextId(nextId + 1); // Tăng counter
     };
 
     const removeProduct = (id: number) => {
@@ -177,19 +179,31 @@ export default function CreateOrderPage() {
                     )}
 
                     {/* Product Rows */}
-                    {products.map((product, index) => (
-                        <ProductRowComponent
-                            key={product.id}
-                            product={product}
-                            index={index}
-                            availableProducts={availableProducts}
-                            loadingProducts={loadingProducts}
-                            canRemove={products.length > 1}
-                            onUpdate={updateProduct}
-                            onUpdateMultiple={updateProductMultipleFields}
-                            onRemove={removeProduct}
-                        />
-                    ))}
+                    {products.map((product, index) => {
+                        // Lọc ra những sản phẩm đã được chọn ở các rows khác
+                        const selectedProductIds = products
+                            .filter(p => p.id !== product.id && p.productId) // Loại trừ row hiện tại
+                            .map(p => p.productId);
+                        
+                        // Chỉ hiển thị products chưa được chọn hoặc product hiện tại
+                        const filteredProducts = availableProducts.filter(
+                            p => !selectedProductIds.includes(p.id) || p.id === product.productId
+                        );
+
+                        return (
+                            <ProductRowComponent
+                                key={product.id}
+                                product={product}
+                                index={index}
+                                availableProducts={filteredProducts}
+                                loadingProducts={loadingProducts}
+                                canRemove={products.length > 1}
+                                onUpdate={updateProduct}
+                                onUpdateMultiple={updateProductMultipleFields}
+                                onRemove={removeProduct}
+                            />
+                        );
+                    })}
 
                     {/* Add Product Button */}
                     <div className={styles.flexCenter}>

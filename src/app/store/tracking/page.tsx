@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { toast } from 'react-toastify';
 import Sidebar from '../../../components/Sidebar';
 import styles from './tracking.module.css';
 import storeService from '../../../services/storeService';
@@ -12,7 +13,7 @@ interface Order {
   products: string;
   createdDate: string;
   deliveryDate: string;
-  status: 'pending' | 'ready' | 'preparing' | 'delivered' | 'completed';
+  status: 'pending' | 'processing' | 'fulfilled' | 'confirmed' | 'cancelled';
   statusLabel: string;
 }
 
@@ -23,6 +24,9 @@ export default function OrderTrackingPage() {
   const [error, setError] = useState<string | null>(null);
   const [selectedFilter, setSelectedFilter] = useState('Tất cả');
   const [searchQuery, setSearchQuery] = useState('');
+  const [showActionMenu, setShowActionMenu] = useState<string | null>(null);
+  const [showCancelConfirm, setShowCancelConfirm] = useState(false);
+  const [orderToCancel, setOrderToCancel] = useState<string | null>(null);
 
   useEffect(() => {
     fetchOrders();
@@ -31,6 +35,17 @@ export default function OrderTrackingPage() {
   useEffect(() => {
     filterOrders();
   }, [orders, selectedFilter, searchQuery]);
+
+  useEffect(() => {
+    const handleClickOutside = () => {
+      if (showActionMenu) {
+        setShowActionMenu(null);
+      }
+    };
+    
+    document.addEventListener('click', handleClickOutside);
+    return () => document.removeEventListener('click', handleClickOutside);
+  }, [showActionMenu]);
 
   const fetchOrders = async () => {
     try {
@@ -52,7 +67,7 @@ export default function OrderTrackingPage() {
     if (selectedFilter !== 'Tất cả') {
       filtered = filtered.filter(order => {
         if (selectedFilter === 'Chờ xử lý') return order.status === 'pending';
-        if (selectedFilter === 'Đã hoàn thành') return order.status === 'completed' || order.status === 'delivered';
+        if (selectedFilter === 'Đã hoàn thành') return order.status === 'fulfilled' || order.status === 'confirmed';
         return true;
       });
     }
@@ -68,17 +83,53 @@ export default function OrderTrackingPage() {
   };
 
   const getStatusClass = (status: string) => {
-    if (status === 'pending' || status === 'Chờ xử lý') return styles.statusPending;
-    if (status === 'ready' || status === 'approved' || status === 'Đã chấp nhận') return styles.statusReady;
-    if (status === 'preparing' || status === 'processing' || status === 'Đang chuẩn bị') return styles.statusPreparing;
-    if (status === 'delivered' || status === 'Đã Giao') return styles.statusDelivered;
-    if (status === 'completed' || status === 'fulfilled' || status === 'Đã hoàn thành') return styles.statusCompleted;
-    if (status === 'cancelled' || status === 'rejected' || status === 'Đã hủy') return styles.statusCancelled;
+    if (status === 'pending') return styles.statusPending;
+    if (status === 'processing') return styles.statusProcessing;
+    if (status === 'fulfilled') return styles.statusReady;
+    if (status === 'confirmed') return styles.statusCompleted;
+    if (status === 'cancelled') return styles.statusCancelled;
     return styles.statusCancelled;
   };
 
   const getStatusDisplay = (order: Order) => {
     return order.statusLabel || order.status;
+  };
+
+  const handleCancelOrder = (orderId: string) => {
+    setOrderToCancel(orderId);
+    setShowCancelConfirm(true);
+    setShowActionMenu(null);
+  };
+
+  const confirmCancelOrder = async () => {
+    if (!orderToCancel) return;
+
+    try {
+      const result = await storeService.cancelOrder(orderToCancel);
+      
+      if (result.success) {
+        toast.success('Đơn hàng đã được hủy thành công!');
+        fetchOrders(); // Refresh list
+      } else {
+        toast.error(result.message || 'Không thể hủy đơn hàng. Vui lòng thử lại.');
+      }
+    } catch (err) {
+      console.error('Error cancelling order:', err);
+      toast.error('Không thể hủy đơn hàng. Vui lòng thử lại.');
+    } finally {
+      setShowCancelConfirm(false);
+      setOrderToCancel(null);
+    }
+  };
+
+  const handleEditOrder = (orderId: string) => {
+    setShowActionMenu(null);
+    toast.info('Để chỉnh sửa đơn hàng, vui lòng hủy đơn hàng này và tạo đơn hàng mới với thông tin cập nhật.');
+  };
+
+  const canEditOrCancel = (status: string) => {
+    // Chỉ cho phép chỉnh sửa/hủy đơn ở trạng thái pending
+    return status === 'pending';
   };
 
   return (
@@ -151,7 +202,7 @@ export default function OrderTrackingPage() {
                   <th>Sản phẩm</th>
                   <th>Trạng thái</th>
                   <th>Ngày tạo</th>
-                  <th>Ngày giao</th>
+                  <th>Chỉnh sửa</th>
                 </tr>
               </thead>
               <tbody>
@@ -184,7 +235,42 @@ export default function OrderTrackingPage() {
                         </span>
                       </td>
                       <td className={styles.dateCell}>{order.createdDate}</td>
-                      <td className={styles.dateCell}>{order.deliveryDate || '—'}</td>
+                      <td>
+                        {canEditOrCancel(order.status) ? (
+                          <div className={styles.actionCell}>
+                            <button
+                              className={styles.actionButton}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setShowActionMenu(showActionMenu === order.id ? null : order.id);
+                              }}
+                            >
+                              ⋮
+                            </button>
+                            {showActionMenu === order.id && (
+                              <div 
+                                className={styles.actionMenu}
+                                onClick={(e) => e.stopPropagation()}
+                              >
+                                <button
+                                  className={styles.actionMenuItem}
+                                  onClick={() => handleEditOrder(order.id)}
+                                >
+                                  ✏️ Chỉnh sửa
+                                </button>
+                                <button
+                                  className={styles.actionMenuItem}
+                                  onClick={() => handleCancelOrder(order.id)}
+                                >
+                                  ❌ Hủy đơn
+                                </button>
+                              </div>
+                            )}
+                          </div>
+                        ) : (
+                          <span className={styles.noAction}>—</span>
+                        )}
+                      </td>
                     </tr>
                   ))
                 )}
@@ -193,6 +279,35 @@ export default function OrderTrackingPage() {
           </div>
         )}
       </div>
+
+      {/* Custom Confirm Modal */}
+      {showCancelConfirm && (
+        <div className={styles.modalOverlay} onClick={() => setShowCancelConfirm(false)}>
+          <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
+            <div className={styles.modalHeader}>
+              <div className={styles.modalIcon}>⚠️</div>
+              <h3 className={styles.modalTitle}>Xác nhận hủy đơn hàng</h3>
+            </div>
+            <p className={styles.modalMessage}>
+              Bạn có chắc chắn muốn hủy đơn hàng này? Hành động này không thể hoàn tác.
+            </p>
+            <div className={styles.modalActions}>
+              <button
+                className={styles.cancelButton}
+                onClick={() => setShowCancelConfirm(false)}
+              >
+                Không, giữ lại
+              </button>
+              <button
+                className={styles.confirmButton}
+                onClick={confirmCancelOrder}
+              >
+                Có, hủy đơn
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
