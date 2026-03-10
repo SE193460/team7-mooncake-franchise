@@ -52,7 +52,7 @@ export interface Order {
     id: string;
     orderCode: string;
     products: string;
-    status: 'pending' | 'ready' | 'preparing' | 'delivered' | 'completed';
+    status: 'pending' | 'processing' | 'fulfilled' | 'confirmed' | 'cancelled';
     statusLabel: string;
     createdDate: string;
     desiredDate: string;
@@ -135,14 +135,10 @@ export interface ConfirmReceiptResponse {
 const convertApiOrderToOrder = (apiOrder: ApiOrder): Order => {
     const statusMap: Record<string, { status: Order['status']; label: string }> = {
         'pending': { status: 'pending', label: 'Chờ Xử Lý' },
-        'approved': { status: 'ready', label: 'Đã Chấp Nhận' },
-        'processing': { status: 'preparing', label: 'Đang Chuẩn Bị' },
-        'ready': { status: 'ready', label: 'Sẵn Sàng Giao' },
-        'delivered': { status: 'delivered', label: 'Đã Giao' },
-        'fulfilled': { status: 'completed', label: 'Hoàn Thành' },
-        'completed': { status: 'completed', label: 'Hoàn Thành' },
-        'cancelled': { status: 'pending', label: 'Đã Hủy' },
-        'rejected': { status: 'pending', label: 'Đã Từ Chối' },
+        'processing': { status: 'processing', label: 'Đang Chuẩn Bị' },
+        'fulfilled': { status: 'fulfilled', label: 'Đã Hoàn Thành' },
+        'confirmed': { status: 'confirmed', label: 'Đã Xác Nhận' },
+        'cancelled': { status: 'cancelled', label: 'Đã Hủy' },
     };
 
     const mappedStatus = statusMap[apiOrder.status] || { status: 'pending', label: apiOrder.status };
@@ -356,6 +352,25 @@ console.log('apine:', data);
             return response;
         } catch (error) {
             console.error("Error confirming receipt:", error);
+            throw error;
+        }
+    },
+
+    // Cancel order (only for pending status)
+    cancelOrder: async (orderId: string): Promise<{ success: boolean; message?: string }> => {
+        try {
+            console.log(`Cancelling order ${orderId}`);
+
+            const response = await fetchClient.put<{ success: boolean; message?: string }>(
+                `/orders/${orderId}/cancel`,
+                {}
+            );
+
+            console.log('Cancel order response:', response);
+
+            return response;
+        } catch (error) {
+            console.error("Error cancelling order:", error);
             throw error;
         }
     },

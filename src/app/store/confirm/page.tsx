@@ -65,9 +65,12 @@ export default function OrderConfirmationPage() {
   }, []);
 
   const getStatusClass = (status: string) => {
-    if (status === 'Đã giao') return styles.statusDelivered;
-    if (status === 'Đã xác nhận') return styles.statusConfirmed;
-    return '';
+    if (status === 'pending') return styles.statusPending;
+    if (status === 'processing') return styles.statusProcessing;
+    if (status === 'fulfilled') return styles.statusReady;
+    if (status === 'confirmed') return styles.statusCompleted;
+    if (status === 'cancelled') return styles.statusCancelled;
+    return styles.statusReady;
   };
 
   const handleConfirmClick = (order: Order) => {
