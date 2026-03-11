@@ -76,15 +76,6 @@ export default function OrderConfirmationPage() {
     fetchOrders();
   }, []);
 
-  const getStatusClass = (status: string) => {
-    if (status === 'pending') return styles.statusPending;
-    if (status === 'processing') return styles.statusProcessing;
-    if (status === 'fulfilled') return styles.statusReady;
-    if (status === 'confirmed') return styles.statusCompleted;
-    if (status === 'cancelled') return styles.statusCancelled;
-    return styles.statusReady;
-  };
-
   const handleConfirmClick = (order: Order) => {
     setSelectedOrder(order);
     setFeedback('');
@@ -170,7 +161,7 @@ export default function OrderConfirmationPage() {
                     </div>
                   </td>
                   <td>
-                    <span className={`${styles.statusBadge} ${getStatusClass(order.status)}`}>
+                    <span className={styles.statusBadge}>
                       {order.status}
                     </span>
                   </td>

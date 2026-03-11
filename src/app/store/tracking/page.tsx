@@ -82,6 +82,15 @@ export default function OrderTrackingPage() {
     setFilteredOrders(filtered);
   };
 
+  const getStatusClass = (status: string) => {
+    if (status === 'pending') return styles.statusPending;
+    if (status === 'processing') return styles.statusProcessing;
+    if (status === 'fulfilled') return styles.statusReady;
+    if (status === 'confirmed') return styles.statusCompleted;
+    if (status === 'cancelled') return styles.statusCancelled;
+    return styles.statusCancelled;
+  };
+
   const getStatusDisplay = (order: Order) => {
     return order.statusLabel || order.status;
   };
@@ -221,7 +230,7 @@ export default function OrderTrackingPage() {
                         </div>
                       </td>
                       <td>
-                        <span className={styles.statusBadge}>
+                        <span className={`${styles.statusBadge} ${getStatusClass(order.status)}`}>
                           {getStatusDisplay(order)}
                         </span>
                       </td>
