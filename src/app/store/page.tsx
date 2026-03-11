@@ -47,6 +47,7 @@ export default function StoreDashboard() {
                
                 setOrders(dashboard.recent_orders || []);
                 console.log("ORDERS:", dashboard.recent_orders);
+                console.log("First order delivery_date:", dashboard.recent_orders?.[0]?.delivery_date);
             })
             .catch(console.error);
     }, []);
@@ -110,15 +111,14 @@ export default function StoreDashboard() {
                         id: o.order_id,
                         orderCode: o.order_code,
                         products: `${o.product_count} sản phẩm`,
-                        productNames: o.product_names,
                         status: o.status,
                         statusLabel: getStatusLabel(o.status),
                         createdDate: new Date(o.created_at).toLocaleDateString(),
                         desiredDate: o.desired_date
                             ? new Date(o.desired_date).toLocaleDateString()
                             : '',
-                        deliveryDate: o.delivered_at
-                            ? new Date(o.delivered_at).toLocaleDateString()
+                        deliveryDate: o.delivery_date
+                            ? new Date(o.delivery_date).toLocaleDateString()
                             : '',
                         note: o.note ?? '',
                     }))}

@@ -52,6 +52,7 @@ export interface Order {
     id: string;
     orderCode: string;
     products: string;
+    productNames?: string;
     status: 'pending' | 'processing' | 'fulfilled' | 'confirmed' | 'cancelled';
     statusLabel: string;
     createdDate: string;
@@ -152,6 +153,7 @@ const convertApiOrderToOrder = (apiOrder: ApiOrder): Order => {
         id: apiOrder.order_id,
         orderCode: apiOrder.order_code,
         products: `${apiOrder.product_count || apiOrder.total_items || 0} sản phẩm`,
+        productNames: apiOrder.product_names,
         status: mappedStatus.status,
         statusLabel: mappedStatus.label,
         createdDate: new Date(apiOrder.created_at).toLocaleDateString('vi-VN'),
