@@ -112,8 +112,13 @@ export interface ConfirmOrder {
     order_code: string;
     status: string;
     delivered_at: string;
-    product_name: string;
-    qty: number;
+    fulfilled_at: string | null;
+    created_at: string;
+    delivery_date: string;
+    received_confirmed_at: string | null;
+    total_products: number;
+    product_names: string;
+    product_labels: string;
 }
 
 export interface ConfirmOrdersResponse {

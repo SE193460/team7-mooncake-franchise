@@ -168,51 +168,8 @@
   font-size: 13px;
   font-weight: 600;
   white-space: nowrap;
-}
-
-.statusPending {
-  background: var(--status-yellow);
-  color: var(--status-yellow-text);
-}
-
-.statusReady {
   background: var(--status-blue);
   color: var(--status-blue-text);
-}
-
-.statusPreparing {
-  background: var(--status-orange);
-  color: var(--status-orange-text);
-}
-
-.statusProcessing {
-  background: var(--status-orange);
-  color: var(--status-orange-text);
-}
-
-.statusDelivered {
-  background: var(--status-purple);
-  color: var(--status-purple-text);
-}
-
-.statusCompleted {
-  background: var(--status-green);
-  color: var(--status-green-text);
-}
-
-.statusFulfilled {
-  background: var(--status-green);
-  color: var(--status-green-text);
-}
-
-.statusCancelled {
-  background: var(--status-red);
-  color: var(--status-red-text);
-}
-
-.statusRejected {
-  background: var(--status-red);
-  color: var(--status-red-text);
 }
 
 .dateCell {

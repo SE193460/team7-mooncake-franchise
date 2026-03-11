@@ -10,6 +10,8 @@ interface Order {
   id: string;
   orderCode: string;
   products: string;
+  productLabels: string;
+  productNames: string;
   createdDate: string;
   deliveryDate: string;
   confirmedDate: string;
@@ -29,17 +31,27 @@ export default function OrderConfirmationPage() {
 
   // Convert API data to UI format
   const convertApiOrderToUI = (apiOrder: ConfirmOrder): Order => {
+    // Tự tạo product label nếu không có
+    const productLabel = apiOrder.product_labels || 
+                         (apiOrder.total_products ? `${apiOrder.total_products} sản phẩm` : '');
+
     return {
       id: String(apiOrder.order_id),
       orderCode: apiOrder.order_code,
-      products: `${apiOrder.product_name} (${apiOrder.qty})`,
-      createdDate: '',
-      deliveryDate: apiOrder.delivered_at 
-        ? new Date(apiOrder.delivered_at).toLocaleDateString('vi-VN') 
+      products: apiOrder.product_names || 'Không có sản phẩm',
+      productLabels: productLabel,
+      productNames: apiOrder.product_names || '',
+      createdDate: apiOrder.created_at 
+        ? new Date(apiOrder.created_at).toLocaleDateString('vi-VN')
         : '',
-      confirmedDate: '',
+      deliveryDate: apiOrder.fulfilled_at 
+        ? new Date(apiOrder.fulfilled_at).toLocaleDateString('vi-VN') 
+        : '',
+      confirmedDate: apiOrder.received_confirmed_at 
+        ? new Date(apiOrder.received_confirmed_at).toLocaleDateString('vi-VN')
+        : '',
       status: 'Đã giao',
-      isConfirmed: false,
+      isConfirmed: !!apiOrder.received_confirmed_at,
     };
   };
 
@@ -149,7 +161,12 @@ export default function OrderConfirmationPage() {
                   </td>
                   <td>
                     <div className={styles.productCell}>
-                      <div className={styles.productCount}>{order.products}</div>
+                      {order.productLabels && (
+                        <div className={styles.productLabel}>{order.productLabels}</div>
+                      )}
+                      {order.productNames.split(',').map((name, idx) => (
+                        <div key={idx} className={styles.productName}>{name.trim()}</div>
+                      ))}
                     </div>
                   </td>
                   <td>
