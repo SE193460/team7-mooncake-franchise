@@ -2,7 +2,6 @@ interface Order {
     id: string;
     orderCode: string;
     products: string;
-    productNames?: string;
     status: 'pending' | 'processing' | 'fulfilled' | 'confirmed' | 'cancelled';
     statusLabel: string;
     createdDate: string;
@@ -183,21 +182,8 @@ export default function OrdersTable({ orders }: OrdersTableProps) {
                                             <span style={{ fontWeight: '600' }}>{order.id}</span>
                                         </div>
                                     </td>
-                                    <td style={{ padding: '18px 16px', fontSize: '14px', color: 'var(--text-primary)', textAlign: 'center' }}>
-                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', alignItems: 'center' }}>
-                                            <div style={{ fontWeight: '500', color: 'var(--text-primary)' }}>
-                                                {order.products}
-                                            </div>
-                                            {order.productNames && (
-                                                <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
-                                                    {order.productNames.split(',').map((name, idx) => (
-                                                        <div key={idx} style={{ fontSize: '12px', color: 'var(--text-secondary)', whiteSpace: 'nowrap' }}>
-                                                            {name.trim()}
-                                                        </div>
-                                                    ))}
-                                                </div>
-                                            )}
-                                        </div>
+                                    <td style={{ padding: '18px 16px', fontSize: '14px', color: 'var(--text-primary)', textAlign: 'center', fontWeight: '500' }}>
+                                        {order.products}
                                     </td>
                                     <td style={{ padding: '18px 16px', textAlign: 'center' }}>
                                         <span
@@ -219,7 +205,7 @@ export default function OrdersTable({ orders }: OrdersTableProps) {
                                         {order.createdDate}
                                     </td>
                                     <td style={{ padding: '18px 16px', fontSize: '14px', color: 'var(--text-secondary)', textAlign: 'center' }}>
-                                        {order.desiredDate}
+                                        {order.deliveryDate}
                                     </td>
                                 </tr>
                             ))

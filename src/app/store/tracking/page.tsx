@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { toast } from 'react-toastify';
 import Sidebar from '../../../components/Sidebar';
+import TrackingOrdersTable from '../../../components/TrackingOrdersTable';
 import styles from './tracking.module.css';
 import storeService from '../../../services/storeService';
 
@@ -11,6 +12,7 @@ interface Order {
   orderCode: string;
   storeName?: string;
   products: string;
+  productNames?: string;
   createdDate: string;
   deliveryDate: string;
   status: 'pending' | 'processing' | 'fulfilled' | 'confirmed' | 'cancelled';
@@ -82,23 +84,14 @@ export default function OrderTrackingPage() {
     setFilteredOrders(filtered);
   };
 
-  const getStatusClass = (status: string) => {
-    if (status === 'pending') return styles.statusPending;
-    if (status === 'processing') return styles.statusProcessing;
-    if (status === 'fulfilled') return styles.statusReady;
-    if (status === 'confirmed') return styles.statusCompleted;
-    if (status === 'cancelled') return styles.statusCancelled;
-    return styles.statusCancelled;
-  };
-
-  const getStatusDisplay = (order: Order) => {
-    return order.statusLabel || order.status;
-  };
-
   const handleCancelOrder = (orderId: string) => {
     setOrderToCancel(orderId);
     setShowCancelConfirm(true);
     setShowActionMenu(null);
+  };
+
+  const handleToggleActionMenu = (orderId: string) => {
+    setShowActionMenu(showActionMenu === orderId ? null : orderId);
   };
 
   const confirmCancelOrder = async () => {
@@ -125,11 +118,6 @@ export default function OrderTrackingPage() {
   const handleEditOrder = (orderId: string) => {
     setShowActionMenu(null);
     toast.info('Để chỉnh sửa đơn hàng, vui lòng hủy đơn hàng này và tạo đơn hàng mới với thông tin cập nhật.');
-  };
-
-  const canEditOrCancel = (status: string) => {
-    // Chỉ cho phép chỉnh sửa/hủy đơn ở trạng thái pending
-    return status === 'pending';
   };
 
   return (
@@ -194,89 +182,13 @@ export default function OrderTrackingPage() {
             </button>
           </div>
         ) : (
-          <div className={styles.tableContainer}>
-            <table className={styles.table}>
-              <thead>
-                <tr>
-                  <th>Mã đơn hàng</th>
-                  <th>Sản phẩm</th>
-                  <th>Trạng thái</th>
-                  <th>Ngày tạo</th>
-                  <th>Chỉnh sửa</th>
-                </tr>
-              </thead>
-              <tbody>
-                {filteredOrders.length === 0 ? (
-                  <tr>
-                    <td colSpan={5} style={{ textAlign: 'center', padding: '24px' }}>
-                      Không tìm thấy đơn hàng nào
-                    </td>
-                  </tr>
-                ) : (
-                  filteredOrders.map((order) => (
-                    <tr key={order.id}>
-                      <td>
-                        <div className={styles.orderIdCell}>
-                          <span className={styles.orderIcon}>📦</span>
-                          <span className={styles.orderId}>{order.id}</span>
-                        </div>
-                      </td>
-                      <td>
-                        <div className={styles.productCell}>
-                          <div className={styles.productCount}>{order.products}</div>
-                          {order.storeName && (
-                            <div className={styles.storeName}>{order.storeName}</div>
-                          )}
-                        </div>
-                      </td>
-                      <td>
-                        <span className={`${styles.statusBadge} ${getStatusClass(order.status)}`}>
-                          {getStatusDisplay(order)}
-                        </span>
-                      </td>
-                      <td className={styles.dateCell}>{order.createdDate}</td>
-                      <td>
-                        {canEditOrCancel(order.status) ? (
-                          <div className={styles.actionCell}>
-                            <button
-                              className={styles.actionButton}
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                setShowActionMenu(showActionMenu === order.id ? null : order.id);
-                              }}
-                            >
-                              ⋮
-                            </button>
-                            {showActionMenu === order.id && (
-                              <div 
-                                className={styles.actionMenu}
-                                onClick={(e) => e.stopPropagation()}
-                              >
-                                <button
-                                  className={styles.actionMenuItem}
-                                  onClick={() => handleEditOrder(order.id)}
-                                >
-                                  ✏️ Chỉnh sửa
-                                </button>
-                                <button
-                                  className={styles.actionMenuItem}
-                                  onClick={() => handleCancelOrder(order.id)}
-                                >
-                                  ❌ Hủy đơn
-                                </button>
-                              </div>
-                            )}
-                          </div>
-                        ) : (
-                          <span className={styles.noAction}>—</span>
-                        )}
-                      </td>
-                    </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
-          </div>
+          <TrackingOrdersTable
+            orders={filteredOrders}
+            showActionMenu={showActionMenu}
+            onToggleActionMenu={handleToggleActionMenu}
+            onEditOrder={handleEditOrder}
+            onCancelOrder={handleCancelOrder}
+          />
         )}
       </div>
 

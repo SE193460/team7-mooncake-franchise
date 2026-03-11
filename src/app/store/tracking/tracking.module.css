@@ -156,6 +156,19 @@
   font-size: 14px;
 }
 
+.productNames {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.productNames .productName {
+  font-weight: 600;
+  color: #1a1a1a;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
 .storeName {
   font-size: 13px;
   color: #6b7280;
@@ -309,7 +322,7 @@
   font-weight: 400;
 }
 
-.productName {
+.orderCardProductName {
   font-size: 14px;
   color: #666;
   overflow: hidden;
