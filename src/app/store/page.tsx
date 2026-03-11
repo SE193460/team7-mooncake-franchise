@@ -110,6 +110,7 @@ export default function StoreDashboard() {
                         id: o.order_id,
                         orderCode: o.order_code,
                         products: `${o.product_count} sản phẩm`,
+                        productNames: o.product_names,
                         status: o.status,
                         statusLabel: getStatusLabel(o.status),
                         createdDate: new Date(o.created_at).toLocaleDateString(),
