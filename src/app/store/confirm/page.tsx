@@ -91,11 +91,16 @@ export default function OrderConfirmationPage() {
       setSubmitting(true);
       
       // Call API to confirm receipt
-      await storeService.confirmReceipt(
+      const response = await storeService.confirmReceipt(
         selectedOrder.id,
         rating,
         feedback
       );
+
+      // Show success message from API
+      if (response.success) {
+        toast.success(response.message || 'Đã xác nhận nhận hàng và cộng vào kho thành công!');
+      }
 
       // Refresh orders list
       await fetchOrders();
