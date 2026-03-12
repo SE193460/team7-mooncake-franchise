@@ -70,6 +70,16 @@ export interface Product {
     description: string;
 }
 
+// API Inventory Item format
+export interface ApiInventoryItem {
+    product_id: string;
+    product_name: string;
+    product_type_name: string;
+    quantity: string;
+    expiry_date: string | null;
+}
+
+// UI Inventory Item format
 export interface InventoryItem {
     inventory_item_id: string;
     product_id: string;
@@ -135,6 +145,13 @@ export interface ConfirmReceiptRequest {
 export interface ConfirmReceiptResponse {
     success: boolean;
     message?: string;
+    data?: {
+        order_id: string;
+        order_code: string;
+        status: string;
+        received_confirmed_at: string;
+        inventory_updated_count: number;
+    };
 }
 
 // Helper function to convert API order to UI order
@@ -297,12 +314,27 @@ const storeService = {
             );
 
             const data = await res.json();
-console.log('apine:', data);
+            console.log('API inventory response:', data);
+            
             if (!data.success) {
                 throw new Error(data.message || "Failed to load inventory");
             }
 
-            return data.data; // 🔥 chỉ trả array
+            const apiItems: ApiInventoryItem[] = data.data || [];
+            
+            // Map API fields to UI fields
+            const inventoryItems: InventoryItem[] = apiItems.map((item, index) => ({
+                inventory_item_id: item.product_id || String(index + 1),
+                product_id: item.product_id,
+                product_code: item.product_id, // Using product_id as code if not provided
+                product_name: item.product_name,
+                category_name: item.product_type_name, // Map product_type_name to category_name
+                quantity: item.quantity,
+                expiry_date: item.expiry_date,
+            }));
+
+            console.log('Mapped inventory items:', inventoryItems);
+            return inventoryItems;
         } catch (error) {
             console.error("Error fetching inventory storage:", error);
             return [];
