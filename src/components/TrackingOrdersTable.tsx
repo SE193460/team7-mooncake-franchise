@@ -1,16 +1,5 @@
 import styles from '../app/store/tracking/tracking.module.css';
-
-interface Order {
-  id: string;
-  orderCode: string;
-  storeName?: string;
-  products: string;
-  productNames?: string;
-  createdDate: string;
-  deliveryDate: string;
-  status: 'pending' | 'processing' | 'fulfilled' | 'confirmed' | 'cancelled';
-  statusLabel: string;
-}
+import type { Order } from '../services/storeService';
 
 interface TrackingOrdersTableProps {
   orders: Order[];
@@ -36,6 +25,12 @@ export default function TrackingOrdersTable({
     return styles.statusCancelled;
   };
 
+  const getPaymentStatusClass = (status: string) => {
+    if (status === 'paid') return styles.paymentPaid;
+    if (status === 'unpaid') return styles.paymentUnpaid;
+    return styles.paymentUnknown;
+  };
+
   const canEditOrCancel = (status: string) => {
     return status === 'pending';
   };
@@ -48,6 +43,8 @@ export default function TrackingOrdersTable({
             <th>Mã đơn hàng</th>
             <th>Sản phẩm</th>
             <th>Trạng thái</th>
+            <th>Thanh toán</th>
+            <th>Tổng giá trị</th>
             <th>Ngày tạo</th>
             <th>Chỉnh sửa</th>
           </tr>
@@ -55,7 +52,7 @@ export default function TrackingOrdersTable({
         <tbody>
           {orders.length === 0 ? (
             <tr>
-              <td colSpan={5} style={{ textAlign: 'center', padding: '24px' }}>
+              <td colSpan={7} style={{ textAlign: 'center', padding: '24px' }}>
                 Không tìm thấy đơn hàng nào
               </td>
             </tr>
@@ -71,6 +68,7 @@ export default function TrackingOrdersTable({
                 <td>
                   <div className={styles.productCell}>
                     <div className={styles.productCount}>{order.products}</div>
+                    <div className={styles.productMeta}>Tổng số bánh: {order.totalProductQty}</div>
                     {order.productNames && (
                       <div className={styles.productNames}>
                         {order.productNames.split(',').map((name, idx) => (
@@ -89,6 +87,14 @@ export default function TrackingOrdersTable({
                     {order.statusLabel}
                   </span>
                 </td>
+                <td>
+                  <span
+                    className={`${styles.statusBadge} ${getPaymentStatusClass(order.paymentStatus)}`}
+                  >
+                    {order.paymentStatusLabel}
+                  </span>
+                </td>
+                <td className={styles.amountCell}>{order.totalAmount}đ</td>
                 <td className={styles.dateCell}>{order.createdDate}</td>
                 <td>
                   {canEditOrCancel(order.status) ? (

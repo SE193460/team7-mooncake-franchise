@@ -156,6 +156,11 @@
   font-size: 14px;
 }
 
+.productMeta {
+  font-size: 12px;
+  color: #6b7280;
+}
+
 .productNames {
   display: flex;
   flex-direction: column;
@@ -223,6 +228,21 @@
   color: var(--status-red-text);
 }
 
+.paymentPaid {
+  background: var(--status-green);
+  color: var(--status-green-text);
+}
+
+.paymentUnpaid {
+  background: var(--status-red);
+  color: var(--status-red-text);
+}
+
+.paymentUnknown {
+  background: var(--status-gray);
+  color: var(--status-gray-text);
+}
+
 .statusRejected {
   background: var(--status-red);
   color: var(--status-red-text);
@@ -231,6 +251,13 @@
 .dateCell {
   color: #6b7280;
   font-size: 14px;
+}
+
+.amountCell {
+  text-align: right;
+  font-weight: 600;
+  color: #1a1a1a;
+  white-space: nowrap;
 }
 
 /* Responsive */
@@ -266,7 +293,7 @@
   }
 
   .table {
-    min-width: 700px;
+    min-width: 980px;
   }
 }
 

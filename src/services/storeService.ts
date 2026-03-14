@@ -7,9 +7,16 @@ export interface DashboardCards {
     approved: number;
     processing: number;
     fulfilled: number;
+    confirmed?: number;
+    cancelled?: number;
 }
 
 export interface DashboardResponse {
+    summary?: {
+        paid_amount: number;
+        unpaid_amount: number;
+        total_orders: number;
+    };
     cards: DashboardCards;
     recent_orders: ApiOrder[];
 }
@@ -39,12 +46,16 @@ export interface ApiOrder {
     order_id: string;
     order_code: string;
     status: string;
+    payment_status?: string;
     created_at: string;
     desired_date: string;
     note: string | null;
-    delivered_at: string | null;
-    total_items?: string;
+    delivered_at?: string | null;
+    fulfilled_at?: string | null;
+    total_items?: string | number;
     product_count?: number;
+    total_amount?: number;
+    total_product_qty?: number;
     product_names?: string;
 }
 
@@ -53,8 +64,12 @@ export interface Order {
     orderCode: string;
     products: string;
     productNames?: string;
+    totalProductQty: number;
     status: 'pending' | 'processing' | 'fulfilled' | 'confirmed' | 'cancelled';
     statusLabel: string;
+    paymentStatus: 'paid' | 'unpaid' | 'unknown';
+    paymentStatusLabel: string;
+    totalAmount: string;
     createdDate: string;
     desiredDate: string;
     deliveryDate: string;
@@ -163,20 +178,34 @@ const convertApiOrderToOrder = (apiOrder: ApiOrder): Order => {
         'confirmed': { status: 'confirmed', label: 'Đã Xác Nhận' },
         'cancelled': { status: 'cancelled', label: 'Đã Hủy' },
     };
+    const paymentStatusMap: Record<string, { status: Order['paymentStatus']; label: string }> = {
+        paid: { status: 'paid', label: 'Đã thanh toán' },
+        unpaid: { status: 'unpaid', label: 'Chưa thanh toán' },
+    };
 
     const mappedStatus = statusMap[apiOrder.status] || { status: 'pending', label: apiOrder.status };
+    const mappedPaymentStatus = paymentStatusMap[apiOrder.payment_status || ''] || {
+        status: 'unknown',
+        label: apiOrder.payment_status || 'Không rõ',
+    };
+    const totalItems = Number(apiOrder.total_items ?? 0);
+    const deliverySource = apiOrder.desired_date || apiOrder.delivered_at || apiOrder.fulfilled_at || '';
 
     return {
         id: apiOrder.order_id,
         orderCode: apiOrder.order_code,
-        products: `${apiOrder.product_count || apiOrder.total_items || 0} sản phẩm`,
+        products: `${Number.isNaN(totalItems) ? 0 : totalItems} sản phẩm`,
         productNames: apiOrder.product_names,
+        totalProductQty: apiOrder.total_product_qty || 0,
         status: mappedStatus.status,
         statusLabel: mappedStatus.label,
+        paymentStatus: mappedPaymentStatus.status,
+        paymentStatusLabel: mappedPaymentStatus.label,
+        totalAmount: new Intl.NumberFormat('vi-VN').format(apiOrder.total_amount || 0),
         createdDate: new Date(apiOrder.created_at).toLocaleDateString('vi-VN'),
         desiredDate: new Date(apiOrder.desired_date).toLocaleDateString('vi-VN'),
-        deliveryDate: apiOrder.delivered_at
-            ? new Date(apiOrder.delivered_at).toLocaleDateString('vi-VN')
+        deliveryDate: deliverySource
+            ? new Date(deliverySource).toLocaleDateString('vi-VN')
             : '',
         note: apiOrder.note || '',
     };
@@ -204,7 +233,7 @@ const storeService = {
                 approvedOrders: cards.approved || 0,
                 processingOrders: cards.processing || 0,
                 fulfilledOrders: cards.fulfilled || 0,
-                totalOrders: (cards.pending || 0) + (cards.approved || 0) + (cards.processing || 0) + (cards.fulfilled || 0),
+                totalOrders: dashboardData.summary?.total_orders || 0,
             };
 
             // Convert recent_orders
@@ -400,9 +429,8 @@ const storeService = {
         try {
             console.log(`Cancelling order ${orderId}`);
 
-            const response = await fetchClient.put<{ success: boolean; message?: string }>(
-                `/orders/${orderId}/cancel`,
-                {}
+            const response = await fetchClient.delete<{ success: boolean; message?: string }>(
+                `/orders/${orderId}`
             );
 
             console.log('Cancel order response:', response);

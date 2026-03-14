@@ -5,51 +5,30 @@ import { useRouter } from 'next/navigation';
 import Sidebar from '../../components/Sidebar';
 import StatusCard from '../../components/StatusCard';
 import OrdersTable from '../../components/OrdersTable';
-import storeService, { DashboardStats, Order } from '../../services/storeService';
+import storeService from '../../services/storeService';
 
 export default function StoreDashboard() {
     const router = useRouter();
-    const [cards, setCards] = useState<any>(null);
-    const [orders, setOrders] = useState<any[]>([]);
-
-    const getStatusLabel = (status: string): string => {
-        const statusMap: { [key: string]: string } = {
-            'pending': 'Chờ Xử Lý',
-            'processing': 'Đang Chuẩn Bị',
-            'fulfilled': 'Đã Hoàn Thành',
-            'confirmed': 'Đã Xác Nhận',
-            'cancelled': 'Đã Hủy',
-        };
-        return statusMap[status] || status;
-    };
+    const [cards, setCards] = useState<{ pending?: number; processing?: number; fulfilled?: number } | null>(null);
+    const [orders, setOrders] = useState<Awaited<ReturnType<typeof storeService.getOrders>>>([]);
 
     useEffect(() => {
-        const token = localStorage.getItem('token');
-        if (!token) return;
+        const loadDashboard = async () => {
+            try {
+                const dashboard = await storeService.getDashboard();
 
-        fetch('https://franchisemooncake.onrender.com/api/franchiseStaff_dashboard', {
-            headers: {
-                Authorization: `Bearer ${token}`,
-            },
-        })
-            .then(res => res.json())
-            .then(result => {
-                console.log("DASHBOARD:", result);
+                setCards({
+                    pending: dashboard.stats.pendingOrders,
+                    processing: dashboard.stats.processingOrders,
+                    fulfilled: dashboard.stats.fulfilledOrders,
+                });
+                setOrders(dashboard.recentOrders);
+            } catch (error) {
+                console.error('Failed to load store dashboard:', error);
+            }
+        };
 
-                const dashboard = result.data;
-
-                if (!dashboard) {
-                    console.error("Dashboard data is null");
-                    return;
-                }
-
-                setCards(dashboard.cards || {});
-               
-                setOrders(dashboard.recent_orders || []);
-                console.log("ORDERS:", dashboard.recent_orders);
-                console.log("First order delivery_date:", dashboard.recent_orders?.[0]?.delivery_date);
-            })
-            .catch(console.error);
+        loadDashboard();
     }, []);
 
     return (
@@ -106,23 +85,7 @@ export default function StoreDashboard() {
                 </div>
 
                 {/* Orders Table */}
-                <OrdersTable
-                    orders={orders?.map((o) => ({
-                        id: o.order_id,
-                        orderCode: o.order_code,
-                        products: `${o.product_count} sản phẩm`,
-                        status: o.status,
-                        statusLabel: getStatusLabel(o.status),
-                        createdDate: new Date(o.created_at).toLocaleDateString(),
-                        desiredDate: o.desired_date
-                            ? new Date(o.desired_date).toLocaleDateString()
-                            : '',
-                        deliveryDate: o.delivery_date
-                            ? new Date(o.delivery_date).toLocaleDateString()
-                            : '',
-                        note: o.note ?? '',
-                    }))}
-                />
+                <OrdersTable orders={orders} />
             </main>
         </div>
     );

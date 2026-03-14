@@ -5,19 +5,7 @@ import { toast } from 'react-toastify';
 import Sidebar from '../../../components/Sidebar';
 import TrackingOrdersTable from '../../../components/TrackingOrdersTable';
 import styles from './tracking.module.css';
-import storeService from '../../../services/storeService';
-
-interface Order {
-  id: string;
-  orderCode: string;
-  storeName?: string;
-  products: string;
-  productNames?: string;
-  createdDate: string;
-  deliveryDate: string;
-  status: 'pending' | 'processing' | 'fulfilled' | 'confirmed' | 'cancelled';
-  statusLabel: string;
-}
+import storeService, { Order } from '../../../services/storeService';
 
 export default function OrderTrackingPage() {
   const [orders, setOrders] = useState<Order[]>([]);
