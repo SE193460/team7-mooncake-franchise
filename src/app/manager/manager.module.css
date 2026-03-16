@@ -1,0 +1,160 @@
+/* Manager Dashboard Styles */
+
+.container {
+    display: flex;
+    min-height: 100vh;
+}
+
+.mainContent {
+    flex: 1;
+    margin-left: 240px;
+    padding: 32px 40px;
+    background-color: #fafafa;
+}
+
+.pageHeader {
+    margin-bottom: 32px;
+}
+
+.pageTitle {
+    font-size: 28px;
+    font-weight: bold;
+    color: #3d3530;
+    margin: 0;
+}
+
+.pageSubtitle {
+    color: #666;
+    margin-top: 8px;
+    font-size: 14px;
+}
+
+.statusCards {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+    margin-bottom: 40px;
+}
+
+.card {
+    background-color: white;
+    border-radius: 12px;
+    padding: 24px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+    border: 1px solid #eee;
+}
+
+.cardContent {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+}
+
+.cardLabel {
+    font-size: 14px;
+    color: #666;
+    margin: 0;
+    margin-bottom: 8px;
+}
+
+.cardValue {
+    font-size: 36px;
+    font-weight: bold;
+    color: #3d3530;
+    margin: 0;
+}
+
+.cardSubtext {
+    font-size: 13px;
+    color: #999;
+    margin: 0;
+    margin-top: 4px;
+}
+
+.cardIcon {
+    width: 48px;
+    height: 48px;
+    background-color: #fff5eb;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.sectionHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.sectionTitle {
+    font-size: 18px;
+    font-weight: 600;
+    color: #3d3530;
+    margin: 0;
+}
+
+.viewDetailsBtn {
+    background: none;
+    border: none;
+    color: #e67e22;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.tableContainer {
+    background-color: white;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+    border: 1px solid #eee;
+}
+
+.table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.tableHead {
+    background-color: #fafafa;
+}
+
+.tableHeader {
+    text-align: left;
+    padding: 16px 24px;
+    font-size: 12px;
+    font-weight: 600;
+    color: #666;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.tableRow {
+    border-top: 1px solid #f0f0f0;
+}
+
+.tableCell {
+    padding: 16px 24px;
+    font-size: 14px;
+}
+
+.tableCellName {
+    padding: 16px 24px;
+    font-size: 14px;
+    color: #3d3530;
+    font-weight: 500;
+}
+
+.tableCellText {
+    padding: 16px 24px;
+    font-size: 14px;
+    color: #666;
+}
+
+.tableCellValue {
+    padding: 16px 24px;
+    font-size: 14px;
+    color: #3d3530;
+}

@@ -1,7 +1,9 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { toast } from 'react-toastify';
 import Sidebar from '../../../components/Sidebar';
+import ConfirmOrdersTable from '../../../components/ConfirmOrdersTable';
 import storeService, { ConfirmOrder } from '../../../services/storeService';
 import styles from './confirm.module.css';
 
@@ -9,6 +11,8 @@ interface Order {
   id: string;
   orderCode: string;
   products: string;
+  productLabels: string;
+  productNames: string;
   createdDate: string;
   deliveryDate: string;
   confirmedDate: string;
@@ -20,8 +24,6 @@ export default function OrderConfirmationPage() {
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [selectedFilter, setSelectedFilter] = useState<'all' | 'delivered' | 'confirmed'>('all');
-  const [searchQuery, setSearchQuery] = useState('');
   const [showFeedbackModal, setShowFeedbackModal] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [feedback, setFeedback] = useState('');
@@ -30,19 +32,27 @@ export default function OrderConfirmationPage() {
 
   // Convert API data to UI format
   const convertApiOrderToUI = (apiOrder: ConfirmOrder): Order => {
+    // Tự tạo product label nếu không có
+    const productLabel = apiOrder.product_labels || 
+                         (apiOrder.total_products ? `${apiOrder.total_products} sản phẩm` : '');
+
     return {
-      id: apiOrder.order_id,
+      id: String(apiOrder.order_id),
       orderCode: apiOrder.order_code,
-      products: '', // API doesn't return product info in this endpoint
-      createdDate: new Date(apiOrder.created_at).toLocaleDateString('vi-VN'),
-      deliveryDate: apiOrder.delivered_at 
-        ? new Date(apiOrder.delivered_at).toLocaleDateString('vi-VN') 
+      products: apiOrder.product_names || 'Không có sản phẩm',
+      productLabels: productLabel,
+      productNames: apiOrder.product_names || '',
+      createdDate: apiOrder.created_at 
+        ? new Date(apiOrder.created_at).toLocaleDateString('vi-VN')
         : '',
-      confirmedDate: apiOrder.received_confirmed_at
+      deliveryDate: apiOrder.fulfilled_at 
+        ? new Date(apiOrder.fulfilled_at).toLocaleDateString('vi-VN') 
+        : '',
+      confirmedDate: apiOrder.received_confirmed_at 
         ? new Date(apiOrder.received_confirmed_at).toLocaleDateString('vi-VN')
         : '',
-      status: apiOrder.status === 'fulfilled' ? 'Đã giao' : 'Đã xác nhận',
-      isConfirmed: apiOrder.status === 'confirmed',
+      status: 'Đã giao',
+      isConfirmed: !!apiOrder.received_confirmed_at,
     };
   };
 
@@ -51,7 +61,7 @@ export default function OrderConfirmationPage() {
     try {
       setLoading(true);
       setError(null);
-      const apiOrders = await storeService.getConfirmOrders(selectedFilter, searchQuery);
+      const apiOrders = await storeService.getConfirmOrders();
       const uiOrders = apiOrders.map(convertApiOrderToUI);
       setOrders(uiOrders);
     } catch (err) {
@@ -62,16 +72,10 @@ export default function OrderConfirmationPage() {
     }
   };
 
-  // Fetch orders on mount and when filter/search changes
+  // Fetch orders on mount
   useEffect(() => {
     fetchOrders();
-  }, [selectedFilter, searchQuery]);
-
-  const getStatusClass = (status: string) => {
-    if (status === 'Đã giao') return styles.statusDelivered;
-    if (status === 'Đã xác nhận') return styles.statusConfirmed;
-    return '';
-  };
+  }, []);
 
   const handleConfirmClick = (order: Order) => {
     setSelectedOrder(order);
@@ -87,11 +91,16 @@ export default function OrderConfirmationPage() {
       setSubmitting(true);
       
       // Call API to confirm receipt
-      await storeService.confirmReceipt(
+      const response = await storeService.confirmReceipt(
         selectedOrder.id,
         rating,
         feedback
       );
+
+      // Show success message from API
+      if (response.success) {
+        toast.success(response.message || 'Đã xác nhận nhận hàng và cộng vào kho thành công!');
+      }
 
       // Refresh orders list
       await fetchOrders();
@@ -102,13 +111,11 @@ export default function OrderConfirmationPage() {
       setRating(5);
     } catch (err) {
       console.error('Error confirming receipt:', err);
-      alert('Không thể xác nhận đơn hàng. Vui lòng thử lại!');
+      toast.error('Không thể xác nhận đơn hàng. Vui lòng thử lại!');
     } finally {
       setSubmitting(false);
     }
   };
-
-  const filteredOrders = orders;
 
   return (
     <div className={styles.pageContainer}>
@@ -117,28 +124,6 @@ export default function OrderConfirmationPage() {
         <div className={styles.header}>
           <h1 className={styles.title}>Xác Nhận Nhận Hàng</h1>
           <p className={styles.subtitle}>Xác nhận đơn hàng đã nhận và viết đánh giá</p>
-        </div>
-
-        <div className={styles.filterBar}>
-          <div className={styles.searchBox}>
-            <span className={styles.searchIcon}>🔍</span>
-            <input
-              type="text"
-              placeholder="Tìm kiếm theo mã đơn hàng..."
-              className={styles.searchInput}
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
-          </div>
-          <select
-            value={selectedFilter}
-            onChange={(e) => setSelectedFilter(e.target.value as 'all' | 'delivered' | 'confirmed')}
-            className={styles.filterSelect}
-          >
-            <option value="all">Tất cả</option>
-            <option value="delivered">Đã giao</option>
-            <option value="confirmed">Đã xác nhận</option>
-          </select>
         </div>
 
         {loading ? (
@@ -151,63 +136,7 @@ export default function OrderConfirmationPage() {
             <button onClick={fetchOrders} className={styles.retryButton}>Thử lại</button>
           </div>
         ) : (
-          <div className={styles.tableContainer}>
-          <table className={styles.table}>
-            <thead>
-              <tr>
-                <th>Mã đơn hàng</th>
-                <th>Sản phẩm</th>
-                <th>Trạng thái</th>
-                <th>Ngày tạo</th>
-                <th>Ngày giao</th>
-                <th>Thao tác</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredOrders.map((order) => (
-                <tr key={order.id}>
-                  <td>
-                    <div className={styles.orderIdCell}>
-                      <span className={styles.orderIcon}>📦</span>
-                      <span className={styles.orderId}>{order.id}</span>
-                    </div>
-                  </td>
-                  <td>
-                    <div className={styles.productCell}>
-                      <div className={styles.productCount}>{order.products || 'N/A'}</div>
-                    </div>
-                  </td>
-                  <td>
-                    <span className={`${styles.statusBadge} ${getStatusClass(order.status)}`}>
-                      {order.status}
-                    </span>
-                  </td>
-                  <td className={styles.dateCell}>{order.createdDate}</td>
-                  <td className={styles.dateCell}>{order.deliveryDate || order.confirmedDate}</td>
-                  <td>
-                    {order.status === 'Đã giao' && !order.isConfirmed ? (
-                      <button 
-                        className={styles.confirmButton}
-                        onClick={() => handleConfirmClick(order)}
-                      >
-                        Xác Nhận Nhận Hàng
-                      </button>
-                    ) : (
-                      <span className={styles.confirmedText}>✓ Đã xác nhận</span>
-                    )}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-
-          {filteredOrders.length === 0 && (
-            <div className={styles.emptyState}>
-              <span className={styles.emptyIcon}>📭</span>
-              <p>Không có đơn hàng nào cần xác nhận</p>
-            </div>
-          )}
-        </div>
+          <ConfirmOrdersTable orders={orders} onConfirmClick={handleConfirmClick} />
         )}
       </div>
 

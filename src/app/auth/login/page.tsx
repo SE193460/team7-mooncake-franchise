@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
+import { toast } from 'react-toastify';
 import styles from './login.module.css';
 import authService from '../../../services/authService';
 
@@ -17,6 +18,8 @@ export default function LoginPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
   e.preventDefault();
+  setLoading(true);
+  setError('');
 
   try {
     const res = await fetch("https://franchisemooncake.onrender.com/api/auth/login", {
@@ -33,20 +36,35 @@ export default function LoginPage() {
     const data = await res.json();
     console.log("LOGIN RESPONSE:", data);
 
+    // Check if login failed
+    if (!res.ok || !data.success) {
+      const errorMsg = data.message || "Đăng nhập thất bại";
+      setError(errorMsg);
+      toast.error(errorMsg);
+      return;
+    }
+
     // 👇 SỬA FIELD TOKEN THEO BACKEND
     const token = data.token || data.data?.token;
     const user = data.user || data.data?.user;
 
     if (!token) {
-      alert("Login không trả token");
+      toast.error("Login không trả token");
       return;
     }
 
+    // ✅ XÓA CÁC TOKEN CŨ/SAI (nếu có)
+    localStorage.removeItem("accessToken");
+    
     // ✅ LƯU TOKEN VÀ USER Ở ĐÂY
     localStorage.setItem("token", token);
     if (user) {
       localStorage.setItem("user", JSON.stringify(user));
     }
+
+    // Show success message
+    const successMsg = data.message || "Đăng nhập thành công!";
+    toast.success(successMsg);
 
     // Decode JWT để lấy role (hoặc gọi API /auth/me)
     try {
@@ -65,7 +83,7 @@ export default function LoginPage() {
       } else if (role === 'admin') {
         router.push("/admin");
       } else {
-        alert("Role không được hỗ trợ: " + role);
+        toast.error("Role không được hỗ trợ: " + role);
       }
     } catch (err) {
       console.error("Error decoding token:", err);
@@ -74,7 +92,11 @@ export default function LoginPage() {
 
   } catch (err) {
     console.error(err);
-    alert("Login lỗi");
+    const errorMsg = "Không thể kết nối đến server. Vui lòng thử lại!";
+    setError(errorMsg);
+    toast.error(errorMsg);
+  } finally {
+    setLoading(false);
   }
 };
 

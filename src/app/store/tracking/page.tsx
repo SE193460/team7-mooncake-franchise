@@ -1,7 +1,9 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { toast } from 'react-toastify';
 import Sidebar from '../../../components/Sidebar';
+import TrackingOrdersTable from '../../../components/TrackingOrdersTable';
 import styles from './tracking.module.css';
 import storeService from '../../../services/storeService';
 
@@ -10,9 +12,10 @@ interface Order {
   orderCode: string;
   storeName?: string;
   products: string;
+  productNames?: string;
   createdDate: string;
   deliveryDate: string;
-  status: 'pending' | 'ready' | 'preparing' | 'delivered' | 'completed';
+  status: 'pending' | 'processing' | 'fulfilled' | 'confirmed' | 'cancelled';
   statusLabel: string;
 }
 
@@ -23,6 +26,9 @@ export default function OrderTrackingPage() {
   const [error, setError] = useState<string | null>(null);
   const [selectedFilter, setSelectedFilter] = useState('Tất cả');
   const [searchQuery, setSearchQuery] = useState('');
+  const [showActionMenu, setShowActionMenu] = useState<string | null>(null);
+  const [showCancelConfirm, setShowCancelConfirm] = useState(false);
+  const [orderToCancel, setOrderToCancel] = useState<string | null>(null);
 
   useEffect(() => {
     fetchOrders();
@@ -31,6 +37,17 @@ export default function OrderTrackingPage() {
   useEffect(() => {
     filterOrders();
   }, [orders, selectedFilter, searchQuery]);
+
+  useEffect(() => {
+    const handleClickOutside = () => {
+      if (showActionMenu) {
+        setShowActionMenu(null);
+      }
+    };
+    
+    document.addEventListener('click', handleClickOutside);
+    return () => document.removeEventListener('click', handleClickOutside);
+  }, [showActionMenu]);
 
   const fetchOrders = async () => {
     try {
@@ -52,7 +69,7 @@ export default function OrderTrackingPage() {
     if (selectedFilter !== 'Tất cả') {
       filtered = filtered.filter(order => {
         if (selectedFilter === 'Chờ xử lý') return order.status === 'pending';
-        if (selectedFilter === 'Đã hoàn thành') return order.status === 'completed' || order.status === 'delivered';
+        if (selectedFilter === 'Đã hoàn thành') return order.status === 'fulfilled' || order.status === 'confirmed';
         return true;
       });
     }
@@ -67,17 +84,40 @@ export default function OrderTrackingPage() {
     setFilteredOrders(filtered);
   };
 
-  const getStatusClass = (status: string) => {
-    if (status === 'pending' || status === 'Chờ xử lý') return styles.statusPending;
-    if (status === 'ready' || status === 'Đã chấp nhận') return styles.statusReady;
-    if (status === 'preparing' || status === 'Đang chuẩn bị') return styles.statusPreparing;
-    if (status === 'delivered' || status === 'Đã Giao') return styles.statusDelivered;
-    if (status === 'completed' || status === 'Đã hoàn thành') return styles.statusCompleted;
-    return '';
+  const handleCancelOrder = (orderId: string) => {
+    setOrderToCancel(orderId);
+    setShowCancelConfirm(true);
+    setShowActionMenu(null);
   };
 
-  const getStatusDisplay = (order: Order) => {
-    return order.statusLabel || order.status;
+  const handleToggleActionMenu = (orderId: string) => {
+    setShowActionMenu(showActionMenu === orderId ? null : orderId);
+  };
+
+  const confirmCancelOrder = async () => {
+    if (!orderToCancel) return;
+
+    try {
+      const result = await storeService.cancelOrder(orderToCancel);
+      
+      if (result.success) {
+        toast.success('Đơn hàng đã được hủy thành công!');
+        fetchOrders(); // Refresh list
+      } else {
+        toast.error(result.message || 'Không thể hủy đơn hàng. Vui lòng thử lại.');
+      }
+    } catch (err) {
+      console.error('Error cancelling order:', err);
+      toast.error('Không thể hủy đơn hàng. Vui lòng thử lại.');
+    } finally {
+      setShowCancelConfirm(false);
+      setOrderToCancel(null);
+    }
+  };
+
+  const handleEditOrder = (orderId: string) => {
+    setShowActionMenu(null);
+    toast.info('Để chỉnh sửa đơn hàng, vui lòng hủy đơn hàng này và tạo đơn hàng mới với thông tin cập nhật.');
   };
 
   return (
@@ -142,56 +182,44 @@ export default function OrderTrackingPage() {
             </button>
           </div>
         ) : (
-          <div className={styles.tableContainer}>
-            <table className={styles.table}>
-              <thead>
-                <tr>
-                  <th>Mã đơn hàng</th>
-                  <th>Sản phẩm</th>
-                  <th>Trạng thái</th>
-                  <th>Ngày tạo</th>
-                  <th>Ngày giao</th>
-                </tr>
-              </thead>
-              <tbody>
-                {filteredOrders.length === 0 ? (
-                  <tr>
-                    <td colSpan={5} style={{ textAlign: 'center', padding: '24px' }}>
-                      Không tìm thấy đơn hàng nào
-                    </td>
-                  </tr>
-                ) : (
-                  filteredOrders.map((order) => (
-                    <tr key={order.id}>
-                      <td>
-                        <div className={styles.orderIdCell}>
-                          <span className={styles.orderIcon}>📦</span>
-                          <span className={styles.orderId}>{order.id}</span>
-                        </div>
-                      </td>
-                      <td>
-                        <div className={styles.productCell}>
-                          <div className={styles.productCount}>{order.products}</div>
-                          {order.storeName && (
-                            <div className={styles.storeName}>{order.storeName}</div>
-                          )}
-                        </div>
-                      </td>
-                      <td>
-                        <span className={`${styles.statusBadge} ${getStatusClass(order.status)}`}>
-                          {getStatusDisplay(order)}
-                        </span>
-                      </td>
-                      <td className={styles.dateCell}>{order.createdDate}</td>
-                      <td className={styles.dateCell}>{order.deliveryDate || '—'}</td>
-                    </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
-          </div>
+          <TrackingOrdersTable
+            orders={filteredOrders}
+            showActionMenu={showActionMenu}
+            onToggleActionMenu={handleToggleActionMenu}
+            onEditOrder={handleEditOrder}
+            onCancelOrder={handleCancelOrder}
+          />
         )}
       </div>
+
+      {/* Custom Confirm Modal */}
+      {showCancelConfirm && (
+        <div className={styles.modalOverlay} onClick={() => setShowCancelConfirm(false)}>
+          <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
+            <div className={styles.modalHeader}>
+              <div className={styles.modalIcon}>⚠️</div>
+              <h3 className={styles.modalTitle}>Xác nhận hủy đơn hàng</h3>
+            </div>
+            <p className={styles.modalMessage}>
+              Bạn có chắc chắn muốn hủy đơn hàng này? Hành động này không thể hoàn tác.
+            </p>
+            <div className={styles.modalActions}>
+              <button
+                className={styles.cancelButton}
+                onClick={() => setShowCancelConfirm(false)}
+              >
+                Không, giữ lại
+              </button>
+              <button
+                className={styles.confirmButton}
+                onClick={confirmCancelOrder}
+              >
+                Có, hủy đơn
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

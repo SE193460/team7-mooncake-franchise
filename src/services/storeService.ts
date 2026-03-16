@@ -52,7 +52,8 @@ export interface Order {
     id: string;
     orderCode: string;
     products: string;
-    status: 'pending' | 'ready' | 'preparing' | 'delivered' | 'completed';
+    productNames?: string;
+    status: 'pending' | 'processing' | 'fulfilled' | 'confirmed' | 'cancelled';
     statusLabel: string;
     createdDate: string;
     desiredDate: string;
@@ -69,6 +70,16 @@ export interface Product {
     description: string;
 }
 
+// API Inventory Item format
+export interface ApiInventoryItem {
+    product_id: string;
+    product_name: string;
+    product_type_name: string;
+    quantity: string;
+    expiry_date: string | null;
+}
+
+// UI Inventory Item format
 export interface InventoryItem {
     inventory_item_id: string;
     product_id: string;
@@ -108,12 +119,17 @@ export interface UserProfile {
 
 // Confirm Receipt API Interfaces
 export interface ConfirmOrder {
-    order_id: string;
+    order_id: number;
     order_code: string;
     status: string;
+    delivered_at: string;
+    fulfilled_at: string | null;
     created_at: string;
-    delivered_at: string | null;
+    delivery_date: string;
     received_confirmed_at: string | null;
+    total_products: number;
+    product_names: string;
+    product_labels: string;
 }
 
 export interface ConfirmOrdersResponse {
@@ -129,17 +145,23 @@ export interface ConfirmReceiptRequest {
 export interface ConfirmReceiptResponse {
     success: boolean;
     message?: string;
+    data?: {
+        order_id: string;
+        order_code: string;
+        status: string;
+        received_confirmed_at: string;
+        inventory_updated_count: number;
+    };
 }
 
 // Helper function to convert API order to UI order
 const convertApiOrderToOrder = (apiOrder: ApiOrder): Order => {
     const statusMap: Record<string, { status: Order['status']; label: string }> = {
         'pending': { status: 'pending', label: 'Chờ Xử Lý' },
-        'approved': { status: 'ready', label: 'Đã Chấp Nhận' },
-        'processing': { status: 'preparing', label: 'Đang Chuẩn Bị' },
-        'ready': { status: 'ready', label: 'Sẵn Sàng Giao' },
-        'delivered': { status: 'delivered', label: 'Đã Giao' },
-        'fulfilled': { status: 'completed', label: 'Hoàn Thành' },
+        'processing': { status: 'processing', label: 'Đang Chuẩn Bị' },
+        'fulfilled': { status: 'fulfilled', label: 'Đã Hoàn Thành' },
+        'confirmed': { status: 'confirmed', label: 'Đã Xác Nhận' },
+        'cancelled': { status: 'cancelled', label: 'Đã Hủy' },
     };
 
     const mappedStatus = statusMap[apiOrder.status] || { status: 'pending', label: apiOrder.status };
@@ -148,6 +170,7 @@ const convertApiOrderToOrder = (apiOrder: ApiOrder): Order => {
         id: apiOrder.order_id,
         orderCode: apiOrder.order_code,
         products: `${apiOrder.product_count || apiOrder.total_items || 0} sản phẩm`,
+        productNames: apiOrder.product_names,
         status: mappedStatus.status,
         statusLabel: mappedStatus.label,
         createdDate: new Date(apiOrder.created_at).toLocaleDateString('vi-VN'),
@@ -225,7 +248,7 @@ const storeService = {
             };
 
             console.log('Sending order request:', JSON.stringify(apiRequestData, null, 2));
-            const data = await fetchClient.post<CreateOrderResponse>("/CreateOrders", apiRequestData);
+            const data = await fetchClient.post<CreateOrderResponse>("/orders", apiRequestData);
             return data;
         } catch (error) {
             console.error("Error creating order:", error);
@@ -291,12 +314,27 @@ const storeService = {
             );
 
             const data = await res.json();
-console.log('apine:', data);
+            console.log('API inventory response:', data);
+            
             if (!data.success) {
                 throw new Error(data.message || "Failed to load inventory");
             }
 
-            return data.data; // 🔥 chỉ trả array
+            const apiItems: ApiInventoryItem[] = data.data || [];
+            
+            // Map API fields to UI fields
+            const inventoryItems: InventoryItem[] = apiItems.map((item, index) => ({
+                inventory_item_id: item.product_id || String(index + 1),
+                product_id: item.product_id,
+                product_code: item.product_id, // Using product_id as code if not provided
+                product_name: item.product_name,
+                category_name: item.product_type_name, // Map product_type_name to category_name
+                quantity: item.quantity,
+                expiry_date: item.expiry_date,
+            }));
+
+            console.log('Mapped inventory items:', inventoryItems);
+            return inventoryItems;
         } catch (error) {
             console.error("Error fetching inventory storage:", error);
             return [];
@@ -311,18 +349,8 @@ console.log('apine:', data);
         limit: number = 20
     ): Promise<ConfirmOrder[]> => {
         try {
-            const params = new URLSearchParams({
-                filter,
-                page: page.toString(),
-                limit: limit.toString(),
-            });
-
-            if (keyword) {
-                params.append('keyword', keyword);
-            }
-
             const response = await fetchClient.get<ConfirmOrdersResponse>(
-                `/franchise/orders/receive-confirm?${params.toString()}`
+                `/orders/delivered`
             );
 
             console.log('Confirm orders response:', response);
@@ -363,6 +391,25 @@ console.log('apine:', data);
             return response;
         } catch (error) {
             console.error("Error confirming receipt:", error);
+            throw error;
+        }
+    },
+
+    // Cancel order (only for pending status)
+    cancelOrder: async (orderId: string): Promise<{ success: boolean; message?: string }> => {
+        try {
+            console.log(`Cancelling order ${orderId}`);
+
+            const response = await fetchClient.put<{ success: boolean; message?: string }>(
+                `/orders/${orderId}/cancel`,
+                {}
+            );
+
+            console.log('Cancel order response:', response);
+
+            return response;
+        } catch (error) {
+            console.error("Error cancelling order:", error);
             throw error;
         }
     },

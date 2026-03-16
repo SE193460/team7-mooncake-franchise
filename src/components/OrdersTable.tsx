@@ -45,8 +45,8 @@ export default function OrdersTable({ orders }: OrdersTableProps) {
                 };
             case 'fulfilled':
                 return {
-                    backgroundColor: 'var(--status-purple)',
-                    color: 'var(--status-purple-text)',
+                    backgroundColor: 'var(--status-blue)',
+                    color: 'var(--status-blue-text)',
                 };
             case 'cancelled':
                 return {
@@ -55,8 +55,8 @@ export default function OrdersTable({ orders }: OrdersTableProps) {
                 };
             default:
                 return {
-                    backgroundColor: '#f3f4f6',
-                    color: 'var(--text-secondary)',
+                    backgroundColor: 'var(--status-gray)',
+                    color: 'var(--status-gray-text)',
                 };
         }
     };
@@ -100,8 +100,8 @@ export default function OrdersTable({ orders }: OrdersTableProps) {
 
                 {showAll && (
                     <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-                        <button 
-                            disabled={page === 1} 
+                        <button
+                            disabled={page === 1}
                             onClick={() => setPage(page - 1)}
                             style={{
                                 padding: '6px 12px',
@@ -336,7 +336,7 @@ export default function OrdersTable({ orders }: OrdersTableProps) {
                                         {order.createdDate}
                                     </td>
                                     <td style={{ padding: '18px 16px', fontSize: '14px', color: 'var(--text-secondary)', textAlign: 'center' }}>
-                                        {order.desiredDate}
+                                        {order.deliveryDate}
                                     </td>
                                 </tr>
                             ))

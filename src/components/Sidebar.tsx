@@ -36,6 +36,18 @@ export default function Sidebar({ activePage = 'dashboard', type = 'franchise' }
                 console.error('Failed to fetch user profile:', error);
             });
         }
+
+        // Listen for user updates từ Profile page
+        const handleUserUpdate = (event: CustomEvent) => {
+            setCurrentUser(event.detail);
+        };
+
+        window.addEventListener('userUpdated', handleUserUpdate as EventListener);
+
+        // Cleanup listener khi component unmount
+        return () => {
+            window.removeEventListener('userUpdated', handleUserUpdate as EventListener);
+        };
     }, []);
 
     const franchiseMenuItems = [
@@ -48,7 +60,10 @@ export default function Sidebar({ activePage = 'dashboard', type = 'franchise' }
 
     const kitchenMenuItems = [
         { id: 'dashboard', label: 'Bảng điều khiển', icon: '📊', href: '/kitchen' },
+        { id: 'new-orders', label: 'Đơn Hàng Mới', icon: '📋', href: '/kitchen/orders' },
+        { id: 'update-status', label: 'Cập Nhật Trạng Thái', icon: '🔄', href: '/kitchen/status' },
         { id: 'ingredients', label: 'Nguyên Liệu & HSD', icon: '📦', href: '/kitchen/ingredients' },
+        { id: 'product-storage', label: 'Kho Thành Phẩm', icon: '🏪', href: '/kitchen/product-storage' },
     ];
 
     const managerMenuItems = [
@@ -60,7 +75,6 @@ export default function Sidebar({ activePage = 'dashboard', type = 'franchise' }
         { id: 'dashboard', label: 'Dashboard', icon: '📊', href: '/admin' },
         { id: 'users', label: 'Quản Lý Users', icon: '👥', href: '/admin/users' },
         { id: 'categories', label: 'Dữ Liệu Danh Mục', icon: '📋', href: '/admin/categories' },
-        { id: 'settings', label: 'Cài Đặt Hệ Thống', icon: '⚙️', href: '/admin/settings' },
     ];
 
     const menuItems = type === 'kitchen' ? kitchenMenuItems : 
@@ -83,6 +97,7 @@ export default function Sidebar({ activePage = 'dashboard', type = 'franchise' }
 
     return (
         <aside
+            suppressHydrationWarning
             style={{
                 width: '280px',
                 height: '100vh',
@@ -97,6 +112,7 @@ export default function Sidebar({ activePage = 'dashboard', type = 'franchise' }
         >
             {/* Logo and Brand */}
             <div
+                suppressHydrationWarning
                 style={{
                     padding: '24px 20px',
                     borderBottom: '1px solid var(--border-color)',
@@ -104,7 +120,7 @@ export default function Sidebar({ activePage = 'dashboard', type = 'franchise' }
                 }}
             >
                 <Link href={homeHref} style={{ display: 'flex', alignItems: 'center', gap: '12px', textDecoration: 'none' }}>
-                    <div style={{ flexShrink: 0, width: '44px', height: '44px', position: 'relative', borderRadius: '6px', overflow: 'hidden' }}>
+                    <div suppressHydrationWarning style={{ flexShrink: 0, width: '44px', height: '44px', position: 'relative', borderRadius: '6px', overflow: 'hidden' }}>
                         <Image
                             src="/logo.png"
                             alt={brandTitle}
@@ -113,11 +129,11 @@ export default function Sidebar({ activePage = 'dashboard', type = 'franchise' }
                             style={{ objectFit: 'contain' }}
                         />
                     </div>
-                    <div>
-                        <div style={{ fontWeight: '600', fontSize: '18px', color: 'var(--text-white)' }}>
+                    <div suppressHydrationWarning>
+                        <div suppressHydrationWarning style={{ fontWeight: '600', fontSize: '18px', color: 'var(--text-white)' }}>
                             {brandTitle}
                         </div>
-                        <div style={{ fontSize: '13px', color: 'rgba(255, 255, 255, 0.7)' }}>{brandSubtitle}</div>
+                        <div suppressHydrationWarning style={{ fontSize: '13px', color: 'rgba(255, 255, 255, 0.7)' }}>{brandSubtitle}</div>
                     </div>
                 </Link>
             </div>
@@ -150,6 +166,7 @@ export default function Sidebar({ activePage = 'dashboard', type = 'franchise' }
             </nav>
             {/* User Info */}
             <div
+                suppressHydrationWarning
                 style={{
                     padding: '20px',
                     borderTop: '1px solid var(--border-color)',
@@ -175,6 +192,7 @@ export default function Sidebar({ activePage = 'dashboard', type = 'franchise' }
                     }}
                 >
                     <div
+                        suppressHydrationWarning
                         style={{
                             width: '40px',
                             height: '40px',
@@ -190,11 +208,11 @@ export default function Sidebar({ activePage = 'dashboard', type = 'franchise' }
                     >
                         {currentUser?.username?.charAt(0).toUpperCase() || 'U'}
                     </div>
-                    <div>
-                        <div style={{ fontSize: '14px', fontWeight: '500', color: 'var(--text-white)' }}>
+                    <div suppressHydrationWarning>
+                        <div suppressHydrationWarning style={{ fontSize: '14px', fontWeight: '500', color: 'var(--text-white)' }}>
                             {currentUser?.username || 'User'}
                         </div>
-                        <div style={{ fontSize: '12px', color: 'rgba(255, 255, 255, 0.7)' }}>
+                        <div suppressHydrationWarning style={{ fontSize: '12px', color: 'rgba(255, 255, 255, 0.7)' }}>
                             {currentUser?.email || ''}
                         </div>
                     </div>

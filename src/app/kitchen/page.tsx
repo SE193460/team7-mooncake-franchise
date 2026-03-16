@@ -1,7 +1,7 @@
 'use client';
 
 import Sidebar from '../../components/Sidebar';
-import KitchenStatusCard from '../../components/KitchenStatusCard';
+import StatusCard from '../../components/StatusCard';
 import { useEffect, useState } from "react";
 
 // Icons as SVG components for better visual match
@@ -85,26 +85,30 @@ export default function KitchenDashboard() {
 
                 {/* Status Cards */}
                 <div style={{ display: 'flex', gap: '20px', marginBottom: '32px' }}>
-                    <KitchenStatusCard
+                    <StatusCard
+                        variant="kitchen"
                         icon={<ClipboardIcon />}
                         count={dashboardData?.cards.pending || 1}
                         label="Đơn Chờ Xử Lý"
                         subLabel="Cần xác nhận"
                     />
-                    <KitchenStatusCard
+                    <StatusCard
+                        variant="kitchen"
                         icon={<PackageIcon />}
                         count={dashboardData?.cards.approved || 3}
                         label="Đang Chuẩn Bị"
                         subLabel="Đã chấp nhận"
                     />
-                    <KitchenStatusCard
+                    <StatusCard
+                        variant="kitchen"
                         icon={<CheckCircleIcon />}
                         count={dashboardData?.cards.processing || 5}
                         label="Sẵn Sàng Giao"
                         subLabel="Chờ điều phối"
                         highlighted={true}
                     />
-                    <KitchenStatusCard
+                    <StatusCard
+                        variant="kitchen"
                         icon={<AlertTriangleIcon />}
                         count={dashboardData?.cards.fulfilled || 2}
                         label="Cảnh Báo Tồn Kho"
@@ -145,7 +149,7 @@ export default function KitchenDashboard() {
                         {/* Order Items */}
                         {dashboardData?.pending_orders?.map((order: any, index: number) => (
                             <div
-                                key={order.order_code || `order-${index}`}
+                                key={order.order_id || order.order_code || `order-${index}`}
                                 style={{
                                     padding: '16px',
                                     backgroundColor: '#fafafa',
@@ -158,7 +162,7 @@ export default function KitchenDashboard() {
                             >
                                 <div>
                                     <div style={{ fontWeight: '600', fontSize: '15px', color: 'var(--text-primary)', marginBottom: '4px' }}>
-                                        {order.order_code}
+                                        ORD-{order.order_id || order.order_code}
                                     </div>
                                     <div style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>
                                         {order.store_name}

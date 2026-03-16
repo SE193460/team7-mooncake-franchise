@@ -1,6 +1,7 @@
 "use client";
 
-import ManagerSidebar from "../../../components/ManagerSidebar";
+import Sidebar from "../../../components/Sidebar";
+import styles from "./inventory.module.css";
 import { useState, useEffect } from "react";
 import inventoryService, { ManagerInventoryItem } from "../../../services/inventoryService";
 
@@ -75,7 +76,7 @@ export default function InventoryManagement() {
   if (loading) {
     return (
       <div style={{ display: "flex", minHeight: "100vh" }}>
-        <ManagerSidebar />
+        <Sidebar type="manager" activePage="inventory" />
         <div style={{ flex: 1, marginLeft: "240px", display: "flex", justifyContent: "center", alignItems: "center" }}>
           <div style={{ fontSize: "18px", color: "#666" }}>Đang tải dữ liệu...</div>
         </div>
@@ -84,18 +85,11 @@ export default function InventoryManagement() {
   }
 
   return (
-    <div style={{ display: "flex", minHeight: "100vh" }}>
-      <ManagerSidebar />
+    <div className={styles.container}>
+      <Sidebar type="manager" activePage="inventory" />
 
       {/* Main Content */}
-      <div
-        style={{
-          flex: 1,
-          marginLeft: "240px",
-          padding: "32px 40px",
-          backgroundColor: "#fafafa",
-        }}
-      >
+      <div className={styles.mainContent}>
         {/* Page Header */}
         <div style={{ marginBottom: "32px", display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
           <div>
@@ -114,11 +108,11 @@ export default function InventoryManagement() {
             </p>
           </div>
           {error && (
-            <div style={{ 
-              padding: "10px 20px", 
-              backgroundColor: "#fee2e2", 
-              color: "#b91c1c", 
-              borderRadius: "8px", 
+            <div style={{
+              padding: "10px 20px",
+              backgroundColor: "#fee2e2",
+              color: "#b91c1c",
+              borderRadius: "8px",
               fontSize: "14px",
               border: "1px solid #fecaca"
             }}>
@@ -128,42 +122,13 @@ export default function InventoryManagement() {
         </div>
 
         {/* Status Cards */}
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(4, 1fr)",
-            gap: "20px",
-            marginBottom: "40px",
-          }}
-        >
+        <div className={styles.statusCards}>
           {/* Total Products Card */}
-          <div
-            style={{
-              backgroundColor: "white",
-              borderRadius: "12px",
-              padding: "24px",
-              boxShadow: "0 1px 3px rgba(0,0,0,0.08)",
-              border: "1px solid #eee",
-            }}
-          >
-            <p
-              style={{
-                fontSize: "14px",
-                color: "#666",
-                margin: 0,
-                marginBottom: "8px",
-              }}
-            >
+          <div className={styles.card}>
+            <p className={styles.cardLabel}>
               Tổng Sản Phẩm
             </p>
-            <p
-              style={{
-                fontSize: "32px",
-                fontWeight: "bold",
-                color: "#3d3530",
-                margin: 0,
-              }}
-            >
+            <p className={styles.cardValue}>
               {totalProducts}
             </p>
           </div>
@@ -188,78 +153,27 @@ export default function InventoryManagement() {
             >
               Tồn Kho Thấp (&lt;{lowStockThreshold})
             </p>
-            <p
-              style={{
-                fontSize: "32px",
-                fontWeight: "bold",
-                color: "#f97316",
-                margin: 0,
-              }}
-            >
+            <p className={styles.cardValue} style={{ color: "#f97316" }}>
               {lowStockCount}
             </p>
           </div>
 
           {/* Bánh Nướng Count Card */}
-          <div
-            style={{
-              backgroundColor: "white",
-              borderRadius: "12px",
-              padding: "24px",
-              boxShadow: "0 1px 3px rgba(0,0,0,0.08)",
-              border: "1px solid #eee",
-            }}
-          >
-            <p
-              style={{
-                fontSize: "14px",
-                color: "#666",
-                margin: 0,
-                marginBottom: "8px",
-              }}
-            >
+          <div className={styles.card}>
+            <p className={styles.cardLabel}>
               Bánh Nướng
             </p>
-            <p
-              style={{
-                fontSize: "32px",
-                fontWeight: "bold",
-                color: "#3d3530",
-                margin: 0,
-              }}
-            >
+            <p className={styles.cardValue}>
               {banhNuongCount}
             </p>
           </div>
 
           {/* Bánh Dẻo Count Card */}
-          <div
-            style={{
-              backgroundColor: "white",
-              borderRadius: "12px",
-              padding: "24px",
-              boxShadow: "0 1px 3px rgba(0,0,0,0.08)",
-              border: "1px solid #eee",
-            }}
-          >
-            <p
-              style={{
-                fontSize: "14px",
-                color: "#666",
-                margin: 0,
-                marginBottom: "8px",
-              }}
-            >
+          <div className={styles.card}>
+            <p className={styles.cardLabel}>
               Bánh Dẻo
             </p>
-            <p
-              style={{
-                fontSize: "32px",
-                fontWeight: "bold",
-                color: "#3d3530",
-                margin: 0,
-              }}
-            >
+            <p className={styles.cardValue}>
               {banhDeoCount}
             </p>
           </div>

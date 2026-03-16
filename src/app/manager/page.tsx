@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import ManagerSidebar from "../../components/ManagerSidebar";
+import Sidebar from "../../components/Sidebar";
+import styles from "./manager.module.css";
 import {
   getManagerDashboard,
   ManagerDashboardCards,
@@ -66,31 +67,17 @@ export default function ManagerDashboard() {
   };
 
   return (
-    <div style={{ display: "flex", minHeight: "100vh" }}>
-      <ManagerSidebar />
+    <div className={styles.container}>
+      <Sidebar type="manager" activePage="dashboard" />
 
       {/* Main Content */}
-      <div
-        style={{
-          flex: 1,
-          marginLeft: "240px",
-          padding: "32px 40px",
-          backgroundColor: "#fafafa",
-        }}
-      >
+      <div className={styles.mainContent}>
         {/* Page Header */}
-        <div style={{ marginBottom: "32px" }}>
-          <h1
-            style={{
-              fontSize: "28px",
-              fontWeight: "bold",
-              color: "#3d3530",
-              margin: 0,
-            }}
-          >
+        <div className={styles.pageHeader}>
+          <h1 className={styles.pageTitle}>
             Bảng Quản Lý
           </h1>
-          <p style={{ color: "#666", marginTop: "8px", fontSize: "14px" }}>
+          <p className={styles.pageSubtitle}>
             Tổng quan tồn kho và báo cáo
           </p>
         </div>

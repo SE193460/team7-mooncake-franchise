@@ -53,6 +53,7 @@ export default function StoreDashboard() {
 
                 setOrders(dashboard.recent_orders || []);
                 console.log("ORDERS:", dashboard.recent_orders);
+                console.log("First order delivery_date:", dashboard.recent_orders?.[0]?.delivery_date);
             })
             .catch(console.error);
     }, []);
@@ -104,10 +105,9 @@ export default function StoreDashboard() {
                 </div>
 
                 {/* Status Cards */}
-                <div style={{ display: 'flex', gap: '16px', marginBottom: '32px' }}>
+                <div style={{ display: 'flex', gap: '20px', marginBottom: '32px', justifyContent: 'space-between', maxWidth: '1200px' }}>
                     <StatusCard icon="🛒" count={cards?.pending ?? 0} label="Chờ Xử Lý" />
-                    <StatusCard icon="📦" count={cards?.approved ?? 0} label="Đã Chấp Nhận" />
-                    <StatusCard icon="⚙️" count={cards?.processing ?? 0} label="Đang Xử Lý" />
+                    <StatusCard icon="⚙️" count={cards?.processing ?? 0} label="Đang Chuẩn Bị" />
                     <StatusCard icon="✅" count={cards?.fulfilled ?? 0} label="Hoàn Thành" />
                 </div>
 
