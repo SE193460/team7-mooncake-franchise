@@ -6,17 +6,34 @@ import Sidebar from '../../components/Sidebar';
 import StatusCard from '../../components/StatusCard';
 import OrdersTable from '../../components/OrdersTable';
 import storeService, { DashboardStats, Order } from '../../services/storeService';
+type OrderStatus = "pending" | "confirmed" | "processing" | "fulfilled" | "cancelled";
 
 export default function StoreDashboard() {
     const router = useRouter();
     const [cards, setCards] = useState<any>(null);
     const [orders, setOrders] = useState<any[]>([]);
 
+    const statusLabelMap: Record<OrderStatus, string> = {
+        pending: "Chờ xác nhận",
+        confirmed: "Đã xác nhận",
+        processing: "Đang xử lý",
+        fulfilled: "Đã giao",
+        cancelled: "Đã hủy",
+    };
+
+    const statusColorMap: Record<OrderStatus, string> = {
+        pending: "bg-yellow-100 text-yellow-800",
+        confirmed: "bg-blue-100 text-blue-800",
+        processing: "bg-purple-100 text-purple-800",
+        fulfilled: "bg-green-100 text-green-800",
+        cancelled: "bg-red-100 text-red-800",
+    };
+
     useEffect(() => {
         const token = localStorage.getItem('token');
         if (!token) return;
 
-        fetch('https://franchisemooncake.onrender.com/api/franchiseStaff_dashboard', {
+        fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/franchiseStaff_dashboard?page=1&limit=50`, {
             headers: {
                 Authorization: `Bearer ${token}`,
             },
@@ -33,7 +50,7 @@ export default function StoreDashboard() {
                 }
 
                 setCards(dashboard.cards || {});
-               
+
                 setOrders(dashboard.recent_orders || []);
                 console.log("ORDERS:", dashboard.recent_orders);
             })
@@ -96,21 +113,26 @@ export default function StoreDashboard() {
 
                 {/* Orders Table */}
                 <OrdersTable
-                    orders={orders?.map((o) => ({
-                        id: o.order_id,
-                        orderCode: o.order_code,
-                        products: `${o.product_count} sản phẩm`,
-                        status: o.status,
-                        statusLabel: o.status,
-                        createdDate: new Date(o.created_at).toLocaleDateString(),
-                        desiredDate: o.desired_date
-                            ? new Date(o.desired_date).toLocaleDateString()
-                            : '',
-                        deliveryDate: o.delivered_at
-                            ? new Date(o.delivered_at).toLocaleDateString()
-                            : '',
-                        note: o.note ?? '',
-                    }))}
+                    orders={orders?.map((o) => {
+                        const status = o.status as OrderStatus;
+
+                        return {
+                            id: o.order_id,
+                            orderCode: o.order_code,
+                            products: `${o.product_count} sản phẩm`,
+                            status,
+                            statusLabel: statusLabelMap[status],
+                            statusColor: statusColorMap[status],
+                            createdDate: new Date(o.created_at).toLocaleDateString(),
+                            desiredDate: o.desired_date
+                                ? new Date(o.desired_date).toLocaleDateString()
+                                : "",
+                            deliveryDate: o.delivered_at
+                                ? new Date(o.delivered_at).toLocaleDateString()
+                                : "",
+                            note: o.note ?? "",
+                        };
+                    })}
                 />
             </main>
         </div>

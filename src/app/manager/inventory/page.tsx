@@ -1,90 +1,64 @@
 "use client";
 
 import ManagerSidebar from "../../../components/ManagerSidebar";
+import { useState, useEffect } from "react";
+import inventoryService, { ManagerInventoryItem } from "../../../services/inventoryService";
 
 export default function InventoryManagement() {
-  // Sample inventory data with expiry dates and status
-  const inventoryData = [
-    {
-      name: "Bánh Trung Thu Thập Cẩm",
-      type: "Bánh Nướng",
-      stock: 500,
-      minStock: 200,
-      status: "sufficient",
-      expiryDate: "15/02/2026",
-    },
-    {
-      name: "Bánh Dẻo Đậu Xanh",
-      type: "Bánh Dẻo",
-      stock: 150,
-      minStock: 100,
-      status: "medium",
-      expiryDate: "10/02/2026",
-    },
-    {
-      name: "Bánh Nướng Trà Xanh",
-      type: "Bánh Nướng",
-      stock: 80,
-      minStock: 50,
-      status: "sufficient",
-      expiryDate: "20/02/2026",
-    },
-    {
-      name: "Bánh Dẻo Sữa Dừa",
-      type: "Bánh Dẻo",
-      stock: 200,
-      minStock: 100,
-      status: "sufficient",
-      expiryDate: "08/02/2026",
-    },
-    {
-      name: "Bánh Nướng Hạt Sen",
-      type: "Bánh Nướng",
-      stock: 45,
-      minStock: 40,
-      status: "medium",
-      expiryDate: "25/01/2026",
-    },
-    {
-      name: "Bánh Trung Thu Jambon",
-      type: "Bánh Mặn",
-      stock: 30,
-      minStock: 25,
-      status: "medium",
-      expiryDate: "20/01/2026",
-    },
-    {
-      name: "Bánh Dẻo Khoai Môn",
-      type: "Bánh Dẻo",
-      stock: 120,
-      minStock: 80,
-      status: "medium",
-      expiryDate: "12/02/2026",
-    },
-    {
-      name: "Bánh Nướng Vị Cá",
-      type: "Bánh Cao Cấp",
-      stock: 20,
-      minStock: 15,
-      status: "medium",
-      expiryDate: "18/01/2026",
-    },
-  ];
+  const [inventoryData, setInventoryData] = useState<ManagerInventoryItem[]>([]);
+  const [cardsData, setCardsData] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [openDropdownId, setOpenDropdownId] = useState<string | null>(null);
 
-  // Calculate statistics
-  const totalProducts = inventoryData.length;
-  const lowStockCount = inventoryData.filter(
-    (item) => item.stock < item.minStock
-  ).length;
-  const banhNuongCount = inventoryData.filter(
-    (item) => item.type === "Bánh Nướng"
-  ).length;
-  const banhDeoCount = inventoryData.filter(
-    (item) => item.type === "Bánh Dẻo"
-  ).length;
+  useEffect(() => {
+    fetchInventory();
+  }, []);
 
-  const getStatusStyle = (status: string) => {
-    if (status === "sufficient") {
+  const fetchInventory = async () => {
+    try {
+      setLoading(true);
+      const data = await inventoryService.getManagerInventory();
+      setInventoryData(data.items || []);
+      setCardsData(data.cards);
+      setError(null);
+    } catch (err) {
+      setError("Không thể tải dữ liệu tồn kho. Vui lòng thử lại sau.");
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Calculate statistics from backend real data
+  const totalProducts = cardsData?.total_products || 0;
+  // Using a threshold of 50 for "low stock"
+  const lowStockThreshold = 50;
+  const lowStockCount = cardsData?.low_stock || 0;
+  const banhNuongCount = cardsData?.baked_mooncake || 0;
+  const banhDeoCount = cardsData?.sticky_mooncake || 0;
+
+  const handleDelete = async (id: string, name: string) => {
+    if (window.confirm(`Bạn có chắc chắn muốn xóa "${name}" khỏi kho?`)) {
+      try {
+        await inventoryService.deleteInventoryItem(id);
+        // Refresh data or filter out the deleted item
+        setInventoryData(prev => prev.filter(item => item.inventory_item_id !== id));
+      } catch (err) {
+        alert("Có lỗi xảy ra khi xóa sản phẩm.");
+      }
+    }
+    setOpenDropdownId(null);
+  };
+
+  useEffect(() => {
+    const handleClickOutside = () => setOpenDropdownId(null);
+    window.addEventListener("click", handleClickOutside);
+    return () => window.removeEventListener("click", handleClickOutside);
+  }, []);
+
+  const getStatusStyle = (quantity: number) => {
+    if (quantity >= lowStockThreshold) {
       return {
         color: "#22c55e",
         icon: "↗",
@@ -94,9 +68,20 @@ export default function InventoryManagement() {
     return {
       color: "#f97316",
       icon: "⚡",
-      text: "Trung Bình",
+      text: "Thấp",
     };
   };
+
+  if (loading) {
+    return (
+      <div style={{ display: "flex", minHeight: "100vh" }}>
+        <ManagerSidebar />
+        <div style={{ flex: 1, marginLeft: "240px", display: "flex", justifyContent: "center", alignItems: "center" }}>
+          <div style={{ fontSize: "18px", color: "#666" }}>Đang tải dữ liệu...</div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div style={{ display: "flex", minHeight: "100vh" }}>
@@ -112,20 +97,34 @@ export default function InventoryManagement() {
         }}
       >
         {/* Page Header */}
-        <div style={{ marginBottom: "32px" }}>
-          <h1
-            style={{
-              fontSize: "28px",
-              fontWeight: "bold",
-              color: "#3d3530",
-              margin: 0,
-            }}
-          >
-            Quản Lý Kho
-          </h1>
-          <p style={{ color: "#666", marginTop: "8px", fontSize: "14px" }}>
-            Tổng quan tồn kho và cảnh báo
-          </p>
+        <div style={{ marginBottom: "32px", display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+          <div>
+            <h1
+              style={{
+                fontSize: "28px",
+                fontWeight: "bold",
+                color: "#3d3530",
+                margin: 0,
+              }}
+            >
+              Quản Lý Kho
+            </h1>
+            <p style={{ color: "#666", marginTop: "8px", fontSize: "14px" }}>
+              Tổng quan tồn kho toàn hệ thống
+            </p>
+          </div>
+          {error && (
+            <div style={{ 
+              padding: "10px 20px", 
+              backgroundColor: "#fee2e2", 
+              color: "#b91c1c", 
+              borderRadius: "8px", 
+              fontSize: "14px",
+              border: "1px solid #fecaca"
+            }}>
+              {error}
+            </div>
+          )}
         </div>
 
         {/* Status Cards */}
@@ -187,7 +186,7 @@ export default function InventoryManagement() {
                 marginBottom: "8px",
               }}
             >
-              Tồn Kho Thấp
+              Tồn Kho Thấp (&lt;{lowStockThreshold})
             </p>
             <p
               style={{
@@ -267,7 +266,7 @@ export default function InventoryManagement() {
         </div>
 
         {/* Inventory Details Section */}
-        <div style={{ marginBottom: "24px" }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "24px" }}>
           <h2
             style={{
               fontSize: "20px",
@@ -276,8 +275,29 @@ export default function InventoryManagement() {
               margin: 0,
             }}
           >
-            Chi Tiết Tồn Kho
+            Chi Tiết Tồn Kho Hệ Thống
           </h2>
+          <button
+            style={{
+              padding: "10px 20px",
+              backgroundColor: "#e67e22",
+              color: "white",
+              border: "none",
+              borderRadius: "8px",
+              fontSize: "14px",
+              fontWeight: "600",
+              cursor: "pointer",
+              display: "flex",
+              alignItems: "center",
+              gap: "8px",
+              boxShadow: "0 2px 4px rgba(230, 126, 34, 0.2)",
+            }}
+            onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "#d35400")}
+            onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "#e67e22")}
+            onClick={() => alert("Chức năng đang được phát triển")}
+          >
+            <span>+</span> Tạo mới sản phẩm
+          </button>
         </div>
 
         {/* Inventory Table */}
@@ -287,7 +307,7 @@ export default function InventoryManagement() {
             borderRadius: "12px",
             boxShadow: "0 1px 3px rgba(0,0,0,0.08)",
             border: "1px solid #eee",
-            overflow: "hidden",
+            overflow: "visible",
           }}
         >
           <table style={{ width: "100%", borderCollapse: "collapse" }}>
@@ -305,6 +325,19 @@ export default function InventoryManagement() {
                   }}
                 >
                   Sản Phẩm
+                </th>
+                <th
+                  style={{
+                    textAlign: "left",
+                    padding: "16px 24px",
+                    fontSize: "12px",
+                    fontWeight: "600",
+                    color: "#999",
+                    textTransform: "uppercase",
+                    letterSpacing: "0.5px",
+                  }}
+                >
+                  Cửa Hàng
                 </th>
                 <th
                   style={{
@@ -343,19 +376,6 @@ export default function InventoryManagement() {
                     letterSpacing: "0.5px",
                   }}
                 >
-                  Tối Thiểu
-                </th>
-                <th
-                  style={{
-                    textAlign: "left",
-                    padding: "16px 24px",
-                    fontSize: "12px",
-                    fontWeight: "600",
-                    color: "#999",
-                    textTransform: "uppercase",
-                    letterSpacing: "0.5px",
-                  }}
-                >
                   Tình Trạng
                 </th>
                 <th
@@ -371,14 +391,29 @@ export default function InventoryManagement() {
                 >
                   Hạn Sử Dụng
                 </th>
+                <th
+                  style={{
+                    textAlign: "center",
+                    padding: "16px 24px",
+                    fontSize: "12px",
+                    fontWeight: "600",
+                    color: "#999",
+                    textTransform: "uppercase",
+                    letterSpacing: "0.5px",
+                    width: "100px",
+                  }}
+                >
+                  Thao tác
+                </th>
               </tr>
             </thead>
+
             <tbody>
               {inventoryData.map((item, index) => {
-                const statusStyle = getStatusStyle(item.status);
+                const statusStyle = getStatusStyle(item.quantity);
                 return (
                   <tr
-                    key={index}
+                    key={item.inventory_item_id}
                     style={{
                       borderBottom:
                         index < inventoryData.length - 1
@@ -394,7 +429,8 @@ export default function InventoryManagement() {
                         color: "#3d3530",
                       }}
                     >
-                      {item.name}
+                      <div style={{ fontWeight: "600" }}>{item.product_name}</div>
+                      <div style={{ fontSize: "12px", color: "#999" }}>{item.product_code}</div>
                     </td>
                     <td
                       style={{
@@ -403,7 +439,16 @@ export default function InventoryManagement() {
                         color: "#666",
                       }}
                     >
-                      {item.type}
+                      {item.store_name}
+                    </td>
+                    <td
+                      style={{
+                        padding: "20px 24px",
+                        fontSize: "14px",
+                        color: "#666",
+                      }}
+                    >
+                      {item.category_name}
                     </td>
                     <td
                       style={{
@@ -412,16 +457,7 @@ export default function InventoryManagement() {
                         color: "#3d3530",
                       }}
                     >
-                      {item.stock} hộp
-                    </td>
-                    <td
-                      style={{
-                        padding: "20px 24px",
-                        fontSize: "14px",
-                        color: "#666",
-                      }}
-                    >
-                      {item.minStock} hộp
+                      {item.quantity} cái
                     </td>
                     <td
                       style={{
@@ -452,13 +488,125 @@ export default function InventoryManagement() {
                         color: "#3d3530",
                       }}
                     >
-                      {item.expiryDate}
+                      {item.expiry_date ? new Date(item.expiry_date).toLocaleDateString('vi-VN') : "N/A"}
+                    </td>
+                    <td
+                      style={{
+                        padding: "16px 24px",
+                        textAlign: "center",
+                        position: "relative",
+                      }}
+                    >
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setOpenDropdownId(
+                            openDropdownId === item.inventory_item_id
+                              ? null
+                              : item.inventory_item_id
+                          );
+                        }}
+                        style={{
+                          background: "none",
+                          border: "none",
+                          cursor: "pointer",
+                          fontSize: "20px",
+                          color: "#999",
+                          padding: "4px 8px",
+                          borderRadius: "4px",
+                          display: "inline-flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                        }}
+                        onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "#f5f5f5")}
+                        onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "transparent")}
+                      >
+                        ⋮
+                      </button>
+
+                      {openDropdownId === item.inventory_item_id && (
+                        <div
+                          style={{
+                            position: "absolute",
+                            right: "24px",
+                            top: "50px",
+                            backgroundColor: "white",
+                            borderRadius: "8px",
+                            boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
+                            zIndex: 100,
+                            minWidth: "160px",
+                            padding: "8px 0",
+                            border: "1px solid #eee",
+                          }}
+                        >
+                          <button
+                            style={{
+                              display: "block",
+                              width: "100%",
+                              padding: "10px 16px",
+                              textAlign: "left",
+                              background: "none",
+                              border: "none",
+                              fontSize: "14px",
+                              color: "#333",
+                              cursor: "pointer",
+                            }}
+                            onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "#f8f9fa")}
+                            onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "transparent")}
+                            onClick={() => alert(`Xem chi tiết: ${item.product_name}`)}
+                          >
+                            Xem chi tiết
+                          </button>
+                          <button
+                            style={{
+                              display: "block",
+                              width: "100%",
+                              padding: "10px 16px",
+                              textAlign: "left",
+                              background: "none",
+                              border: "none",
+                              fontSize: "14px",
+                              color: "#333",
+                              cursor: "pointer",
+                            }}
+                            onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "#f8f9fa")}
+                            onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "transparent")}
+                            onClick={() => alert(`Chỉnh sửa: ${item.product_name}`)}
+                          >
+                            Chỉnh sửa
+                          </button>
+                          <button
+                            onClick={() => handleDelete(item.inventory_item_id, item.product_name)}
+                            style={{
+                              display: "block",
+                              width: "100%",
+                              padding: "10px 16px",
+                              textAlign: "left",
+                              background: "none",
+                              border: "none",
+                              fontSize: "14px",
+                              color: "#e74c3c",
+                              cursor: "pointer",
+                              borderTop: "1px solid #eee",
+                            }}
+                            onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "#fff5f5")}
+                            onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "transparent")}
+                          >
+                            Xóa
+                          </button>
+                        </div>
+                      )}
                     </td>
                   </tr>
                 );
               })}
             </tbody>
           </table>
+          {inventoryData.length === 0 && !loading && (
+            <div style={{ padding: "40px", textAlign: "center", color: "#999" }}>
+              Không có dữ liệu tồn kho nào.
+            </div>
+          )}
         </div>
       </div>
     </div>

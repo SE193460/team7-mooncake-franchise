@@ -1,6 +1,6 @@
 // src/services/fetchClient.ts
 const API_BASE_URL = "https://franchisemooncake.onrender.com/api";
-
+const API_BASE_URL1 = "http://localhost:8000/api";
 interface FetchOptions extends RequestInit {
     params?: Record<string, string>;
 }
