@@ -16,7 +16,7 @@ export default function Sidebar({ activePage = 'dashboard', type = 'franchise' }
     useEffect(() => {
         const user = authService.getCurrentUser();
         setCurrentUser(user);
-        
+
         // Nếu không có username từ localStorage, fetch từ API
         if (!user?.username) {
             authService.getUserProfile().then((profile) => {
@@ -55,6 +55,7 @@ export default function Sidebar({ activePage = 'dashboard', type = 'franchise' }
         { id: 'order', label: 'Đặt Hàng', icon: '🛒', href: '/store/order' },
         { id: 'tracking', label: 'Theo Dõi Đơn', icon: '🚚', href: '/store/tracking' },
         { id: 'confirm', label: 'Xác Nhận Nhận Hàng', icon: '📦', href: '/store/confirm' },
+        { id: 'payment', label: 'Thanh Toán', icon: '💳', href: '/store/payment' },
         { id: 'storage', label: 'Kho Lưu Trữ', icon: '🏪', href: '/store/storage' },
     ];
 
@@ -69,6 +70,7 @@ export default function Sidebar({ activePage = 'dashboard', type = 'franchise' }
     const managerMenuItems = [
         { id: 'dashboard', label: 'Bảng điều khiển', icon: '📊', href: '/manager' },
         { id: 'inventory', label: 'Tồn Kho Tổng', icon: '📦', href: '/manager/inventory' },
+        { id: 'report', label: 'Báo Cáo & Thống Kê', icon: '📊', href: '/manager/report' },
     ];
 
     const adminMenuItems = [
@@ -77,23 +79,23 @@ export default function Sidebar({ activePage = 'dashboard', type = 'franchise' }
         { id: 'categories', label: 'Dữ Liệu Danh Mục', icon: '📋', href: '/admin/categories' },
     ];
 
-    const menuItems = type === 'kitchen' ? kitchenMenuItems : 
-                      type === 'manager' ? managerMenuItems : 
-                      type === 'admin' ? adminMenuItems : 
-                      franchiseMenuItems;
-    const homeHref = type === 'kitchen' ? '/kitchen' : 
-                     type === 'manager' ? '/manager' : 
-                     type === 'admin' ? '/admin' : 
-                     '/store';
+    const menuItems = type === 'kitchen' ? kitchenMenuItems :
+        type === 'manager' ? managerMenuItems :
+            type === 'admin' ? adminMenuItems :
+                franchiseMenuItems;
+    const homeHref = type === 'kitchen' ? '/kitchen' :
+        type === 'manager' ? '/manager' :
+            type === 'admin' ? '/admin' :
+                '/store';
     const profileHref = '/profile'; // Profile chung cho tất cả roles
-    const brandTitle = type === 'kitchen' ? 'Mooncake Kitchen' : 
-                       type === 'manager' ? 'Mooncake Manager' : 
-                       type === 'admin' ? 'Admin Panel' : 
-                       'Mooncake Franchise';
-    const brandSubtitle = type === 'kitchen' ? 'Bếp Trung Tâm' : 
-                          type === 'manager' ? 'Quản Lý' : 
-                          type === 'admin' ? 'Quản Trị Viên' : 
-                          'Cửa hàng';
+    const brandTitle = type === 'kitchen' ? 'Mooncake Kitchen' :
+        type === 'manager' ? 'Mooncake Manager' :
+            type === 'admin' ? 'Admin Panel' :
+                'Mooncake Franchise';
+    const brandSubtitle = type === 'kitchen' ? 'Bếp Trung Tâm' :
+        type === 'manager' ? 'Quản Lý' :
+            type === 'admin' ? 'Quản Trị Viên' :
+                'Cửa hàng';
 
     return (
         <aside
@@ -172,12 +174,12 @@ export default function Sidebar({ activePage = 'dashboard', type = 'franchise' }
                     borderTop: '1px solid var(--border-color)',
                 }}
             >
-                <Link 
+                <Link
                     href={profileHref}
-                    style={{ 
-                        display: 'flex', 
-                        alignItems: 'center', 
-                        gap: '12px', 
+                    style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '12px',
                         marginBottom: '14px',
                         textDecoration: 'none',
                         padding: '8px',
