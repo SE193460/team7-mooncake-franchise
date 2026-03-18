@@ -3,63 +3,31 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Sidebar from "../../../components/Sidebar";
-interface Order {
-    id: string;
-    products: string[];
-    amount: string;
-    receiveDate: string;
-}
-
-interface PaymentHistory {
-    id: string;
-    amount: string;
-    date: string;
-    status: string;
-}
-
-const ordersPending: Order[] = [
-    {
-        id: "ORD-009",
-        products: [
-            "Bánh Trung Thu Thập Cẩm: 40 hộp",
-            "Bánh Dẻo Sữa Dừa: 20 hộp",
-        ],
-        amount: "19.600.000 VND",
-        receiveDate: "12/01/2026 22:00",
-    },
-    {
-        id: "ORD-010",
-        products: ["Bánh Nướng Hạt Sen: 25 hộp"],
-        amount: "9.500.000 VND",
-        receiveDate: "13/01/2026 21:30",
-    },
-    {
-        id: "ORD-011",
-        products: [
-            "Bánh Trung Thu Jambon: 15 hộp",
-            "Bánh Nướng Trà Xanh: 30 hộp",
-        ],
-        amount: "10.500.000 VND",
-        receiveDate: "14/01/2026 23:00",
-    },
-];
-
-const paymentHistory: PaymentHistory[] = [
-    {
-        id: "ORD-006",
-        amount: "4.000.000 VND",
-        date: "06/01/2026 00:00",
-        status: "Đã Thanh Toán",
-    },
-];
 
 export default function PaymentPage() {
 
     const router = useRouter();
-    const [orders, setOrders] = useState<any[]>([]);
+    const [pendingOrders, setPendingOrders] = useState<any[]>([]);
+    const [history, setHistory] = useState<any[]>([]);
+    const [stats, setStats] = useState({
+        waiting: 0,
+        paid: 0,
+    });
+
+    const formatVND = (amount: number) => {
+        return new Intl.NumberFormat("vi-VN").format(amount) + " VNĐ";
+    };
+
+    const formatDate = (date: string | null) => {
+        if (!date) return '—';
+        try {
+            return new Date(date).toLocaleDateString('vi-VN');
+        } catch {
+            return date;
+        }
+    };
 
     useEffect(() => {
-
         const token = localStorage.getItem("token");
 
         if (!token) {
@@ -67,30 +35,36 @@ export default function PaymentPage() {
             return;
         }
 
-        // fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/payments`, {
-        //     headers: {
-        //         Authorization: `Bearer ${token}`,
-        //     },
-        // })
-        //     .then(res => {
-        //         if (res.status === 401) {
-        //             router.push("/login");
-        //             return;
-        //         }
-        //         return res.json();
-        //     })
-        //     .then(data => {
-        //         if (!data) return;
-        //         setOrders(data.data || []);
-        //     })
-        //     .catch(console.error);
+        fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/franchise/payment-orders?page=1&limit=50`, {
+            headers: {
+                Authorization: `Bearer ${token}`,
+            },
+        })
+            .then(res => {
+                if (res.status === 401) {
+                    router.push("/login");
+                    return;
+                }
+                return res.json();
+            })
+            .then(data => {
+                if (!data?.data) return;
 
+                const d = data.data;
+
+                setPendingOrders(d.waiting_payment_orders || []);
+                setHistory(d.payment_history || []);
+                setStats({
+                    waiting: d.waiting_payment_count,
+                    paid: d.paid_count,
+                });
+            })
+            .catch(console.error);
     }, []);
 
-    const handlePayment = (orderId: string) => {
-        console.log("Pay order:", orderId);
+    const handlePayment = (orderId: number) => {
+        window.alert("Đã Thanh Toán Đơn Hàng " + orderId);
     };
-
     return (
         <div className="flex min-h-screen">
             <Sidebar activePage="payment" />
@@ -107,7 +81,7 @@ export default function PaymentPage() {
                         <div>
                             <p className="text-gray-400 text-sm font-medium mb-3">Chờ Thanh Toán</p>
                             <p className="text-4xl font-bold text-[#E65C00]">
-                                {ordersPending.length}
+                                {stats.waiting}
                             </p>
                         </div>
                         <div className="text-[#E65C00]">
@@ -119,7 +93,7 @@ export default function PaymentPage() {
                         <div>
                             <p className="text-gray-400 text-sm font-medium mb-3">Đã Thanh Toán</p>
                             <p className="text-4xl font-bold text-[#10B981]">
-                                {paymentHistory.length}
+                                {stats.paid}
                             </p>
                         </div>
                         <div className="text-[#10B981]">
@@ -142,35 +116,30 @@ export default function PaymentPage() {
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-gray-50">
-                            {ordersPending.map((order) => (
-                                <tr key={order.id} className="hover:bg-gray-50/40 transition-colors group">
+                            {pendingOrders.map((order) => (
+                                <tr key={order.order_id} className="hover:bg-gray-50/40 transition-colors group">
                                     <td className="px-8 py-7">
                                         <div className="flex items-center gap-3">
                                             <svg className="text-[#E65C00]" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" /></svg>
-                                            <span className="font-bold text-gray-700">{order.id}</span>
+                                            <span className="font-bold text-gray-700">{order.order_code}</span>
                                         </div>
                                     </td>
                                     <td className="px-8 py-7">
                                         <div className="flex flex-col gap-1">
-                                            {order.products.map((product, index) => (
-                                                <span key={index} className="text-[13.5px] text-gray-500 leading-relaxed">
-                                                    {product}
-                                                </span>
-                                            ))}
+                                            Không có dữ liệu
                                         </div>
                                     </td>
                                     <td className="px-8 py-7">
                                         <div className="flex items-center gap-2 font-bold text-[#E65C00]">
-                                            <span>$</span>
-                                            <span>{order.amount.replace(' VND', ' VNĐ')}</span>
+                                            <span>{formatVND(order?.amount || 0)}</span>
                                         </div>
                                     </td>
                                     <td className="px-8 py-7 text-[14px] text-gray-500">
-                                        {order.receiveDate}
+                                        {order?.receiveDate}
                                     </td>
                                     <td className="px-8 py-7">
                                         <button
-                                            onClick={() => handlePayment(order.id)}
+                                            onClick={() => handlePayment(order.order_code)}
                                             className="bg-[#10B981] hover:bg-[#059669] text-white px-5 py-2.5 rounded-xl text-sm font-bold flex items-center gap-2.5 transition-all transform hover:scale-[1.02] active:scale-[0.98] shadow-sm"
                                         >
                                             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><rect width="20" height="14" x="2" y="5" rx="2" /><line x1="2" x2="22" y1="10" y2="10" /></svg>
@@ -196,26 +165,25 @@ export default function PaymentPage() {
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-gray-50">
-                            {paymentHistory.map((item) => (
-                                <tr key={item.id} className="hover:bg-gray-50/40 transition-colors group">
+                            {history.map((item) => (
+                                <tr key={item.order_id} className="hover:bg-gray-50/40 transition-colors group">
                                     <td className="px-8 py-7">
                                         <div className="flex items-center gap-3">
                                             <svg className="text-[#DAA06D]" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" /></svg>
-                                            <span className="font-bold text-gray-700">{item.id}</span>
+                                            <span className="font-bold text-gray-700">{item.order_code}</span>
                                         </div>
                                     </td>
                                     <td className="px-8 py-7">
                                         <div className="flex items-center gap-2 font-bold text-gray-800">
-                                            <span>$</span>
-                                            <span>{item.amount.replace(' VND', ' VNĐ')}</span>
+                                            <span>{formatVND(item.amount || 0)}</span>
                                         </div>
                                     </td>
                                     <td className="px-8 py-7 text-[14px] text-gray-500">
-                                        {item.date}
+                                        {formatDate(item.paid_at)}
                                     </td>
                                     <td className="px-8 py-7">
                                         <span className="bg-[#D1FAE5] text-[#059669] px-4 py-2 rounded-full text-[11px] font-black uppercase tracking-wider">
-                                            {item.status}
+                                            {item.status_label}
                                         </span>
                                     </td>
                                 </tr>
