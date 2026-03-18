@@ -1,3 +1,5 @@
+@import "tailwindcss";
+
 :root {
   --primary-orange: #FF6B35;
   --primary-orange-hover: #E55A2B;
@@ -31,14 +33,11 @@
   --table-border: #E5E7EB;
 }
 
-* {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
+@layer base {
+  body {
+    @apply antialiased;
+    background-color: var(--main-bg);
+    color: var(--text-primary);
+  }
 }
 
-body {
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  background-color: var(--main-bg);
-  color: var(--text-primary);
-}

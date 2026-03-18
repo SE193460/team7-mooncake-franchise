@@ -5,9 +5,12 @@ interface Order {
     id: string;
     orderCode: string;
     products: string;
+    totalAmount: number;
     status: 'pending' | 'confirmed' | 'processing' | 'fulfilled' | 'cancelled';
     statusLabel: string;
     statusColor: string;
+    paymentStatus?: 'paid' | 'unpaid';
+    paymentStatusLabel?: string;
     createdDate: string;
     desiredDate: string;
     deliveryDate: string;
@@ -59,6 +62,10 @@ export default function OrdersTable({ orders }: OrdersTableProps) {
                     color: 'var(--status-gray-text)',
                 };
         }
+    };
+
+    const formatVND = (amount: number) => {
+        return new Intl.NumberFormat("vi-VN").format(amount) + " VNĐ";
     };
 
     const totalPages = Math.ceil(orders.length / limit);
@@ -251,7 +258,35 @@ export default function OrdersTable({ orders }: OrdersTableProps) {
                                     width: '160px',
                                 }}
                             >
+                                Tổng Tiền
+                            </th>
+                            <th
+                                style={{
+                                    textAlign: 'center',
+                                    padding: '14px 16px',
+                                    fontSize: '12px',
+                                    fontWeight: '600',
+                                    color: 'var(--text-secondary)',
+                                    textTransform: 'uppercase',
+                                    letterSpacing: '0.5px',
+                                    width: '160px',
+                                }}
+                            >
                                 Trạng Thái
+                            </th>
+                            <th
+                                style={{
+                                    textAlign: 'center',
+                                    padding: '14px 16px',
+                                    fontSize: '12px',
+                                    fontWeight: '600',
+                                    color: 'var(--text-secondary)',
+                                    textTransform: 'uppercase',
+                                    letterSpacing: '0.5px',
+                                    width: '120px',
+                                }}
+                            >
+                                Thanh Toán
                             </th>
                             <th
                                 style={{
@@ -315,6 +350,9 @@ export default function OrdersTable({ orders }: OrdersTableProps) {
                                     <td style={{ padding: '18px 16px', fontSize: '14px', color: 'var(--text-primary)', textAlign: 'center', fontWeight: '500' }}>
                                         {order.products}
                                     </td>
+                                    <td style={{ padding: '18px 16px', fontSize: '14px', color: 'var(--primary-orange)', textAlign: 'center', fontWeight: '500' }}>
+                                        {formatVND(order.totalAmount || 0)}
+                                    </td>
                                     <td style={{ padding: '18px 16px', textAlign: 'center' }}>
                                         <span
                                             style={{
@@ -330,6 +368,22 @@ export default function OrdersTable({ orders }: OrdersTableProps) {
                                             className={`px-2 py-1 text-xs font-medium rounded ${order.statusColor}`}
                                         >
                                             {order.statusLabel}
+                                        </span>
+                                    </td>
+                                    <td style={{ padding: '18px 16px', textAlign: 'center' }}>
+                                        <span
+                                            style={{
+                                                backgroundColor: order.paymentStatus === 'paid' ? '#DCFCE7' : order.paymentStatus === 'unpaid' ? '#FFF7ED' : 'transparent',
+                                                color: order.paymentStatus === 'paid' ? '#166534' : order.paymentStatus === 'unpaid' ? '#9A3412' : 'var(--text-secondary)',
+                                                padding: order.paymentStatus ? '8px 16px' : '0',
+                                                borderRadius: '20px',
+                                                fontSize: '12px',
+                                                fontWeight: order.paymentStatus ? '600' : 'normal',
+                                                display: 'inline-block',
+                                                whiteSpace: 'nowrap',
+                                            }}
+                                        >
+                                            {order.paymentStatusLabel || '—'}
                                         </span>
                                     </td>
                                     <td style={{ padding: '18px 16px', fontSize: '14px', color: 'var(--text-secondary)', textAlign: 'center' }}>
