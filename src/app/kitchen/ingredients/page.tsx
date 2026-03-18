@@ -13,14 +13,6 @@ const CalendarIcon = () => (
     </svg>
 );
 
-// Plus icon for import button
-const PlusIcon = () => (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <line x1="12" y1="5" x2="12" y2="19" />
-        <line x1="5" y1="12" x2="19" y2="12" />
-    </svg>
-);
-
 // Function to get badge color based on days left
 const getDaysLeftColor = (days: number) => {
     if (days <= 7) return { bg: '#fee2e2', text: '#dc2626' };
@@ -32,13 +24,22 @@ export default function IngredientsPage() {
     const [inventoryItems, setInventoryItems] = useState<any[]>([]);
     const [expiringItems, setExpiringItems] = useState<any[]>([]);
 
+    const formatDate = (date: string | null) => {
+        if (!date) return '—';
+        try {
+            return new Date(date).toLocaleDateString('vi-VN');
+        } catch {
+            return date;
+        }
+    };
+
     useEffect(() => {
         const fetchInventory = async () => {
             try {
                 const token = localStorage.getItem('token');
 
                 const res = await fetch(
-                    'https://franchisemooncake.onrender.com/api/central-kitchen/materials-inventory',
+                    `${process.env.NEXT_PUBLIC_API_URL}/api/central-kitchen/materials-inventory`,
                     {
                         headers: {
                             Authorization: `Bearer ${token}`,
@@ -127,7 +128,7 @@ export default function IngredientsPage() {
                         <div
                             style={{
                                 display: 'grid',
-                                gridTemplateColumns: '2fr 1.8fr 1.2fr 1.4fr',
+                                gridTemplateColumns: '2fr 1.4fr 1.4fr 1.4fr',
                                 padding: '16px 24px',
                                 borderBottom: '1px solid #e5e7eb',
                                 backgroundColor: '#fafafa',
@@ -140,10 +141,10 @@ export default function IngredientsPage() {
                                 Tồn Kho
                             </span>
                             <span style={{ fontSize: '12px', fontWeight: '600', color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                                Đơn vị
+                                Hạn Sử Dụng
                             </span>
                             <span style={{ fontSize: '12px', fontWeight: '600', color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                                Hạn Sử Dụng
+                                Cập Nhật Lần Cuối
                             </span>
                         </div>
 
@@ -155,7 +156,7 @@ export default function IngredientsPage() {
                                     key={item.inventory_item_id}
                                     style={{
                                         display: 'grid',
-                                        gridTemplateColumns: '2fr 1.8fr 1.2fr 1.4fr',
+                                        gridTemplateColumns: '2fr 1.4fr 1.4fr 1.4fr',
                                         padding: '16px 24px',
                                         borderBottom: index < inventoryItems.length - 1 ? '1px solid #f3f4f6' : 'none',
                                         alignItems: 'center',
@@ -190,11 +191,6 @@ export default function IngredientsPage() {
                                         </span>
                                     </div>
 
-                                    {/* Minimum Stock */}
-                                    <div style={{ color: '#6b7280', fontSize: '14px' }}>
-                                        {item.minStock} {item.uom}
-                                    </div>
-
                                     {/* Expiry Date */}
                                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                                         <span style={{ color: '#1f2937', fontSize: '14px' }}>
@@ -214,36 +210,11 @@ export default function IngredientsPage() {
                                         </span>
                                     </div>
 
-                                    {/* Actions */}
-                                    {/* <div style={{ textAlign: 'right' }}>
-                                        <button
-                                            style={{
-                                                display: 'inline-flex',
-                                                alignItems: 'center',
-                                                gap: '6px',
-                                                padding: '8px 16px',
-                                                backgroundColor: 'white',
-                                                border: '1px solid #e5e7eb',
-                                                borderRadius: '8px',
-                                                fontSize: '13px',
-                                                fontWeight: '500',
-                                                color: '#374151',
-                                                cursor: 'pointer',
-                                                transition: 'all 0.2s ease',
-                                            }}
-                                            onMouseOver={(e) => {
-                                                e.currentTarget.style.backgroundColor = '#f9fafb';
-                                                e.currentTarget.style.borderColor = '#d1d5db';
-                                            }}
-                                            onMouseOut={(e) => {
-                                                e.currentTarget.style.backgroundColor = 'white';
-                                                e.currentTarget.style.borderColor = '#e5e7eb';
-                                            }}
-                                        >
-                                            <PlusIcon />
-                                            Nhập Kho
-                                        </button>
-                                    </div> */}
+                                    {/* Minimum Stock */}
+                                    <div style={{ color: '#6b7280', fontSize: '14px' }}>
+                                        {formatDate(item.last_updated_at)}
+                                    </div>
+
                                 </div>
                             );
                         })}

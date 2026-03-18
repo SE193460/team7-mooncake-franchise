@@ -25,6 +25,10 @@ export default function ProductStoragePage() {
     const [expiringItems, setExpiringItems] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
 
+    const formatVND = (amount: number) => {
+        return new Intl.NumberFormat("vi-VN").format(amount) + " VNĐ";
+    };
+
     useEffect(() => {
         const fetchInventory = async () => {
             try {
@@ -33,7 +37,7 @@ export default function ProductStoragePage() {
 
                 // Assuming the endpoint for products inventory exists
                 const res = await fetch(
-                    'https://franchisemooncake.onrender.com/api/centralKitchen/product-inventory',
+                    `${process.env.NEXT_PUBLIC_API_URL}/api/centralKitchen/product-inventory`,
                     {
                         headers: {
                             Authorization: `Bearer ${token}`,
@@ -135,7 +139,7 @@ export default function ProductStoragePage() {
                                 <div
                                     style={{
                                         display: 'grid',
-                                        gridTemplateColumns: '2fr 1fr 1fr 1.2fr',
+                                        gridTemplateColumns: '2fr 1fr 1fr 1.2fr 1fr 1fr 1fr 1fr',
                                         padding: '16px 24px',
                                         borderBottom: '1px solid #e5e7eb',
                                         backgroundColor: '#fafafa',
@@ -151,7 +155,19 @@ export default function ProductStoragePage() {
                                         Đơn Vị
                                     </span>
                                     <span style={{ fontSize: '12px', fontWeight: '600', color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                                        Giá Bán
+                                    </span>
+                                    <span style={{ fontSize: '12px', fontWeight: '600', color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                                        Loại
+                                    </span>
+                                    <span style={{ fontSize: '12px', fontWeight: '600', color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                                        Mức tối thiểu
+                                    </span>
+                                    <span style={{ fontSize: '12px', fontWeight: '600', color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
                                         Hạn Sử Dụng
+                                    </span>
+                                    <span style={{ fontSize: '12px', fontWeight: '600', color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                                        Cập Nhật Lần Cuối
                                     </span>
                                 </div>
 
@@ -168,7 +184,7 @@ export default function ProductStoragePage() {
                                                 key={item.inventory_item_id}
                                                 style={{
                                                     display: 'grid',
-                                                    gridTemplateColumns: '2fr 1fr 1fr 1.2fr',
+                                                    gridTemplateColumns: '2fr 1fr 1fr 1.2fr 1fr 1fr 1fr 1fr',
                                                     padding: '16px 24px',
                                                     borderBottom: index < inventoryItems.length - 1 ? '1px solid #f3f4f6' : 'none',
                                                     alignItems: 'center',
@@ -196,6 +212,25 @@ export default function ProductStoragePage() {
                                                     {item.uom}
                                                 </div>
 
+                                                {/* Price */}
+                                                <div>
+                                                    <span style={{ color: '#1f2937', fontSize: '14px', fontWeight: '500' }}>
+                                                        {formatVND(item.price * item.on_hand_qty)}
+                                                    </span>
+                                                </div>
+
+                                                {/* Category */}
+                                                <div style={{ color: '#6b7280', fontSize: '14px' }}>
+                                                    {item.product_type_name}
+                                                </div>
+
+                                                {/* Minimum Quantity */}
+                                                <div>
+                                                    <span style={{ color: '#1f2937', fontSize: '14px', fontWeight: '500' }}>
+                                                        {item.min_qty} {item.uom}
+                                                    </span>
+                                                </div>
+
                                                 {/* Expiry Date */}
                                                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                                                     <span style={{ color: '#1f2937', fontSize: '14px' }}>
@@ -216,6 +251,12 @@ export default function ProductStoragePage() {
                                                         </span>
                                                     )}
                                                 </div>
+
+                                                {/* Last Updated */}
+                                                <div style={{ color: '#6b7280', fontSize: '14px' }}>
+                                                    {item.last_updated_at ? new Date(item.last_updated_at).toLocaleDateString('vi-VN') : '—'}
+                                                </div>
+
                                             </div>
                                         );
                                     })

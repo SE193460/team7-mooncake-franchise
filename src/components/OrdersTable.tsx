@@ -1,14 +1,16 @@
-import Link from 'next/link';
+import { useEffect, useState } from "react";
+import { getOrders } from "../services/orderService";
 
 interface Order {
     id: string;
     orderCode: string;
     products: string;
-    status: 'pending' | 'processing' | 'fulfilled' | 'confirmed' | 'cancelled';
+    totalAmount: number;
+    status: 'pending' | 'confirmed' | 'processing' | 'fulfilled' | 'cancelled';
     statusLabel: string;
-    paymentStatus: 'paid' | 'unpaid' | 'unknown';
-    paymentStatusLabel: string;
-    totalAmount: string;
+    statusColor: string;
+    paymentStatus?: 'paid' | 'unpaid';
+    paymentStatusLabel?: string;
     createdDate: string;
     desiredDate: string;
     deliveryDate: string;
@@ -20,12 +22,24 @@ interface OrdersTableProps {
 }
 
 export default function OrdersTable({ orders }: OrdersTableProps) {
+    const [showAll, setShowAll] = useState(false);
+    const [page, setPage] = useState(1);
+
+    const limit = 5;
+
+    const displayedOrders = orders.slice((page - 1) * limit, page * limit);
+
     const getStatusStyle = (status: string) => {
         switch (status) {
             case 'pending':
                 return {
                     backgroundColor: 'var(--status-yellow)',
                     color: 'var(--status-yellow-text)',
+                };
+            case 'confirmed':
+                return {
+                    backgroundColor: 'var(--status-blue)',
+                    color: 'var(--status-blue-text)',
                 };
             case 'processing':
                 return {
@@ -36,11 +50,6 @@ export default function OrdersTable({ orders }: OrdersTableProps) {
                 return {
                     backgroundColor: 'var(--status-blue)',
                     color: 'var(--status-blue-text)',
-                };
-            case 'confirmed':
-                return {
-                    backgroundColor: 'var(--status-green)',
-                    color: 'var(--status-green-text)',
                 };
             case 'cancelled':
                 return {
@@ -55,25 +64,11 @@ export default function OrdersTable({ orders }: OrdersTableProps) {
         }
     };
 
-    const getPaymentStatusStyle = (status: string) => {
-        switch (status) {
-            case 'paid':
-                return {
-                    backgroundColor: 'var(--status-green)',
-                    color: 'var(--status-green-text)',
-                };
-            case 'unpaid':
-                return {
-                    backgroundColor: 'var(--status-red)',
-                    color: 'var(--status-red-text)',
-                };
-            default:
-                return {
-                    backgroundColor: 'var(--status-gray)',
-                    color: 'var(--status-gray-text)',
-                };
-        }
+    const formatVND = (amount: number) => {
+        return new Intl.NumberFormat("vi-VN").format(amount) + " VNĐ";
     };
+
+    const totalPages = Math.ceil(orders.length / limit);
 
     return (
         <div>
@@ -88,20 +83,135 @@ export default function OrdersTable({ orders }: OrdersTableProps) {
                 <h2 style={{ fontSize: '18px', fontWeight: '600', color: 'var(--text-primary)' }}>
                     Đơn Hàng Gần Đây
                 </h2>
-                <Link
-                    href="/store/tracking"
-                    style={{
-                        background: 'none',
-                        border: 'none',
-                        color: 'var(--primary-orange)',
-                        fontSize: '14px',
-                        cursor: 'pointer',
-                        fontWeight: '500',
-                        textDecoration: 'none',
-                    }}
-                >
-                    Xem tất cả
-                </Link>
+                {!showAll && (
+                    <button
+                        onClick={() => {
+                            setShowAll(true);
+                            setPage(1);
+                        }}
+                        style={{
+                            background: 'none',
+                            border: 'none',
+                            color: 'var(--primary-orange)',
+                            fontSize: '14px',
+                            cursor: 'pointer',
+                            fontWeight: '600',
+                            transition: 'all 0.2s ease',
+                        }}
+                        onMouseEnter={(e) => e.currentTarget.style.color = 'var(--primary-orange-hover)'}
+                        onMouseLeave={(e) => e.currentTarget.style.color = 'var(--primary-orange)'}
+                    >
+                        Xem tất cả
+                    </button>
+                )}
+
+                {showAll && (
+                    <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+                        <button
+                            disabled={page === 1}
+                            onClick={() => setPage(page - 1)}
+                            style={{
+                                padding: '6px 12px',
+                                backgroundColor: page === 1 ? '#f3f4f6' : 'white',
+                                border: '1px solid var(--table-border)',
+                                borderRadius: '6px',
+                                color: page === 1 ? 'var(--text-secondary)' : 'var(--text-primary)',
+                                fontSize: '13px',
+                                fontWeight: '500',
+                                cursor: page === 1 ? 'not-allowed' : 'pointer',
+                                transition: 'all 0.2s ease',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '4px'
+                            }}
+                            onMouseEnter={(e) => {
+                                if (page !== 1) {
+                                    e.currentTarget.style.borderColor = 'var(--primary-orange)';
+                                    e.currentTarget.style.color = 'var(--primary-orange)';
+                                }
+                            }}
+                            onMouseLeave={(e) => {
+                                if (page !== 1) {
+                                    e.currentTarget.style.borderColor = 'var(--table-border)';
+                                    e.currentTarget.style.color = 'var(--text-primary)';
+                                }
+                            }}
+                        >
+                            <span>←</span> Trước
+                        </button>
+
+                        <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
+                            {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
+                                <button
+                                    key={p}
+                                    onClick={() => setPage(p)}
+                                    style={{
+                                        width: '32px',
+                                        height: '32px',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        borderRadius: '6px',
+                                        fontSize: '13px',
+                                        fontWeight: '600',
+                                        cursor: 'pointer',
+                                        transition: 'all 0.2s ease',
+                                        backgroundColor: page === p ? 'var(--primary-orange)' : 'transparent',
+                                        color: page === p ? 'white' : 'var(--text-secondary)',
+                                        border: page === p ? '1px solid var(--primary-orange)' : '1px solid transparent',
+                                    }}
+                                    onMouseEnter={(e) => {
+                                        if (page !== p) {
+                                            e.currentTarget.style.backgroundColor = 'rgba(255, 107, 53, 0.1)';
+                                            e.currentTarget.style.color = 'var(--primary-orange)';
+                                        }
+                                    }}
+                                    onMouseLeave={(e) => {
+                                        if (page !== p) {
+                                            e.currentTarget.style.backgroundColor = 'transparent';
+                                            e.currentTarget.style.color = 'var(--text-secondary)';
+                                        }
+                                    }}
+                                >
+                                    {p}
+                                </button>
+                            ))}
+                        </div>
+
+                        <button
+                            disabled={page >= totalPages}
+                            onClick={() => setPage(page + 1)}
+                            style={{
+                                padding: '6px 12px',
+                                backgroundColor: page >= totalPages ? '#f3f4f6' : 'white',
+                                border: '1px solid var(--table-border)',
+                                borderRadius: '6px',
+                                color: page >= totalPages ? 'var(--text-secondary)' : 'var(--text-primary)',
+                                fontSize: '13px',
+                                fontWeight: '500',
+                                cursor: page >= totalPages ? 'not-allowed' : 'pointer',
+                                transition: 'all 0.2s ease',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '4px'
+                            }}
+                            onMouseEnter={(e) => {
+                                if (page < totalPages) {
+                                    e.currentTarget.style.borderColor = 'var(--primary-orange)';
+                                    e.currentTarget.style.color = 'var(--primary-orange)';
+                                }
+                            }}
+                            onMouseLeave={(e) => {
+                                if (page < totalPages) {
+                                    e.currentTarget.style.borderColor = 'var(--table-border)';
+                                    e.currentTarget.style.color = 'var(--text-primary)';
+                                }
+                            }}
+                        >
+                            Sau <span>→</span>
+                        </button>
+                    </div>
+                )}
             </div>
 
             <div style={{ backgroundColor: 'var(--card-bg)', borderRadius: '12px', padding: '24px', boxShadow: '0 1px 3px rgba(0, 0, 0, 0.05)' }}>
@@ -148,7 +258,7 @@ export default function OrdersTable({ orders }: OrdersTableProps) {
                                     width: '160px',
                                 }}
                             >
-                                Trạng Thái
+                                Tổng Tiền
                             </th>
                             <th
                                 style={{
@@ -162,21 +272,21 @@ export default function OrdersTable({ orders }: OrdersTableProps) {
                                     width: '160px',
                                 }}
                             >
-                                Thanh Toán
+                                Trạng Thái
                             </th>
                             <th
                                 style={{
-                                    textAlign: 'right',
+                                    textAlign: 'center',
                                     padding: '14px 16px',
                                     fontSize: '12px',
                                     fontWeight: '600',
                                     color: 'var(--text-secondary)',
                                     textTransform: 'uppercase',
                                     letterSpacing: '0.5px',
-                                    width: '160px',
+                                    width: '120px',
                                 }}
                             >
-                                Tổng Giá Trị
+                                Thanh Toán
                             </th>
                             <th
                                 style={{
@@ -209,11 +319,11 @@ export default function OrdersTable({ orders }: OrdersTableProps) {
                         </tr>
                     </thead>
                     <tbody>
-                        {orders.length === 0 ? (
+                        {displayedOrders.length === 0 ? (
                             <tr>
-                                <td colSpan={7} style={{ 
-                                    padding: '40px', 
-                                    textAlign: 'center', 
+                                <td colSpan={5} style={{
+                                    padding: '40px',
+                                    textAlign: 'center',
                                     color: 'var(--text-secondary)',
                                     fontSize: '14px'
                                 }}>
@@ -221,11 +331,11 @@ export default function OrdersTable({ orders }: OrdersTableProps) {
                                 </td>
                             </tr>
                         ) : (
-                            orders.map((order, index) => (
-                                <tr 
-                                    key={order.id || `order-${index}`} 
-                                    style={{ 
-                                        borderBottom: index !== orders.length - 1 ? '1px solid var(--table-border)' : 'none',
+                            displayedOrders.map((order, index) => (
+                                <tr
+                                    key={order.id || `order-${index}`}
+                                    style={{
+                                        borderBottom: index !== displayedOrders.length - 1 ? '1px solid var(--table-border)' : 'none',
                                         transition: 'background-color 0.2s ease',
                                     }}
                                     onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgba(255, 107, 53, 0.02)'}
@@ -240,6 +350,9 @@ export default function OrdersTable({ orders }: OrdersTableProps) {
                                     <td style={{ padding: '18px 16px', fontSize: '14px', color: 'var(--text-primary)', textAlign: 'center', fontWeight: '500' }}>
                                         {order.products}
                                     </td>
+                                    <td style={{ padding: '18px 16px', fontSize: '14px', color: 'var(--primary-orange)', textAlign: 'center', fontWeight: '500' }}>
+                                        {formatVND(order.totalAmount || 0)}
+                                    </td>
                                     <td style={{ padding: '18px 16px', textAlign: 'center' }}>
                                         <span
                                             style={{
@@ -252,6 +365,7 @@ export default function OrdersTable({ orders }: OrdersTableProps) {
                                                 whiteSpace: 'nowrap',
                                                 minWidth: '110px',
                                             }}
+                                            className={`px-2 py-1 text-xs font-medium rounded ${order.statusColor}`}
                                         >
                                             {order.statusLabel}
                                         </span>
@@ -259,27 +373,24 @@ export default function OrdersTable({ orders }: OrdersTableProps) {
                                     <td style={{ padding: '18px 16px', textAlign: 'center' }}>
                                         <span
                                             style={{
-                                                ...getPaymentStatusStyle(order.paymentStatus),
-                                                padding: '8px 16px',
+                                                backgroundColor: order.paymentStatus === 'paid' ? '#DCFCE7' : order.paymentStatus === 'unpaid' ? '#FFF7ED' : 'transparent',
+                                                color: order.paymentStatus === 'paid' ? '#166534' : order.paymentStatus === 'unpaid' ? '#9A3412' : 'var(--text-secondary)',
+                                                padding: order.paymentStatus ? '8px 16px' : '0',
                                                 borderRadius: '20px',
                                                 fontSize: '12px',
-                                                fontWeight: '600',
+                                                fontWeight: order.paymentStatus ? '600' : 'normal',
                                                 display: 'inline-block',
                                                 whiteSpace: 'nowrap',
-                                                minWidth: '120px',
                                             }}
                                         >
-                                            {order.paymentStatusLabel}
+                                            {order.paymentStatusLabel || '—'}
                                         </span>
-                                    </td>
-                                    <td style={{ padding: '18px 16px', fontSize: '14px', color: 'var(--text-primary)', textAlign: 'right', fontWeight: '600' }}>
-                                        {order.totalAmount}đ
                                     </td>
                                     <td style={{ padding: '18px 16px', fontSize: '14px', color: 'var(--text-secondary)', textAlign: 'center' }}>
                                         {order.createdDate}
                                     </td>
                                     <td style={{ padding: '18px 16px', fontSize: '14px', color: 'var(--text-secondary)', textAlign: 'center' }}>
-                                        {order.desiredDate || order.deliveryDate}
+                                        {order.deliveryDate}
                                     </td>
                                 </tr>
                             ))
