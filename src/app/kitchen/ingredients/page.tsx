@@ -39,13 +39,17 @@ export default function IngredientsPage() {
                 const token = localStorage.getItem('token');
 
                 const res = await fetch(
-                    `${process.env.NEXT_PUBLIC_API_URL}/api/central-kitchen/materials-inventory`,
+                    "https://franchisemooncake.onrender.com/api/central-kitchen/materials-inventory?expiry_days=60&limit=50&expiring_limit=8",
                     {
                         headers: {
                             Authorization: `Bearer ${token}`,
                         },
                     }
                 );
+
+                if (!res.ok) {
+                    throw new Error(`API error: ${res.status} ${res.statusText}`);
+                }
 
                 const result = await res.json();
 

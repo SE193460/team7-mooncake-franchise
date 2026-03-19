@@ -28,6 +28,7 @@ export default function CreateOrderPage() {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [loadingProducts, setLoadingProducts] = useState(true);
+    const [totalPrice, setTotalPrice] = useState(0);
 
     // Fetch available products on component mount
     useEffect(() => {
@@ -48,6 +49,21 @@ export default function CreateOrderPage() {
 
         fetchProducts();
     }, []);
+
+    // Calculate total price whenever products change
+    useEffect(() => {
+        const total = products.reduce((sum, product) => {
+            if (product.productId && product.quantity > 0) {
+                const availProduct = availableProducts.find(p => p.id === product.productId);
+                if (availProduct) {
+                    const price = parseFloat(availProduct.price) || 0;
+                    return sum + (price * product.quantity);
+                }
+            }
+            return sum;
+        }, 0);
+        setTotalPrice(total);
+    }, [products, availableProducts]);
 
     const addProduct = () => {
         setProducts([
@@ -216,6 +232,18 @@ export default function CreateOrderPage() {
                         </button>
                     </div>
                 </div>
+
+                {/* Price Summary Card */}
+                {totalPrice > 0 && (
+                    <div className={styles.priceCard}>
+                        <div className={styles.priceCardHeader}>
+                            <span className={styles.priceLabel}>💰 Tổng Giá Tiền</span>
+                        </div>
+                        <div className={styles.priceAmount}>
+                            {totalPrice.toLocaleString('vi-VN')} ₫
+                        </div>
+                    </div>
+                )}
 
                 {/* Delivery Information Section */}
                 <div className={styles.deliverySection}>

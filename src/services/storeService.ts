@@ -7,9 +7,16 @@ export interface DashboardCards {
     approved: number;
     processing: number;
     fulfilled: number;
+    confirmed?: number;
+    cancelled?: number;
 }
 
 export interface DashboardResponse {
+    summary?: {
+        paid_amount: number;
+        unpaid_amount: number;
+        total_orders: number;
+    };
     cards: DashboardCards;
     recent_orders: ApiOrder[];
 }
@@ -22,9 +29,25 @@ export interface DashboardStats {
     totalOrders: number;
 }
 
+export interface DashboardSummary {
+    paid_amount: number;
+    unpaid_amount: number;
+    total_orders: number;
+}
+
 export interface DashboardDataWithOrders {
     stats: DashboardStats;
     recentOrders: Order[];
+    summary: DashboardSummary;
+}
+
+export interface OrdersResponse {
+    success: boolean;
+    data: {
+        summary?: DashboardSummary;
+        cards?: DashboardCards;
+        recent_orders: ApiOrder[];
+    };
 }
 
 // API Response wrapper
@@ -39,13 +62,24 @@ export interface ApiOrder {
     order_id: string;
     order_code: string;
     status: string;
+    payment_status?: string;
     created_at: string;
     desired_date: string;
     note: string | null;
-    delivered_at: string | null;
-    total_items?: string;
+    delivered_at?: string | null;
+    fulfilled_at?: string | null;
+    total_items?: string | number;
     product_count?: number;
+    total_amount?: number;
+    total_product_qty?: number;
     product_names?: string;
+    product_details?: Array<{
+        product_id: number;
+        product_name: string;
+        qty: string | number;
+        unit_price?: number;
+        line_total?: number;
+    }>;
 }
 
 export interface Order {
@@ -53,8 +87,16 @@ export interface Order {
     orderCode: string;
     products: string;
     productNames?: string;
+    totalProductQty: number;
+    productDetails?: Array<{
+        product_name: string;
+        qty: string | number;
+    }>;
     status: 'pending' | 'processing' | 'fulfilled' | 'confirmed' | 'cancelled';
     statusLabel: string;
+    paymentStatus: 'paid' | 'unpaid' | 'unknown';
+    paymentStatusLabel: string;
+    totalAmount: string;
     createdDate: string;
     desiredDate: string;
     deliveryDate: string;
@@ -130,6 +172,10 @@ export interface ConfirmOrder {
     total_products: number;
     product_names: string;
     product_labels: string;
+    product_details?: Array<{
+        product_name: string;
+        qty: number;
+    }>;
 }
 
 export interface ConfirmOrdersResponse {
@@ -163,20 +209,38 @@ const convertApiOrderToOrder = (apiOrder: ApiOrder): Order => {
         'confirmed': { status: 'confirmed', label: 'Đã Xác Nhận' },
         'cancelled': { status: 'cancelled', label: 'Đã Hủy' },
     };
+    const paymentStatusMap: Record<string, { status: Order['paymentStatus']; label: string }> = {
+        paid: { status: 'paid', label: 'Đã thanh toán' },
+        unpaid: { status: 'unpaid', label: 'Chưa thanh toán' },
+    };
 
     const mappedStatus = statusMap[apiOrder.status] || { status: 'pending', label: apiOrder.status };
+    const mappedPaymentStatus = paymentStatusMap[apiOrder.payment_status || ''] || {
+        status: 'unknown',
+        label: apiOrder.payment_status || 'Không rõ',
+    };
+    const totalItems = Number(apiOrder.total_items ?? 0);
+    const deliverySource = apiOrder.desired_date || apiOrder.delivered_at || apiOrder.fulfilled_at || '';
 
     return {
         id: apiOrder.order_id,
         orderCode: apiOrder.order_code,
-        products: `${apiOrder.product_count || apiOrder.total_items || 0} sản phẩm`,
+        products: `${Number.isNaN(totalItems) ? 0 : totalItems} sản phẩm`,
         productNames: apiOrder.product_names,
+        totalProductQty: apiOrder.total_product_qty || 0,
+        productDetails: apiOrder.product_details?.map(p => ({
+            product_name: p.product_name,
+            qty: p.qty,
+        })),
         status: mappedStatus.status,
         statusLabel: mappedStatus.label,
+        paymentStatus: mappedPaymentStatus.status,
+        paymentStatusLabel: mappedPaymentStatus.label,
+        totalAmount: new Intl.NumberFormat('vi-VN').format(apiOrder.total_amount || 0),
         createdDate: new Date(apiOrder.created_at).toLocaleDateString('vi-VN'),
         desiredDate: new Date(apiOrder.desired_date).toLocaleDateString('vi-VN'),
-        deliveryDate: apiOrder.delivered_at
-            ? new Date(apiOrder.delivered_at).toLocaleDateString('vi-VN')
+        deliveryDate: deliverySource
+            ? new Date(deliverySource).toLocaleDateString('vi-VN')
             : '',
         note: apiOrder.note || '',
     };
@@ -204,21 +268,51 @@ const storeService = {
                 approvedOrders: cards.approved || 0,
                 processingOrders: cards.processing || 0,
                 fulfilledOrders: cards.fulfilled || 0,
-                totalOrders: (cards.pending || 0) + (cards.approved || 0) + (cards.processing || 0) + (cards.fulfilled || 0),
+                totalOrders: dashboardData.summary?.total_orders || 0,
             };
 
             // Convert recent_orders
             const recentOrders = (dashboardData.recent_orders || []).map(convertApiOrderToOrder);
 
+            // Extract summary
+            const summary: DashboardSummary = {
+                paid_amount: dashboardData.summary?.paid_amount || 0,
+                unpaid_amount: dashboardData.summary?.unpaid_amount || 0,
+                total_orders: dashboardData.summary?.total_orders || 0,
+            };
+
             console.log('Parsed dashboard stats:', stats);
             console.log('Recent orders:', recentOrders);
+            console.log('Summary:', summary);
 
             return {
                 stats,
                 recentOrders,
+                summary,
             };
         } catch (error) {
             console.error("Error fetching dashboard:", error);
+            throw error;
+        }
+    },
+
+    // Get paginated orders for tracking page
+    getOrders: async (page: number = 1, limit: number = 10): Promise<Order[]> => {
+        try {
+            const response = await fetchClient.get<ApiResponse<ApiOrder[]>>(
+                `/Franchise_ViewOrders?page=${page}&limit=${limit}`
+            );
+            const ordersData = (response as ApiResponse<ApiOrder[]>).data || [];
+            
+            if (!Array.isArray(ordersData)) {
+                console.warn('Invalid orders response, returning empty array');
+                return [];
+            }
+
+            const orders = ordersData.map(convertApiOrderToOrder);
+            return orders;
+        } catch (error) {
+            console.error("Error fetching orders:", error);
             throw error;
         }
     },
@@ -252,30 +346,6 @@ const storeService = {
             return data;
         } catch (error) {
             console.error("Error creating order:", error);
-            throw error;
-        }
-    },
-
-    // View all orders
-    getOrders: async (): Promise<Order[]> => {
-        try {
-            const response = await fetchClient.get<ApiResponse<ApiOrder[]>>("/ViewOrders");
-            console.log('Raw orders response:', response);
-
-            const apiOrders = (response as ApiResponse<ApiOrder[]>).data;
-
-            if (!apiOrders || !Array.isArray(apiOrders)) {
-                console.warn('Invalid orders response, returning empty array');
-                return [];
-            }
-
-            // Convert API orders to UI orders
-            const orders = apiOrders.map(convertApiOrderToOrder);
-            console.log('Converted orders:', orders);
-
-            return orders;
-        } catch (error) {
-            console.error("Error fetching orders:", error);
             throw error;
         }
     },
@@ -400,9 +470,8 @@ const storeService = {
         try {
             console.log(`Cancelling order ${orderId}`);
 
-            const response = await fetchClient.put<{ success: boolean; message?: string }>(
-                `/orders/${orderId}/cancel`,
-                {}
+            const response = await fetchClient.delete<{ success: boolean; message?: string }>(
+                `/orders/${orderId}`
             );
 
             console.log('Cancel order response:', response);
@@ -410,6 +479,18 @@ const storeService = {
             return response;
         } catch (error) {
             console.error("Error cancelling order:", error);
+            throw error;
+        }
+    },
+
+    // Get payment orders data
+    getPaymentOrders: async (): Promise<any> => {
+        try {
+            const response = await fetchClient.get<any>("/franchise/payment-orders");
+            console.log('Raw payment orders response:', response);
+            return response;
+        } catch (error) {
+            console.error("Error fetching payment orders:", error);
             throw error;
         }
     },

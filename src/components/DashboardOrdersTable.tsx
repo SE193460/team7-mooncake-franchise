@@ -1,5 +1,3 @@
-import { useEffect, useState } from "react";
-
 interface Order {
     id: string;
     orderCode: string;
@@ -16,14 +14,14 @@ interface Order {
     note: string;
 }
 
-interface OrdersTableProps {
+interface DashboardOrdersTableProps {
     orders: Order[];
     totalItems?: number;
     currentPage?: number;
     onPageChange?: (page: number) => void;
 }
 
-export default function OrdersTable({ orders, totalItems, currentPage = 1, onPageChange }: OrdersTableProps) {
+export default function DashboardOrdersTable({ orders, totalItems, currentPage = 1, onPageChange }: DashboardOrdersTableProps) {
     const limit = 5;
     const totalPages = totalItems ? Math.ceil(totalItems / limit) : 0;
 
@@ -303,7 +301,7 @@ export default function OrdersTable({ orders, totalItems, currentPage = 1, onPag
                     <tbody>
                         {orders.length === 0 ? (
                             <tr>
-                                <td colSpan={5} style={{
+                                <td colSpan={7} style={{
                                     padding: '40px',
                                     textAlign: 'center',
                                     color: 'var(--text-secondary)',
@@ -347,7 +345,6 @@ export default function OrdersTable({ orders, totalItems, currentPage = 1, onPag
                                                 whiteSpace: 'nowrap',
                                                 minWidth: '110px',
                                             }}
-                                            className={`px-2 py-1 text-xs font-medium rounded ${order.statusColor}`}
                                         >
                                             {order.statusLabel}
                                         </span>

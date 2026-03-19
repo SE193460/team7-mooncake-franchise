@@ -87,8 +87,25 @@ export default function ProductRowComponent({
                     readOnly
                     className={styles.productInput}
                     style={{ backgroundColor: '#f9fafb' }}
-                    placeholder="hộp"
+                    placeholder="-"
                 />
+            </div>
+
+            <div className={styles.productField}>
+                <label className={styles.productLabel}>Giá/1 {product.unit || 'sản phẩm'}</label>
+                <div className={styles.priceDisplay}>
+                    {product.productId ? (
+                        <>
+                            {(() => {
+                                const selectedProduct = availableProducts.find(p => p.id === product.productId);
+                                const price = selectedProduct ? parseFloat(selectedProduct.price) || 0 : 0;
+                                return price.toLocaleString('vi-VN') + ' ₫';
+                            })()}
+                        </>
+                    ) : (
+                        '-'
+                    )}
+                </div>
             </div>
 
             <button
