@@ -470,7 +470,7 @@ const storeService = {
         try {
             console.log(`Cancelling order ${orderId}`);
 
-            const response = await fetchClient.delete<{ success: boolean; message?: string }>(
+            const response = await fetchClient.patch<{ success: boolean; message?: string }>(
                 `/orders/${orderId}`
             );
 
