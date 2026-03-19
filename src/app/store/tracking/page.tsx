@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { toast } from 'react-toastify';
 import Sidebar from '../../../components/Sidebar';
 import TrackingOrdersTable from '../../../components/TrackingOrdersTable';
+import Pagination from '../../../components/Pagination';
 import styles from './tracking.module.css';
 import storeService, { Order } from '../../../services/storeService';
 
@@ -17,10 +18,14 @@ export default function OrderTrackingPage() {
   const [showActionMenu, setShowActionMenu] = useState<string | null>(null);
   const [showCancelConfirm, setShowCancelConfirm] = useState(false);
   const [orderToCancel, setOrderToCancel] = useState<string | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize] = useState(10);
+  const [totalOrders, setTotalOrders] = useState(0);
+  const [totalPages, setTotalPages] = useState(1);
 
   useEffect(() => {
     fetchOrders();
-  }, []);
+  }, [currentPage]);
 
   useEffect(() => {
     filterOrders();
@@ -40,8 +45,19 @@ export default function OrderTrackingPage() {
   const fetchOrders = async () => {
     try {
       setLoading(true);
-      const data = await storeService.getOrders();
-      setOrders(data);
+      const data = await storeService.getOrders(currentPage, pageSize);
+      
+      // Nếu page hiện tại trả về items trống → đã hết dữ liệu
+      if (data.length === 0 && currentPage > 1) {
+        setOrders([]);
+        setTotalPages(currentPage - 1);
+        toast.info('Không còn đơn hàng nào');
+      } else {
+        setOrders(data);
+        // Nếu số item < pageSize → đây là trang cuối
+        const isLastPage = data.length < pageSize;
+        setTotalPages(isLastPage ? currentPage : currentPage + 1);
+      }
     } catch (err) {
       console.error('Error fetching orders:', err);
       setError('Không thể tải danh sách đơn hàng. Vui lòng thử lại.');
@@ -80,6 +96,18 @@ export default function OrderTrackingPage() {
 
   const handleToggleActionMenu = (orderId: string) => {
     setShowActionMenu(showActionMenu === orderId ? null : orderId);
+  };
+
+  const handleNextPage = () => {
+    if (currentPage < totalPages) {
+      setCurrentPage(prev => prev + 1);
+    }
+  };
+
+  const handlePrevPage = () => {
+    if (currentPage > 1) {
+      setCurrentPage(prev => prev - 1);
+    }
   };
 
   const confirmCancelOrder = async () => {
@@ -170,13 +198,24 @@ export default function OrderTrackingPage() {
             </button>
           </div>
         ) : (
-          <TrackingOrdersTable
-            orders={filteredOrders}
-            showActionMenu={showActionMenu}
-            onToggleActionMenu={handleToggleActionMenu}
-            onEditOrder={handleEditOrder}
-            onCancelOrder={handleCancelOrder}
-          />
+          <>
+            <TrackingOrdersTable
+              orders={filteredOrders}
+              showActionMenu={showActionMenu}
+              onToggleActionMenu={handleToggleActionMenu}
+              onEditOrder={handleEditOrder}
+              onCancelOrder={handleCancelOrder}
+            />
+            
+            {/* Pagination Controls */}
+            {totalPages > 1 && (
+              <Pagination
+                currentPage={currentPage}
+                totalPages={totalPages}
+                onPageChange={setCurrentPage}
+              />
+            )}
+          </>
         )}
       </div>
 

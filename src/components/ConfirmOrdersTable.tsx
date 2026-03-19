@@ -6,6 +6,10 @@ interface Order {
   products: string;
   productLabels: string;
   productNames: string;
+  productDetails?: Array<{
+    product_name: string;
+    qty: number;
+  }>;
   createdDate: string;
   deliveryDate: string;
   confirmedDate: string;
@@ -45,14 +49,22 @@ export default function ConfirmOrdersTable({
               </td>
               <td>
                 <div className={styles.productCell}>
-                  {order.productLabels && (
-                    <div className={styles.productLabel}>{order.productLabels}</div>
-                  )}
-                  {order.productNames.split(',').map((name, idx) => (
-                    <div key={idx} className={styles.productName}>
-                      {name.trim()}
+                  <div className={styles.productCount}>{order.productLabels}</div>
+                  {order.productDetails && order.productDetails.length > 0 ? (
+                    <div className={styles.productList}>
+                      {order.productDetails.map((product, idx) => (
+                        <div key={idx} className={styles.productItem}>
+                          {product.product_name} : {product.qty}
+                        </div>
+                      ))}
                     </div>
-                  ))}
+                  ) : (
+                    order.productNames.split(',').map((name, idx) => (
+                      <div key={idx} className={styles.productName}>
+                        {name.trim()}
+                      </div>
+                    ))
+                  )}
                 </div>
               </td>
               <td>

@@ -13,6 +13,10 @@ interface Order {
   products: string;
   productLabels: string;
   productNames: string;
+  productDetails?: Array<{
+    product_name: string;
+    qty: number;
+  }>;
   createdDate: string;
   deliveryDate: string;
   confirmedDate: string;
@@ -42,6 +46,7 @@ export default function OrderConfirmationPage() {
       products: apiOrder.product_names || 'Không có sản phẩm',
       productLabels: productLabel,
       productNames: apiOrder.product_names || '',
+      productDetails: apiOrder.product_details || [],
       createdDate: apiOrder.created_at 
         ? new Date(apiOrder.created_at).toLocaleDateString('vi-VN')
         : '',

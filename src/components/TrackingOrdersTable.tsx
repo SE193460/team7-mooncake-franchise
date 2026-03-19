@@ -68,15 +68,16 @@ export default function TrackingOrdersTable({
                 <td>
                   <div className={styles.productCell}>
                     <div className={styles.productCount}>{order.products}</div>
-                    <div className={styles.productMeta}>Tổng số bánh: {order.totalProductQty}</div>
-                    {order.productNames && (
-                      <div className={styles.productNames}>
-                        {order.productNames.split(',').map((name, idx) => (
-                          <div key={idx} className={styles.productName}>
-                            {name.trim()}
+                    {order.productDetails && order.productDetails.length > 0 ? (
+                      <div className={styles.productList}>
+                        {order.productDetails.map((product, idx) => (
+                          <div key={idx} className={styles.productItem}>
+                            {product.product_name} : {product.qty}
                           </div>
                         ))}
                       </div>
+                    ) : (
+                      <div className={styles.productMeta}>Tổng số bánh: {order.totalProductQty}</div>
                     )}
                   </div>
                 </td>
