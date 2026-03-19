@@ -1,0 +1,397 @@
+/* Kitchen Order Management Page Styles */
+
+.container {
+  display: flex;
+  min-height: 100vh;
+  background-color: #fafafa;
+}
+
+.main {
+  flex: 1;
+  padding: 32px 40px;
+}
+
+.header {
+  margin-bottom: 32px;
+}
+
+.title {
+  font-size: 28px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 8px;
+}
+
+.subtitle {
+  font-size: 14px;
+  color: var(--text-secondary);
+}
+
+/* Search and Filter Section */
+.filterSection {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+}
+
+.searchInput {
+  flex: 1;
+  min-width: 280px;
+  padding: 10px 16px;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  font-size: 14px;
+  background-color: white;
+}
+
+.statusSelect {
+  padding: 10px 16px;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  font-size: 14px;
+  background-color: white;
+  cursor: pointer;
+  min-width: 180px;
+}
+
+/* Summary Cards */
+.summarySection {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+}
+
+.summaryCard {
+  flex: 1;
+  min-width: 200px;
+  padding: 16px;
+  background-color: white;
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+}
+
+.summaryLabel {
+  font-size: 12px;
+  color: var(--text-secondary);
+  margin-bottom: 8px;
+}
+
+.summaryValue {
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--primary-orange);
+}
+
+.summaryValue.green {
+  color: #10b981;
+}
+
+/* Table Styles */
+.tableContainer {
+  background-color: white;
+  border-radius: 12px;
+  border: 1px solid var(--border-color);
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.tableHead {
+  border-bottom: 2px solid var(--border-color);
+  background-color: #f9fafb;
+}
+
+.tableHeader {
+  padding: 16px;
+  text-align: left;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.tableHeader.center {
+  text-align: center;
+}
+
+.tableRow {
+  border-bottom: 1px solid var(--border-color);
+  transition: background-color 0.2s;
+  cursor: pointer;
+}
+
+.tableRow:hover {
+  background-color: #f9fafb;
+}
+
+.tableCell {
+  padding: 16px;
+  font-size: 14px;
+  color: var(--text-primary);
+}
+
+.tableCell.center {
+  text-align: center;
+}
+
+.orderCode {
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.orderCode::before {
+  content: '📦';
+  font-size: 16px;
+}
+
+.storeInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.storeName {
+  font-weight: 500;
+}
+
+.storeId {
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.productInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.productQty {
+  font-weight: 600;
+}
+
+.productList {
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.totalAmount {
+  font-weight: 600;
+  color: var(--primary-orange);
+}
+
+.statusBadge {
+  display: inline-block;
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.statusPending {
+  background: var(--status-yellow);
+  color: var(--status-yellow-text);
+}
+
+.statusConfirmed {
+  background: var(--status-blue);
+  color: var(--status-blue-text);
+}
+
+.statusProcessing {
+  background: var(--status-orange);
+  color: var(--status-orange-text);
+}
+
+.statusFulfilled {
+  background: var(--status-green);
+  color: var(--status-green-text);
+}
+
+.statusCancelled {
+  background: var(--status-red);
+  color: var(--status-red-text);
+}
+
+.paymentBadge {
+  display: inline-block;
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.paymentPaid {
+  background: var(--status-green);
+  color: var(--status-green-text);
+}
+
+.paymentUnpaid {
+  background: var(--status-orange);
+  color: var(--status-orange-text);
+}
+
+/* Expanded Details */
+.expandedDetails {
+  background-color: #f9fafb;
+  padding: 20px 16px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.detailsTitle {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 12px;
+}
+
+.detailsTable {
+  width: 100%;
+  border-collapse: collapse;
+  background-color: white;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.detailsTableHead {
+  background-color: #f3f4f6;
+}
+
+.detailsTableHeader {
+  padding: 10px 12px;
+  text-align: left;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.detailsTableHeader.center {
+  text-align: center;
+}
+
+.detailsTableHeader.right {
+  text-align: right;
+}
+
+.detailsTableCell {
+  padding: 10px 12px;
+  font-size: 13px;
+  color: var(--text-primary);
+  border-bottom: 1px solid var(--border-color);
+}
+
+.detailsTableCell.center {
+  text-align: center;
+  font-weight: 600;
+  color: var(--primary-orange);
+}
+
+.detailsTableCell.right {
+  text-align: right;
+}
+
+.detailsTableCell.amount {
+  font-weight: 600;
+  color: var(--primary-orange);
+}
+
+.detailsFooter {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border-color);
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 16px;
+}
+
+.detailsFooterItem {
+  display: flex;
+  flex-direction: column;
+}
+
+.detailsFooterLabel {
+  font-size: 12px;
+  color: var(--text-secondary);
+  margin-bottom: 4px;
+}
+
+.detailsFooterValue {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.detailsFooterValue.amount {
+  color: var(--primary-orange);
+}
+
+/* Empty State */
+.emptyState {
+  padding: 40px;
+  text-align: center;
+  color: var(--text-secondary);
+  background-color: white;
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+}
+
+.loadingState {
+  padding-top: 40px;
+  text-align: center;
+  color: var(--text-secondary);
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+  .main {
+    padding: 24px 20px;
+  }
+
+  .summarySection {
+    flex-direction: column;
+  }
+
+  .summaryCard {
+    min-width: 100%;
+  }
+
+  .detailsFooter {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .filterSection {
+    flex-direction: column;
+  }
+
+  .searchInput,
+  .statusSelect {
+    width: 100%;
+    min-width: unset;
+  }
+
+  .title {
+    font-size: 22px;
+  }
+
+  .tableCell {
+    padding: 12px 8px;
+    font-size: 12px;
+  }
+
+  .tableHeader {
+    font-size: 11px;
+    padding: 12px 8px;
+  }
+}

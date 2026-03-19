@@ -63,6 +63,7 @@ export default function Sidebar({ activePage = 'dashboard', type = 'franchise' }
         { id: 'dashboard', label: 'Bảng điều khiển', icon: '📊', href: '/kitchen' },
         { id: 'new-orders', label: 'Đơn Hàng Mới', icon: '📋', href: '/kitchen/orders' },
         { id: 'update-status', label: 'Cập Nhật Trạng Thái', icon: '🔄', href: '/kitchen/status' },
+        { id: 'management', label: 'Quản Lý Đơn Hàng', icon: '📑', href: '/kitchen/management' },
         { id: 'ingredients', label: 'Nguyên Liệu & HSD', icon: '📦', href: '/kitchen/ingredients' },
         { id: 'product-storage', label: 'Kho Thành Phẩm', icon: '🏪', href: '/kitchen/product-storage' },
     ];
