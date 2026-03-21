@@ -3,11 +3,14 @@
 import { useEffect, useState } from 'react';
 import { toast } from 'react-toastify';
 import Sidebar from '../../components/Sidebar';
-import adminService, { AdminUser } from '../../services/adminService';
+import adminService, { AdminUser, DashboardResponse } from '../../services/adminService';
 
 interface DashboardStats {
     activeUsers: number;
-    pendingOrders: number;
+    totalUsers: number;
+    products: number;
+    stores: number;
+    centralKitchens: number;
     systemStatus: string;
     alerts: number;
 }
@@ -15,34 +18,51 @@ interface DashboardStats {
 export default function AdminDashboard() {
     const [stats, setStats] = useState<DashboardStats>({
         activeUsers: 0,
-        pendingOrders: 0,
+        totalUsers: 0,
+        products: 0,
+        stores: 0,
+        centralKitchens: 0,
         systemStatus: 'Hoạt động',
         alerts: 0,
     });
 
     const [users, setUsers] = useState<AdminUser[]>([]);
     const [loading, setLoading] = useState(true);
-    const [keyword, setKeyword] = useState('');
-    const [roleFilter, setRoleFilter] = useState('');
-    const [searchTimeout, setSearchTimeout] = useState<NodeJS.Timeout | null>(null);
 
-    // Fetch users từ API
-    const fetchUsers = async (searchKeyword?: string, role?: string) => {
+    // Fetch dashboard data từ API
+    const fetchDashboard = async () => {
+        const toastId = toast.loading('Đang tải dữ liệu dashboard...');
         try {
             setLoading(true);
-            const data = await adminService.getUsers(searchKeyword, role);
-            setUsers(data);
+            const data = await adminService.getDashboard();
             
             // Update stats
-            const activeCount = data.filter((u) => u.status === 'active').length;
-            setStats((prev) => ({
-                ...prev,
-                activeUsers: activeCount,
-                pendingOrders: data.length,
-            }));
+            setStats({
+                activeUsers: data.users.active,
+                totalUsers: data.users.total,
+                products: data.contents.products,
+                stores: data.contents.stores,
+                centralKitchens: data.contents.central_kitchens,
+                systemStatus: 'Hoạt động',
+                alerts: 0,
+            });
+
+            // Update users list
+            setUsers(data.users.list);
+            
+            // Show success notification
+            toast.dismiss(toastId);
+            toast.success(`✓ Tải dữ liệu thành công! Tổng ${data.users.total} người dùng`, {
+                position: 'top-right',
+                autoClose: 3000,
+            });
         } catch (error) {
-            console.error('Error fetching users:', error);
-            toast.error('Lỗi khi tải danh sách người dùng');
+            console.error('Error fetching dashboard:', error);
+            toast.dismiss(toastId);
+            toast.error('❌ Lỗi khi tải dữ liệu dashboard. Vui lòng thử lại!', {
+                position: 'top-right',
+                autoClose: 4000,
+            });
         } finally {
             setLoading(false);
         }
@@ -50,27 +70,8 @@ export default function AdminDashboard() {
 
     // Load data khi component mount
     useEffect(() => {
-        fetchUsers();
+        fetchDashboard();
     }, []);
-
-    // Handle search với debounce
-    const handleSearch = (value: string) => {
-        setKeyword(value);
-        
-        if (searchTimeout) clearTimeout(searchTimeout);
-        
-        const newTimeout = setTimeout(() => {
-            fetchUsers(value || undefined, roleFilter || undefined);
-        }, 500);
-        
-        setSearchTimeout(newTimeout);
-    };
-
-    // Handle role filter
-    const handleRoleFilter = (value: string) => {
-        setRoleFilter(value);
-        fetchUsers(keyword || undefined, value || undefined);
-    };
 
     const getStatusBadgeStyle = (status: string) => {
         if (status === 'active') {
@@ -83,6 +84,21 @@ export default function AdminDashboard() {
             backgroundColor: '#FEE2E2',
             color: '#DC2626',
         };
+    };
+
+    const getRoleLabel = (role: string) => {
+        const roleMap: Record<string, string> = {
+            admin: 'Admin',
+            franchise_staff: 'Cửa Hàng',
+            kitchen_staff: 'Nhân Viên Bếp',
+            kitchen_manager: 'Quản Lý Bếp',
+            user: 'Quản Lý',
+        };
+        return roleMap[role] || role;
+    };
+
+    const getStatusLabel = (status: string) => {
+        return status === 'active' ? 'Hoạt Động' : 'Ngưng Hoạt Động';
     };
 
     const formatDate = (dateStr: string | null) => {
@@ -101,13 +117,35 @@ export default function AdminDashboard() {
 
             <main style={{ flex: 1, padding: '32px 40px' }}>
                 {/* Header */}
-                <div style={{ marginBottom: '32px' }}>
-                    <h1 style={{ fontSize: '32px', fontWeight: '700', color: '#1F2937', marginBottom: '8px' }}>
-                        Quản Trị Hệ Thống
-                    </h1>
-                    <p style={{ fontSize: '15px', color: '#6B7280' }}>
-                        Quản lý người dùng và các đặt hệ thống bánh Trung  Thu
-                    </p>
+                <div style={{ marginBottom: '32px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                    <div>
+                        <h1 style={{ fontSize: '32px', fontWeight: '700', color: '#1F2937', marginBottom: '8px' }}>
+                            Quản Trị Hệ Thống
+                        </h1>
+                        <p style={{ fontSize: '15px', color: '#6B7280' }}>
+                            Quản lý người dùng và các đặt hệ thống bánh Trung  Thu
+                        </p>
+                    </div>
+                    <button
+                        onClick={fetchDashboard}
+                        disabled={loading}
+                        style={{
+                            padding: '10px 20px',
+                            backgroundColor: loading ? '#D1D5DB' : '#3B82F6',
+                            color: 'white',
+                            border: 'none',
+                            borderRadius: '8px',
+                            cursor: loading ? 'not-allowed' : 'pointer',
+                            fontSize: '14px',
+                            fontWeight: '500',
+                            transition: 'all 0.3s ease',
+                            opacity: loading ? 0.7 : 1,
+                        }}
+                        onMouseEnter={(e) => !loading && (e.currentTarget.style.backgroundColor = '#2563EB')}
+                        onMouseLeave={(e) => !loading && (e.currentTarget.style.backgroundColor = '#3B82F6')}
+                    >
+                        {loading ? '⟳ Đang tải...' : '↻ Tải lại'}
+                    </button>
                 </div>
 
                 {/* Stats Cards */}
@@ -128,11 +166,11 @@ export default function AdminDashboard() {
                             {stats.activeUsers}
                         </div>
                         <div style={{ fontSize: '13px', color: '#6B7280' }}>
-                            trong tổng 6 người
+                            trong tổng {stats.totalUsers} người
                         </div>
                     </div>
 
-                    {/* Pending Orders Card */}
+                    {/* Products Card */}
                     <div style={{
                         backgroundColor: 'white',
                         borderRadius: '12px',
@@ -141,18 +179,18 @@ export default function AdminDashboard() {
                         boxShadow: '0 1px 3px rgba(0, 0, 0, 0.05)',
                     }}>
                         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px' }}>
-                            <span style={{ fontSize: '14px', color: '#6B7280', fontWeight: '500' }}>Dữ Liệu Chủ</span>
-                            <span style={{ fontSize: '24px' }}>📊</span>
+                            <span style={{ fontSize: '14px', color: '#6B7280', fontWeight: '500' }}>Sản Phẩm</span>
+                            <span style={{ fontSize: '24px' }}>🍰</span>
                         </div>
                         <div style={{ fontSize: '32px', fontWeight: '700', color: '#1F2937', marginBottom: '4px' }}>
-                            {stats.pendingOrders}
+                            {stats.products}
                         </div>
                         <div style={{ fontSize: '13px', color: '#6B7280' }}>
-                            Sản phẩm, cửa hàng...
+                            Tổng số loại sản phẩm
                         </div>
                     </div>
 
-                    {/* System Status Card */}
+                    {/* Stores Card */}
                     <div style={{
                         backgroundColor: 'white',
                         borderRadius: '12px',
@@ -161,34 +199,34 @@ export default function AdminDashboard() {
                         boxShadow: '0 1px 3px rgba(0, 0, 0, 0.05)',
                     }}>
                         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px' }}>
-                            <span style={{ fontSize: '14px', color: '#6B7280', fontWeight: '500' }}>Trạng Thái Hệ Thống</span>
-                            <span style={{ fontSize: '24px' }}>⚙️</span>
-                        </div>
-                        <div style={{ fontSize: '24px', fontWeight: '700', color: '#059669', marginBottom: '4px' }}>
-                            {stats.systemStatus}
-                        </div>
-                        <div style={{ fontSize: '13px', color: '#6B7280' }}>
-                            Tất cả dịch vụ bình thường
-                        </div>
-                    </div>
-
-                    {/* Alerts Card */}
-                    <div style={{
-                        backgroundColor: 'white',
-                        borderRadius: '12px',
-                        padding: '24px',
-                        border: '1px solid #E5E7EB',
-                        boxShadow: '0 1px 3px rgba(0, 0, 0, 0.05)',
-                    }}>
-                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px' }}>
-                            <span style={{ fontSize: '14px', color: '#6B7280', fontWeight: '500' }}>Báo Mật</span>
-                            <span style={{ fontSize: '24px' }}>🔒</span>
+                            <span style={{ fontSize: '14px', color: '#6B7280', fontWeight: '500' }}>Cửa Hàng</span>
+                            <span style={{ fontSize: '24px' }}>🏪</span>
                         </div>
                         <div style={{ fontSize: '32px', fontWeight: '700', color: '#1F2937', marginBottom: '4px' }}>
-                            {stats.alerts}
+                            {stats.stores}
                         </div>
                         <div style={{ fontSize: '13px', color: '#6B7280' }}>
-                            Không có vấn đề
+                            Cửa hàng Franchise
+                        </div>
+                    </div>
+
+                    {/* Kitchen Card */}
+                    <div style={{
+                        backgroundColor: 'white',
+                        borderRadius: '12px',
+                        padding: '24px',
+                        border: '1px solid #E5E7EB',
+                        boxShadow: '0 1px 3px rgba(0, 0, 0, 0.05)',
+                    }}>
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px' }}>
+                            <span style={{ fontSize: '14px', color: '#6B7280', fontWeight: '500' }}>Bếp Trung Tâm</span>
+                            <span style={{ fontSize: '24px' }}>🍳</span>
+                        </div>
+                        <div style={{ fontSize: '32px', fontWeight: '700', color: '#1F2937', marginBottom: '4px' }}>
+                            {stats.centralKitchens}
+                        </div>
+                        <div style={{ fontSize: '13px', color: '#6B7280' }}>
+                            Bếp trong hệ thống
                         </div>
                     </div>
                 </div>
@@ -245,41 +283,9 @@ export default function AdminDashboard() {
                         gap: '12px',
                         flexWrap: 'wrap',
                     }}>
-                        <input
-                            type="text"
-                            placeholder="Tìm kiếm theo tên hoặc email..."
-                            value={keyword}
-                            onChange={(e) => handleSearch(e.target.value)}
-                            style={{
-                                flex: 1,
-                                minWidth: '200px',
-                                padding: '10px 12px',
-                                border: '1px solid #D1D5DB',
-                                borderRadius: '8px',
-                                fontSize: '14px',
-                                backgroundColor: 'white',
-                            }}
-                        />
-                        
-                        <select
-                            value={roleFilter}
-                            onChange={(e) => handleRoleFilter(e.target.value)}
-                            style={{
-                                padding: '10px 12px',
-                                border: '1px solid #D1D5DB',
-                                borderRadius: '8px',
-                                fontSize: '14px',
-                                backgroundColor: 'white',
-                                cursor: 'pointer',
-                                minWidth: '150px',
-                            }}
-                        >
-                            <option value="">Tất cả vai trò</option>
-                            <option value="admin">Admin</option>
-                            <option value="franchise_staff">Cửa Hàng</option>
-                            <option value="kitchen_staff">Nhân Viên Nhà Bếp</option>
-                            <option value="kitchen_manager">Quản Lý Nhà Bếp</option>
-                        </select>
+                        <p style={{ fontSize: '14px', color: '#6B7280', margin: 0 }}>
+                            Hiển thị {users.length} người dùng hoạt động
+                        </p>
                     </div>
 
                     {loading ? (
@@ -338,7 +344,7 @@ export default function AdminDashboard() {
                                                 {user.email}
                                             </td>
                                             <td style={{ padding: '18px 24px', fontSize: '14px', color: '#6B7280' }}>
-                                                {user.role_label}
+                                                {getRoleLabel(user.role)}
                                             </td>
                                             <td style={{ padding: '18px 24px' }}>
                                                 <span style={{
@@ -349,7 +355,7 @@ export default function AdminDashboard() {
                                                     fontWeight: '600',
                                                     display: 'inline-block',
                                                 }}>
-                                                    {user.status_label}
+                                                    {getStatusLabel(user.status)}
                                                 </span>
                                             </td>
                                             <td style={{ padding: '18px 24px', fontSize: '14px', color: '#6B7280' }}>
