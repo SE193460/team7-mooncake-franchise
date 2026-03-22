@@ -1,40 +1,48 @@
 'use client';
 
 interface SummaryCardsProps {
-    stats: {
-        totalUsers: number;
-        activeStores: number;
-        totalOrders: number;
-        totalInventory: number;
+    data: {
+        users: {
+            active: number;
+            total: number;
+        };
+        franchise_stores: {
+            active: number;
+            total: number;
+        };
+        total_orders: number;
+        total_stock: number;
     };
 }
 
-export default function SummaryCards({ stats }: SummaryCardsProps) {
+export default function SummaryCards({ data }: SummaryCardsProps) {
     const cards = [
         {
             label: 'Người Dùng',
-            value: stats.totalUsers,
+            value: data.users.total,
+            activeValue: data.users.active,
             icon: '👥',
             color: '#F3F4F6',
             borderColor: '#10B981',
         },
         {
             label: 'Cửa Hàng Franchise',
-            value: stats.activeStores,
+            value: data.franchise_stores.total,
+            activeValue: data.franchise_stores.active,
             icon: '🏪',
             color: '#F3F4F6',
             borderColor: '#F59E0B',
         },
         {
             label: 'Tổng Đơn Hàng',
-            value: stats.totalOrders,
+            value: data.total_orders,
             icon: '🛒',
             color: '#F3F4F6',
             borderColor: '#FF6B35',
         },
         {
             label: 'Tổng Tồn Kho',
-            value: stats.totalInventory,
+            value: data.total_stock,
             icon: '📦',
             color: '#F3F4F6',
             borderColor: '#0EA5E9',
@@ -62,6 +70,11 @@ export default function SummaryCards({ stats }: SummaryCardsProps) {
                             <p style={{ fontSize: '32px', fontWeight: '700', color: '#1F2937' }}>
                                 {card.value}
                             </p>
+                            {card.activeValue !== undefined && (
+                                <p style={{ fontSize: '12px', color: '#10B981', marginTop: '4px', fontWeight: '500' }}>
+                                    {card.activeValue} hoạt động
+                                </p>
+                            )}
                         </div>
                         <span style={{ fontSize: '28px' }}>{card.icon}</span>
                     </div>

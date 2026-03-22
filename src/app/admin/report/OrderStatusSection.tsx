@@ -1,12 +1,24 @@
 'use client';
 
-export default function OrderStatusSection() {
+interface OrderStatusSectionProps {
+    data: {
+        pending: number;
+        approved: number;
+        processing: number;
+        fulfilled: number;
+        confirmed: number;
+        cancelled: number;
+    };
+}
+
+export default function OrderStatusSection({ data }: OrderStatusSectionProps) {
     const orderStatuses = [
-        { label: 'Chờ xử lý', count: 1, color: '#F59E0B' },
-        { label: 'Đã chấp nhận', count: 1, color: '#10B981' },
-        { label: 'Sắn sàng giao', count: 8, color: '#0EA5E9' },
-        { label: 'Đã giao', count: 5, color: '#8B5CF6' },
-        { label: 'Từ chối', count: 1, color: '#EF4444' },
+        { label: 'Chờ xử lý', count: data.pending, color: '#F59E0B' },
+        { label: 'Đã chấp nhận', count: data.approved, color: '#10B981' },
+        { label: 'Sắn sàng giao', count: data.processing, color: '#0EA5E9' },
+        { label: 'Đã giao', count: data.fulfilled, color: '#8B5CF6' },
+        { label: 'Xác nhận', count: data.confirmed, color: '#088FF7' },
+        { label: 'Từ chối', count: data.cancelled, color: '#EF4444' },
     ];
 
     return (

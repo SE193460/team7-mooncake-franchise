@@ -1,11 +1,11 @@
 'use client';
 
 interface FinanceSectionProps {
-    stats: {
-        revenue: number;
-        orders: number;
-        expectedRevenue: number;
-        profitMargin: number;
+    data: {
+        paid_amount: number;
+        unpaid_amount: number;
+        total_order_value: number;
+        collection_rate: number;
     };
 }
 
@@ -17,29 +17,29 @@ const formatCurrency = (value: number) => {
     }).format(value);
 };
 
-export default function FinanceSection({ stats }: FinanceSectionProps) {
+export default function FinanceSection({ data }: FinanceSectionProps) {
     const financialCards = [
         {
             title: 'Đã Thu',
-            value: formatCurrency(stats.revenue),
+            value: formatCurrency(data.paid_amount),
             icon: '💵',
             color: '#10B981',
         },
         {
             title: 'Chờ Thu',
-            value: formatCurrency(stats.orders),
+            value: formatCurrency(data.unpaid_amount),
             icon: '📊',
             color: '#F59E0B',
         },
         {
             title: 'Tổng Giá Trị Đơn',
-            value: formatCurrency(stats.expectedRevenue),
+            value: formatCurrency(data.total_order_value),
             icon: '💰',
             color: '#FF6B35',
         },
         {
             title: 'Tỷ Lệ Thu',
-            value: `${stats.profitMargin}%`,
+            value: `${data.collection_rate}%`,
             icon: '📈',
             color: '#0EA5E9',
         },
