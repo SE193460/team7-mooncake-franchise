@@ -1,5 +1,14 @@
 'use client';
 
+// Role mapping from Vietnamese labels to API codes
+const ROLE_MAPPING: Record<string, string> = {
+    'Tất cả vai trò': 'all',
+    'Cửa Hàng': 'franchise_staff',
+    'Kitchen': 'kitchen_staff',
+    'Quản Lý': 'manager',
+    'Quản Trị Viên': 'admin',
+};
+
 interface SearchAndFiltersProps {
     searchQuery: string;
     filterRole: string;
@@ -72,12 +81,11 @@ export default function SearchAndFilters({
                     fontWeight: '500',
                 }}
             >
-                <option>Tất cả vai trò</option>
-                <option>Cửa Hàng</option>
-                <option>Kitchen</option>
-                <option>Quản Lý</option>
-                <option>Điều Phối</option>
-                <option>Quản Trị Viên</option>
+                <option value="Tất cả vai trò">Tất cả vai trò</option>
+                <option value="Cửa Hàng">Cửa Hàng</option>
+                <option value="Kitchen">Kitchen</option>
+                <option value="Quản Lý">Quản Lý</option>
+                <option value="Quản Trị Viên">Quản Trị Viên</option>
             </select>
         </div>
     );

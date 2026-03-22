@@ -9,6 +9,7 @@ import DeleteStoreModal from './DeleteStoreModal';
 import EditKitchenModal, { EditKitchenFormData } from './EditKitchenModal';
 import DeleteKitchenModal from './DeleteKitchenModal';
 import EditUserModal from './EditUserModal';
+import CreateUserModal, { CreateUserFormData } from './CreateUserModal';
 import ResetPasswordModal from './ResetPasswordModal';
 import DisableConfirmModal from './DisableConfirmModal';
 import SearchAndFilters from './SearchAndFilters';
@@ -65,6 +66,13 @@ export default function SystemManagementPage() {
     const [newPassword, setNewPassword] = useState('');
     const [openMenuId, setOpenMenuId] = useState<string | null>(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [createUserModalOpen, setCreateUserModalOpen] = useState(false);
+    const [createUserLoading, setCreateUserLoading] = useState(false);
+    const [createUserFormData, setCreateUserFormData] = useState<CreateUserFormData>({
+        username: '',
+        email: '',
+        password: '',
+    });
 
     // ============ FETCH FUNCTIONS ============
 
@@ -338,8 +346,16 @@ export default function SystemManagementPage() {
         if (searchTimeout) clearTimeout(searchTimeout);
         const timeout: ReturnType<typeof setTimeout> = setTimeout(() => {
             if (isModalOpen) return;
-            const role = filterRole === 'Tất cả vai trò' ? undefined : filterRole;
-            fetchUsers(value || undefined, role);
+            // Map Vietnamese labels to role codes
+            const roleCodeMap: Record<string, string> = {
+                'Tất cả vai trò': 'all',
+                'Cửa Hàng': 'franchise_staff',
+                'Kitchen': 'kitchen_staff',
+                'Quản Lý': 'manager',
+                'Quản Trị Viên': 'admin',
+            };
+            const roleCode = roleCodeMap[filterRole] === 'all' ? undefined : roleCodeMap[filterRole];
+            fetchUsers(value || undefined, roleCode);
         }, 500);
         setSearchTimeout(timeout);
     };
@@ -349,9 +365,17 @@ export default function SystemManagementPage() {
         if (isModalOpen) {
             return;
         }
-        const roleValue = role === 'Tất cả vai trò' ? undefined : role;
+        // Map Vietnamese labels to role codes
+        const roleCodeMap: Record<string, string> = {
+            'Tất cả vai trò': 'all',
+            'Cửa Hàng': 'franchise_staff',
+            'Kitchen': 'kitchen_staff',
+            'Quản Lý': 'manager',
+            'Quản Trị Viên': 'admin',
+        };
+        const roleCode = roleCodeMap[role] === 'all' ? undefined : roleCodeMap[role];
         const keyword = searchQuery || undefined;
-        fetchUsers(keyword, roleValue);
+        fetchUsers(keyword, roleCode);
     };
 
     const openEditModal = (user: AdminUser) => {
@@ -483,6 +507,59 @@ export default function SystemManagementPage() {
         }
     };
 
+    const openCreateUserModal = () => {
+        if (searchTimeout) clearTimeout(searchTimeout);
+        setIsModalOpen(true);
+        setCreateUserModalOpen(true);
+        setCreateUserFormData({ username: '', email: '', password: '' });
+    };
+
+    const closeCreateUserModal = () => {
+        setCreateUserModalOpen(false);
+        setIsModalOpen(false);
+        setCreateUserFormData({ username: '', email: '', password: '' });
+    };
+
+    const handleCreateUserFormChange = (field: keyof CreateUserFormData, value: string) => {
+        setCreateUserFormData((prev) => ({ ...prev, [field]: value }));
+    };
+
+    const submitCreateUser = async () => {
+        if (!createUserFormData.username || !createUserFormData.email || !createUserFormData.password) {
+            toast.error('Vui lòng điền đầy đủ thông tin', {
+                position: 'top-right',
+                autoClose: 3000,
+            });
+            return;
+        }
+
+        try {
+            setCreateUserLoading(true);
+            await adminService.createUser({
+                username: createUserFormData.username,
+                email: createUserFormData.email,
+                password: createUserFormData.password,
+            });
+            
+            // Refresh users list
+            const role = filterRole === 'Tất cả vai trò' ? undefined : filterRole;
+            await fetchUsers(searchQuery || undefined, role);
+            closeCreateUserModal();
+            toast.success('✓ Tạo người dùng mới thành công!', {
+                position: 'top-right',
+                autoClose: 3000,
+            });
+        } catch (err) {
+            toast.error('❌ Lỗi khi tạo người dùng mới!', {
+                position: 'top-right',
+                autoClose: 4000,
+            });
+            console.error('Error creating user:', err);
+        } finally {
+            setCreateUserLoading(false);
+        }
+    };
+
     // Filter users by search and role
     const filteredUsers = users.filter(user => {
         const matchesSearch = user.username.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -520,7 +597,7 @@ export default function SystemManagementPage() {
                                 } else if (activeTab === 'kitchens') {
                                     alert(`Mở form thêm bếp trung tâm`);
                                 } else {
-                                    alert(`Mở form thêm người dùng`);
+                                    openCreateUserModal();
                                 }
                             }}
                             style={{
@@ -637,6 +714,15 @@ export default function SystemManagementPage() {
                 loading={actionLoading}
                 onSubmit={handleDisableAccount}
                 onClose={closeDisableConfirmModal}
+            />
+
+            <CreateUserModal
+                isOpen={createUserModalOpen}
+                formData={createUserFormData}
+                loading={createUserLoading}
+                onFormChange={handleCreateUserFormChange}
+                onSubmit={submitCreateUser}
+                onCancel={closeCreateUserModal}
             />
         </div>
     );

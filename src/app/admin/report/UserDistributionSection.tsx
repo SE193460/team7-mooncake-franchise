@@ -1,39 +1,25 @@
 'use client';
 
-export default function UserDistributionSection() {
-    const userDistribution = [
-        {
-            role: 'Cửa hàng Franchise',
-            totalUsers: 2,
-            activeUsers: 1,
-            inactiveUsers: 1,
-        },
-        {
-            role: 'Bếp Trung Tâm',
-            totalUsers: 1,
-            activeUsers: 1,
-            inactiveUsers: 0,
-        },
-        {
-            role: 'Điều phối viên',
-            totalUsers: 1,
-            activeUsers: 1,
-            inactiveUsers: 0,
-        },
-        {
-            role: 'Quản lý',
-            totalUsers: 1,
-            activeUsers: 1,
-            inactiveUsers: 0,
-        },
-        {
-            role: 'Quản trị viên',
-            totalUsers: 1,
-            activeUsers: 1,
-            inactiveUsers: 0,
-        },
-    ];
+interface RoleDistributionItem {
+    role: string;
+    total: number;
+    active: number;
+    inactive: number;
+}
 
+interface UserDistributionSectionProps {
+    data: RoleDistributionItem[];
+}
+
+const ROLE_LABELS: Record<string, string> = {
+    'franchise_staff': 'Cửa hàng Franchise',
+    'kitchen_staff': 'Bếp Trung Tâm',
+    'coordinator': 'Điều phối viên',
+    'manager': 'Quản lý',
+    'admin': 'Quản trị viên',
+};
+
+export default function UserDistributionSection({ data }: UserDistributionSectionProps) {
     return (
         <div style={{ marginBottom: '32px' }}>
             <h2 style={{ fontSize: '18px', fontWeight: '700', color: '#1F2937', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -67,27 +53,27 @@ export default function UserDistributionSection() {
                             </tr>
                         </thead>
                         <tbody>
-                            {userDistribution.map((item, index) => (
+                            {data.map((item, index) => (
                                 <tr
                                     key={index}
                                     style={{
-                                        borderBottom: index !== userDistribution.length - 1 ? '1px solid #F3F4F6' : 'none',
+                                        borderBottom: index !== data.length - 1 ? '1px solid #F3F4F6' : 'none',
                                         transition: 'background-color 0.2s',
                                     }}
                                     onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#F9FAFB'}
                                     onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
                                 >
                                     <td style={{ padding: '18px 24px', fontSize: '14px', fontWeight: '500', color: '#1F2937' }}>
-                                        {item.role}
+                                        {ROLE_LABELS[item.role] || item.role}
                                     </td>
                                     <td style={{ padding: '18px 24px', fontSize: '14px', fontWeight: '600', color: '#1F2937' }}>
-                                        {item.totalUsers}
+                                        {item.total}
                                     </td>
                                     <td style={{ padding: '18px 24px', fontSize: '14px', fontWeight: '600', color: '#10B981' }}>
-                                        {item.activeUsers}
+                                        {item.active}
                                     </td>
                                     <td style={{ padding: '18px 24px', fontSize: '14px', fontWeight: '600', color: '#DC2626' }}>
-                                        {item.inactiveUsers}
+                                        {item.inactive}
                                     </td>
                                 </tr>
                             ))}

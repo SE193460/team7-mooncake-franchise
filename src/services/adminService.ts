@@ -52,6 +52,25 @@ export interface UpdateUserStatusRequest {
   status: 'active' | 'inactive';
 }
 
+export interface CreateUserRequest {
+  username: string;
+  email: string;
+  password: string;
+}
+
+export interface CreateUserResponse {
+  success: boolean;
+  data: {
+    user_id: string;
+    username: string;
+    email: string;
+    status: string;
+    created_at: string;
+    last_login_at: string | null;
+  };
+  message: string;
+}
+
 export interface FranchiseStore {
   franchise_store_id: string;
   store_code: string;
@@ -157,6 +176,54 @@ export interface DashboardResponse {
   message?: string;
 }
 
+export interface SystemReportData {
+  summary_cards: {
+    users: {
+      active: number;
+      total: number;
+    };
+    franchise_stores: {
+      active: number;
+      total: number;
+    };
+    total_orders: number;
+    total_stock: number;
+  };
+  financial: {
+    paid_amount: number;
+    unpaid_amount: number;
+    total_order_value: number;
+    collection_rate: number;
+  };
+  order_status: {
+    pending: number;
+    approved: number;
+    processing: number;
+    fulfilled: number;
+    confirmed: number;
+    cancelled: number;
+  };
+  store_report: Array<{
+    franchise_store_id: number;
+    store_name: string;
+    total_orders: number;
+    total_value: number;
+    paid_amount: number;
+    unpaid_amount: number;
+  }>;
+  role_distribution: Array<{
+    role: string;
+    total: number;
+    active: number;
+    inactive: number;
+  }>;
+}
+
+export interface SystemReportResponse {
+  success: boolean;
+  data: SystemReportData;
+}
+
 const adminService = {
   // Lấy dữ liệu dashboard tổng hợp
   async getDashboard(): Promise<DashboardResponse['data']> {
@@ -180,6 +247,16 @@ const adminService = {
       return response.data || [];
     } catch (error) {
       console.error('Error fetching users:', error);
+      throw error;
+    }
+  },
+
+  // Tạo mới người dùng
+  async createUser(data: CreateUserRequest): Promise<CreateUserResponse> {
+    try {
+      return await fetchClient.post<CreateUserResponse>('/admin/users', data);
+    } catch (error) {
+      console.error('Error creating user:', error);
       throw error;
     }
   },
@@ -280,6 +357,23 @@ const adminService = {
       });
     } catch (error) {
       console.error('Error updating kitchen status:', error);
+      throw error;
+    }
+  },
+
+  // Lấy báo cáo hệ thống tổng hợp
+  async getSystemReport(): Promise<SystemReportData> {
+    try {
+      const response = await fetchClient.get<SystemReportResponse>('/admin/system_report');
+      return response.data || {
+        summary_cards: { users: { active: 0, total: 0 }, franchise_stores: { active: 0, total: 0 }, total_orders: 0, total_stock: 0 },
+        financial: { paid_amount: 0, unpaid_amount: 0, total_order_value: 0, collection_rate: 0 },
+        order_status: { pending: 0, approved: 0, processing: 0, fulfilled: 0, confirmed: 0, cancelled: 0 },
+        store_report: [],
+        role_distribution: [],
+      };
+    } catch (error) {
+      console.error('Error fetching system report:', error);
       throw error;
     }
   },

@@ -8,41 +8,46 @@ import FinanceSection from './FinanceSection';
 import OrderStatusSection from './OrderStatusSection';
 import OrderByStoreSection from './OrderByStoreSection';
 import UserDistributionSection from './UserDistributionSection';
+import adminService, { SystemReportData } from '../../../services/adminService';
 
 export default function ReportPage() {
-    const [loading, setLoading] = useState(false);
-    const [stats, setStats] = useState({
-        totalUsers: 6,
-        activeStores: 3,
-        totalOrders: 11,
-        totalInventory: 1145,
-        revenue: 126350000,
-        orders: 39600000,
-        expectedRevenue: 126350000,
-        profitMargin: 10,
-    });
+    const [loading, setLoading] = useState(true);
+    const [reportData, setReportData] = useState<SystemReportData | null>(null);
 
-    const refreshReport = async () => {
-        const toastId = toast.loading('Đang tải báo cáo...');
+    const fetchReport = async (showNotification: boolean = false) => {
+        const toastId = showNotification ? toast.loading('Đang tải báo cáo...') : null;
         try {
             setLoading(true);
-            // Add actual API call here
-            await new Promise(resolve => setTimeout(resolve, 1000));
+            const data = await adminService.getSystemReport();
+            setReportData(data);
             
-            toast.dismiss(toastId);
-            toast.success('✓ Tải báo cáo thành công!', {
-                position: 'top-right',
-                autoClose: 3000,
-            });
+            if (showNotification && toastId) {
+                toast.dismiss(toastId);
+                toast.success('✓ Tải báo cáo thành công!', {
+                    position: 'top-right',
+                    autoClose: 3000,
+                });
+            }
         } catch (err) {
-            toast.dismiss(toastId);
-            toast.error('❌ Lỗi khi tải báo cáo. Vui lòng thử lại!', {
-                position: 'top-right',
-                autoClose: 4000,
-            });
+            if (showNotification && toastId) {
+                toast.dismiss(toastId);
+                toast.error('❌ Lỗi khi tải báo cáo. Vui lòng thử lại!', {
+                    position: 'top-right',
+                    autoClose: 4000,
+                });
+            }
+            console.error('Error fetching report:', err);
         } finally {
             setLoading(false);
         }
+    };
+
+    useEffect(() => {
+        fetchReport(false);
+    }, []);
+
+    const refreshReport = async () => {
+        await fetchReport(true);
     };
 
     return (
@@ -82,20 +87,24 @@ export default function ReportPage() {
                         </button>
                     </div>
 
-                    {/* Summary Cards */}
-                    <SummaryCards stats={stats} />
+                    {reportData && (
+                        <>
+                            {/* Summary Cards */}
+                            <SummaryCards data={reportData.summary_cards} />
 
-                    {/* Finance Section */}
-                    <FinanceSection stats={stats} />
+                            {/* Finance Section */}
+                            <FinanceSection data={reportData.financial} />
 
-                    {/* Order Status Section */}
-                    <OrderStatusSection />
+                            {/* Order Status Section */}
+                            <OrderStatusSection data={reportData.order_status} />
 
-                    {/* Order by Store Section */}
-                    <OrderByStoreSection />
+                            {/* Order by Store Section */}
+                            <OrderByStoreSection data={reportData.store_report} />
 
-                    {/* User Distribution Section */}
-                    <UserDistributionSection />
+                            {/* User Distribution Section */}
+                            <UserDistributionSection data={reportData.role_distribution} />
+                        </>
+                    )}
                 </div>
             </div>
         </div>
