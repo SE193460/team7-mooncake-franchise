@@ -66,7 +66,7 @@ const recentPayments: RecentPayment[] = [
 export default function ManagerReportPage() {
     return (
         <div style={{ display: "flex", minHeight: "100vh" }}>
-            <Sidebar activePage="report" />
+            <Sidebar type="manager" activePage="report" />
 
             <main className="flex-1 p-8 bg-gray-50">
 

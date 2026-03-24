@@ -139,7 +139,7 @@ class FetchClient {
     }
 }
 
-const fetchClient = new FetchClient(API_BASE_URL);
+const fetchClient = new FetchClient(API_BASE_URL1);
 
 export default fetchClient;
 
