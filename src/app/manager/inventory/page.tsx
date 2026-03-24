@@ -3,7 +3,10 @@
 import Sidebar from "../../../components/Sidebar";
 import styles from "./inventory.module.css";
 import { useState, useEffect } from "react";
-import inventoryService, { ManagerInventoryItem } from "../../../services/inventoryService";
+import inventoryService, { ManagerInventoryItem, ProductDetail } from "../../../services/inventoryService";
+import ProductDetailModal from "./ProductDetailModal";
+import CreateProductModal from "./CreateProductModal";
+import UpdateProductModal from "./UpdateProductModal";
 
 export default function InventoryManagement() {
   const [inventoryData, setInventoryData] = useState<ManagerInventoryItem[]>([]);
@@ -11,6 +14,18 @@ export default function InventoryManagement() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [openDropdownId, setOpenDropdownId] = useState<string | null>(null);
+  
+  // Detail Modal State
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedProduct, setSelectedProduct] = useState<ProductDetail | null>(null);
+  const [modalLoading, setModalLoading] = useState(false);
+  
+  // Create Modal State
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+
+  // Update Modal State
+  const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
+  const [updateProductId, setUpdateProductId] = useState<string | null>(null);
 
   useEffect(() => {
     fetchInventory();
@@ -49,6 +64,27 @@ export default function InventoryManagement() {
         alert("Có lỗi xảy ra khi xóa sản phẩm.");
       }
     }
+    setOpenDropdownId(null);
+  };
+
+  const handleViewDetail = async (productId: string) => {
+    try {
+      setOpenDropdownId(null);
+      setIsModalOpen(true);
+      setModalLoading(true);
+      const detail = await inventoryService.getProductDetail(productId);
+      setSelectedProduct(detail);
+    } catch (err) {
+      alert("Không thể tải chi tiết sản phẩm.");
+      setIsModalOpen(false);
+    } finally {
+      setModalLoading(false);
+    }
+  };
+
+  const handleEdit = (productId: string) => {
+    setUpdateProductId(productId);
+    setIsUpdateModalOpen(true);
     setOpenDropdownId(null);
   };
 
@@ -208,7 +244,7 @@ export default function InventoryManagement() {
             }}
             onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "#d35400")}
             onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "#e67e22")}
-            onClick={() => alert("Chức năng đang được phát triển")}
+            onClick={() => setIsCreateModalOpen(true)}
           >
             <span>+</span> Tạo mới sản phẩm
           </button>
@@ -467,7 +503,7 @@ export default function InventoryManagement() {
                             }}
                             onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "#f8f9fa")}
                             onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "transparent")}
-                            onClick={() => alert(`Xem chi tiết: ${item.product_name}`)}
+                            onClick={() => handleViewDetail(item.product_id)}
                           >
                             Xem chi tiết
                           </button>
@@ -485,7 +521,7 @@ export default function InventoryManagement() {
                             }}
                             onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "#f8f9fa")}
                             onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "transparent")}
-                            onClick={() => alert(`Chỉnh sửa: ${item.product_name}`)}
+                            onClick={() => handleEdit(item.product_id)}
                           >
                             Chỉnh sửa
                           </button>
@@ -523,6 +559,26 @@ export default function InventoryManagement() {
           )}
         </div>
       </div>
+
+      <ProductDetailModal 
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        product={selectedProduct}
+        loading={modalLoading}
+      />
+
+      <CreateProductModal
+        isOpen={isCreateModalOpen}
+        onClose={() => setIsCreateModalOpen(false)}
+        onSuccess={fetchInventory}
+      />
+
+      <UpdateProductModal
+        isOpen={isUpdateModalOpen}
+        productId={updateProductId}
+        onClose={() => setIsUpdateModalOpen(false)}
+        onSuccess={fetchInventory}
+      />
     </div>
   );
 }

@@ -26,7 +26,10 @@ export interface ManagerDashboardCards {
 
 export interface MaterialInventory {
   inventory_item_id: string;
+  material_id: string;
   material_name: string;
+  cost_price: number;
+  min_stock: number;
   on_hand_qty: string;
   expiry_date: string;
   uom: string;

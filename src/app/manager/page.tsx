@@ -8,18 +8,96 @@ import {
   ManagerDashboardCards,
   MaterialInventory,
 } from "../../services/dashboardService";
+import materialService from "../../services/materialService";
+import CreateMaterialModal from "./CreateMaterialModal";
+import MaterialDetailModal from "./MaterialDetailModal";
+import UpdateMaterialModal from "./UpdateMaterialModal";
 
 export default function ManagerDashboard() {
   const [cards, setCards] = useState<ManagerDashboardCards | null>(null);
   const [materials, setMaterials] = useState<MaterialInventory[]>([]);
   const [openDropdownId, setOpenDropdownId] = useState<string | null>(null);
 
-  const handleDelete = (id: string) => {
-    if (window.confirm("Bạn có chắc chắn muốn xóa nguyên liệu này?")) {
-      console.log("Deleting material:", id);
-      // Implement delete logic here
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
+  const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
+  const [selectedMaterialId, setSelectedMaterialId] = useState<string | null>(null);
+  const [selectedMaterial, setSelectedMaterial] = useState<any | null>(null);
+  const [modalLoading, setModalLoading] = useState(false);
+
+  const fetchDashboard = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        setError("Vui lòng đăng nhập");
+        setLoading(false);
+        return;
+      }
+      const res = await getManagerDashboard(token);
+      if (res.success) {
+        setCards(res.data.cards);
+        setMaterials(res.data.materials_inventory);
+        console.log("materials_inventory", res.data.materials_inventory);
+      } else {
+        setError(res.message || "Lỗi khi tải dữ liệu");
+      }
+    } catch (err) {
+      setError("Không thể kết nối đến máy chủ");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDelete = async (id: string, name: string) => {
+    if (!id) {
+      alert("Lỗi: Không tìm thấy ID nguyên liệu để xóa");
+      return;
+    }
+    if (window.confirm(`Bạn có chắc chắn muốn xóa nguyên liệu "${name}"?`)) {
+      try {
+        const res = await materialService.deleteMaterial(id);
+        if (res.success) {
+          alert("Xóa thành công!");
+          fetchDashboard();
+        } else {
+          alert(res.message || "Xóa thất bại");
+        }
+      } catch (err) {
+        alert("Có lỗi xảy ra khi xóa");
+      }
     }
     setOpenDropdownId(null);
+  };
+
+  const handleViewDetail = async (id: string) => {
+    try {
+      if (!id) {
+        alert("Lỗi: Không tìm thấy ID nguyên liệu");
+        return;
+      }
+      setOpenDropdownId(null);
+      setIsDetailModalOpen(true);
+      setModalLoading(true);
+      const res = await materialService.getMaterialById(id);
+      console.log(res.data);
+      if (res.success) {
+        setSelectedMaterial(res.data);
+      }
+    } catch (err) {
+      alert("Lỗi khi tải chi tiết");
+    } finally {
+      setModalLoading(false);
+    }
+  };
+
+  const handleEdit = (id: string) => {
+    if (!id) {
+      alert("Lỗi: Không tìm thấy ID nguyên liệu để chỉnh sửa");
+      return;
+    }
+    setOpenDropdownId(null);
+    setSelectedMaterialId(id);
+    setIsUpdateModalOpen(true);
   };
 
   useEffect(() => {
@@ -32,27 +110,6 @@ export default function ManagerDashboard() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const fetchDashboard = async () => {
-      try {
-        const token = localStorage.getItem("token");
-        if (!token) {
-          setError("Vui lòng đăng nhập");
-          setLoading(false);
-          return;
-        }
-        const res = await getManagerDashboard(token);
-        if (res.success) {
-          setCards(res.data.cards);
-          setMaterials(res.data.materials_inventory);
-        } else {
-          setError(res.message || "Lỗi khi tải dữ liệu");
-        }
-      } catch (err) {
-        setError("Không thể kết nối đến máy chủ");
-      } finally {
-        setLoading(false);
-      }
-    };
     fetchDashboard();
   }, []);
 
@@ -454,6 +511,7 @@ export default function ManagerDashboard() {
                     }}
                     onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "#d35400")}
                     onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "#e67e22")}
+                    onClick={() => setIsCreateModalOpen(true)}
                   >
                     <span>+</span> Tạo mới
                   </button>
@@ -648,6 +706,9 @@ export default function ManagerDashboard() {
                                 }}
                                 onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "#f8f9fa")}
                                 onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "transparent")}
+                                onClick={() => {
+                                  handleViewDetail(item.material_id || item.inventory_item_id);
+                                }}
                               >
                                 Xem chi tiết
                               </button>
@@ -665,11 +726,18 @@ export default function ManagerDashboard() {
                                 }}
                                 onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "#f8f9fa")}
                                 onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "transparent")}
+                                onClick={() => {
+                                  const id = item.material_id;
+                                  handleEdit(String(id));
+                                }}
                               >
                                 Chỉnh sửa
                               </button>
                               <button
-                                onClick={() => handleDelete(item.inventory_item_id)}
+                                onClick={() => {
+                                  const id = item.material_id;
+                                  handleDelete(String(id), item.material_name);
+                                }}
                                 style={{
                                   display: "block",
                                   width: "100%",
@@ -700,6 +768,26 @@ export default function ManagerDashboard() {
           </>
         )}
       </div>
+
+      <CreateMaterialModal
+        isOpen={isCreateModalOpen}
+        onClose={() => setIsCreateModalOpen(false)}
+        onSuccess={fetchDashboard}
+      />
+
+      <MaterialDetailModal
+        isOpen={isDetailModalOpen}
+        onClose={() => setIsDetailModalOpen(false)}
+        material={selectedMaterial}
+        loading={modalLoading}
+      />
+
+      <UpdateMaterialModal
+        isOpen={isUpdateModalOpen}
+        materialId={selectedMaterialId}
+        onClose={() => setIsUpdateModalOpen(false)}
+        onSuccess={fetchDashboard}
+      />
     </div>
   );
 }
