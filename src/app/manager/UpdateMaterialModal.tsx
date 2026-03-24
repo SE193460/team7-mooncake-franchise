@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import styles from "./inventory/inventory.module.css";
-import materialService, { MaterialType, Material } from "../../services/materialService";
+import materialService, { MaterialType, CentralKitchen } from "../../services/materialService";
 
 interface UpdateMaterialModalProps {
   isOpen: boolean;
@@ -20,6 +20,7 @@ const UpdateMaterialModal: React.FC<UpdateMaterialModalProps> = ({
   const [loading, setLoading] = useState(false);
   const [initialLoading, setInitialLoading] = useState(false);
   const [materialTypes, setMaterialTypes] = useState<MaterialType[]>([]);
+  const [centralKitchens, setCentralKitchens] = useState<CentralKitchen[]>([]);
 
   // Form State
   const [formData, setFormData] = useState({
@@ -29,43 +30,78 @@ const UpdateMaterialModal: React.FC<UpdateMaterialModalProps> = ({
     materials_type_id: "",
     on_hand_qty: "",
     expiry_date: "",
+    central_kitchen_id: "",
+    cost_price: "",
+    min_stock: "",
     is_active: true,
   });
 
   useEffect(() => {
     if (isOpen && materialId) {
       fetchInitialData();
+      fetchMaterialTypes();
+      fetchCentralKitchens();
     }
   }, [isOpen, materialId]);
 
   const fetchInitialData = async () => {
     try {
       setInitialLoading(true);
-      const [typesRes, materialRes] = await Promise.all([
+      const [typesRes, materialRes, kitchensRes] = await Promise.all([
         materialService.getMaterialTypes(),
         materialService.getMaterialById(materialId!.toString()),
+        materialService.getCentralKitchens(),
       ]);
 
       if (typesRes.success) {
         setMaterialTypes(typesRes.data);
       }
 
+      if (kitchensRes.success) {
+        setCentralKitchens(kitchensRes.data);
+      }
+
       if (materialRes.success) {
         const mat = materialRes.data;
         setFormData({
-          name: mat.name,
-          material_code: mat.material_code,
-          uom: mat.uom,
-          materials_type_id: mat.materials_type_id.toString(),
-          on_hand_qty: mat.on_hand_qty.toString(),
+          name: mat.name || "",
+          material_code: mat.material_code || "",
+          uom: mat.uom || "",
+          materials_type_id: mat.materials_type_id?.toString() || "",
+          on_hand_qty: mat.on_hand_qty?.toString() || "",
           expiry_date: mat.expiry_date ? mat.expiry_date.split("T")[0] : "",
-          is_active: mat.is_active,
+          central_kitchen_id: mat.central_kitchen_id?.toString() || "",
+          cost_price: mat.cost_price?.toString() || "",
+          min_stock: mat.min_stock?.toString() || "",
+          is_active: mat.is_active ?? true,
         });
       }
     } catch (err) {
       console.error("Error fetching material data:", err);
     } finally {
       setInitialLoading(false);
+    }
+  };
+
+  const fetchMaterialTypes = async () => {
+    try {
+      const response = await materialService.getMaterialTypes();
+      if (response.success) {
+        setMaterialTypes(response.data);
+      }
+    } catch (err) {
+      console.error("Error fetching material types:", err);
+    }
+  };
+
+  const fetchCentralKitchens = async () => {
+    try {
+      const response = await materialService.getCentralKitchens();
+      if (response.success) {
+        setCentralKitchens(response.data);
+      }
+    } catch (err) {
+      console.error("Error fetching central kitchens:", err);
     }
   };
 
@@ -94,6 +130,9 @@ const UpdateMaterialModal: React.FC<UpdateMaterialModalProps> = ({
         materials_type_id: parseInt(formData.materials_type_id),
         on_hand_qty: parseFloat(formData.on_hand_qty) || 0,
         expiry_date: formData.expiry_date || null,
+        central_kitchen_id: parseInt(formData.central_kitchen_id),
+        cost_price: parseFloat(formData.cost_price) || 0,
+        min_stock: parseInt(formData.min_stock) || 0,
         is_active: formData.is_active,
       };
 
@@ -200,6 +239,47 @@ const UpdateMaterialModal: React.FC<UpdateMaterialModalProps> = ({
                     onChange={handleInputChange}
                     className={styles.input}
                   />
+                </div>
+                <div className={styles.formGroup}>
+                  <label className={styles.label}>Giá Bán</label>
+                  <input
+                    type="number"
+                    step="0.01"
+                    name="cost_price"
+                    value={formData.cost_price}
+                    onChange={handleInputChange}
+                    className={styles.input}
+                    placeholder="0.00"
+                  />
+                </div>
+                <div className={styles.formGroup}>
+                  <label className={styles.label}>Số lượng tồn kho tối thiểu</label>
+                  <input
+                    type="number"
+                    step="0.01"
+                    name="min_stock"
+                    value={formData.min_stock}
+                    onChange={handleInputChange}
+                    className={styles.input}
+                    placeholder="0.00"
+                  />
+                </div>
+                <div className={styles.formGroup}>
+                  <label className={styles.label}>Bếp Trung Tâm *</label>
+                  <select
+                    name="central_kitchen_id"
+                    value={formData.central_kitchen_id}
+                    onChange={handleInputChange}
+                    className={styles.select}
+                    required
+                  >
+                    <option value="">Chọn bếp</option>
+                    {centralKitchens.map(type => (
+                      <option key={type.central_kitchen_id} value={type.central_kitchen_id}>
+                        {type.name}
+                      </option>
+                    ))}
+                  </select>
                 </div>
                 <div className={styles.formGroup} style={{ gridColumn: "span 2", display: "flex", alignItems: "center", gap: "10px" }}>
                   <input

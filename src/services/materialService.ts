@@ -27,6 +27,7 @@ export interface Material {
     min_stock?: number;
     on_hand_qty: number | string;
     expiry_date: string | null;
+    central_kitchen_id: number;
     is_active: boolean;
 }
 

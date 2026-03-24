@@ -49,7 +49,8 @@ export interface ManagerDashboardResponse {
 }
 
 export async function getManagerDashboard(token: string): Promise<ManagerDashboardResponse> {
-  const res = await fetch(`${BASE_URL}/manager/dashboard`, {
+  const timestamp = new Date().getTime();
+  const res = await fetch(`${BASE_URL}/manager/dashboard?t=${timestamp}`, {
     method: "GET",
     headers: {
       "Content-Type": "application/json",
