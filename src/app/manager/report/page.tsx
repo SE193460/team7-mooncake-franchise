@@ -35,7 +35,7 @@ export default function ManagerReportPage() {
             return;
         }
 
-        fetch(`http://localhost:8000/api/franchise/payment-orders?page=1&limit=50`, {
+        fetch(`https://franchisemooncake.onrender.com/api/franchise/payment-orders?page=1&limit=50`, {
             headers: {
                 Authorization: `Bearer ${token}`,
             },
