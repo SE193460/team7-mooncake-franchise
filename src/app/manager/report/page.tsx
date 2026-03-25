@@ -67,7 +67,7 @@ export default function ManagerReportPage() {
             const token = localStorage.getItem("token");
 
             const res = await fetch(
-                `http://localhost:8000/api/Manager_confirmPaymentOrder/orders/${orderId}`,
+                `https://franchisemooncake.onrender.com/api/Manager_confirmPaymentOrder/orders/${orderId}`,
                 {
                     method: "PATCH",
                     headers: {
