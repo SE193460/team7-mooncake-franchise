@@ -1,3 +1,6 @@
+import { useState } from 'react';
+import styles from './Pagination.module.css';
+
 interface PaginationProps {
   currentPage: number;
   totalPages: number;
@@ -5,23 +8,38 @@ interface PaginationProps {
 }
 
 export default function Pagination({ currentPage, totalPages, onPageChange }: PaginationProps) {
-  const maxPagesToShow = 5;
-  let startPage = Math.max(1, currentPage - Math.floor(maxPagesToShow / 2));
-  const endPage = Math.min(totalPages, startPage + maxPagesToShow - 1);
+  const [goToPageInput, setGoToPageInput] = useState('');
+  
+  // Smart pagination logic
+  const isSmallPagination = totalPages <= 10;
+  const maxPagesToShow = isSmallPagination ? totalPages : 5;
+  
+  let startPage = isSmallPagination ? 1 : Math.max(1, currentPage - Math.floor(maxPagesToShow / 2));
+  const endPage = isSmallPagination ? totalPages : Math.min(totalPages, startPage + maxPagesToShow - 1);
   startPage = Math.max(1, endPage - maxPagesToShow + 1);
 
   const pages = Array.from({ length: endPage - startPage + 1 }, (_, i) => startPage + i);
 
+  const handleGoToPage = (e: React.FormEvent) => {
+    e.preventDefault();
+    const pageNum = parseInt(goToPageInput, 10);
+    
+    if (!isNaN(pageNum) && pageNum >= 1 && pageNum <= totalPages) {
+      onPageChange(pageNum);
+      setGoToPageInput('');
+    }
+  };
+
   return (
-    <div className="flex items-center justify-center gap-2 mt-8">
+    <div className={styles.container}>
       <button
         onClick={() => onPageChange(currentPage - 1)}
         disabled={currentPage === 1}
-        className="inline-flex items-center justify-center w-10 h-10 rounded-md border border-gray-200 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+        className={styles.button}
         title="Trang trước"
       >
         <svg
-          className="w-4 h-4"
+          className={styles.icon}
           fill="none"
           stroke="currentColor"
           viewBox="0 0 24 24"
@@ -35,16 +53,16 @@ export default function Pagination({ currentPage, totalPages, onPageChange }: Pa
         </svg>
       </button>
 
-      {startPage > 1 && (
+      {!isSmallPagination && startPage > 1 && (
         <>
           <button
             onClick={() => onPageChange(1)}
-            className="inline-flex items-center justify-center w-10 h-10 rounded-md border border-gray-200 bg-white hover:bg-gray-50 text-sm font-medium transition-colors"
+            className={styles.button}
           >
             1
           </button>
           {startPage > 2 && (
-            <span className="text-gray-500 px-2">...</span>
+            <span className={styles.ellipsis}>...</span>
           )}
         </>
       )}
@@ -53,24 +71,20 @@ export default function Pagination({ currentPage, totalPages, onPageChange }: Pa
         <button
           key={page}
           onClick={() => onPageChange(page)}
-          className={`inline-flex items-center justify-center w-10 h-10 rounded-md text-sm font-medium transition-colors ${
-            currentPage === page
-              ? 'bg-orange-500 text-white border border-orange-600'
-              : 'border border-gray-200 bg-white hover:bg-gray-50'
-          }`}
+          className={`${styles.button} ${currentPage === page ? styles.buttonActive : ''}`}
         >
           {page}
         </button>
       ))}
 
-      {endPage < totalPages && (
+      {!isSmallPagination && endPage < totalPages && (
         <>
           {endPage < totalPages - 1 && (
-            <span className="text-gray-500 px-2">...</span>
+            <span className={styles.ellipsis}>...</span>
           )}
           <button
             onClick={() => onPageChange(totalPages)}
-            className="inline-flex items-center justify-center w-10 h-10 rounded-md border border-gray-200 bg-white hover:bg-gray-50 text-sm font-medium transition-colors"
+            className={styles.button}
           >
             {totalPages}
           </button>
@@ -80,11 +94,11 @@ export default function Pagination({ currentPage, totalPages, onPageChange }: Pa
       <button
         onClick={() => onPageChange(currentPage + 1)}
         disabled={currentPage === totalPages}
-        className="inline-flex items-center justify-center w-10 h-10 rounded-md border border-gray-200 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+        className={styles.button}
         title="Trang sau"
       >
         <svg
-          className="w-4 h-4"
+          className={styles.icon}
           fill="none"
           stroke="currentColor"
           viewBox="0 0 24 24"
@@ -98,9 +112,22 @@ export default function Pagination({ currentPage, totalPages, onPageChange }: Pa
         </svg>
       </button>
 
-      <span className="text-sm text-gray-600 ml-4">
-        Trang {currentPage} / {totalPages}
-      </span>
+      {!isSmallPagination && (
+        <form onSubmit={handleGoToPage} className={styles.goToForm}>
+          <input
+            type="number"
+            min="1"
+            max={totalPages}
+            value={goToPageInput}
+            onChange={(e) => setGoToPageInput(e.target.value)}
+            placeholder="Trang..."
+            className={styles.goToInput}
+          />
+          <button type="submit" className={styles.goToButton}>
+            Go
+          </button>
+        </form>
+      )}
     </div>
   );
 }

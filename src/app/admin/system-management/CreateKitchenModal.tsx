@@ -1,44 +1,46 @@
 'use client';
 
 import { useState } from 'react';
-import { FranchiseStore, CentralKitchen } from '../../../services/adminService';
 
-export interface CreateUserFormData {
-    role: 'kitchen_staff' | 'manager' | 'franchise_staff' | '';
-    username: string;
-    email: string;
-    password: string;
-    franchise_store_id?: string;
-    central_kitchen_id?: string;
+export interface CreateKitchenFormData {
+    kitchen_code: string;
+    kitchen_name: string;
+    kitchen_address: string;
+    production_capacity: number;
 }
 
-interface CreateUserModalProps {
+interface CreateKitchenModalProps {
     isOpen: boolean;
-    formData: CreateUserFormData;
+    formData: CreateKitchenFormData;
     loading: boolean;
-    onFormChange: (field: keyof CreateUserFormData, value: string) => void;
+    onFormChange: (field: keyof CreateKitchenFormData, value: string | number) => void;
     onSubmit: () => Promise<void>;
     onCancel: () => void;
-    stores: FranchiseStore[];
-    kitchens: CentralKitchen[];
 }
 
-export default function CreateUserModal({
+export default function CreateKitchenModal({
     isOpen,
     formData,
     loading,
     onFormChange,
     onSubmit,
     onCancel,
-    stores,
-    kitchens,
-}: CreateUserModalProps) {
-    const [passwordVisible, setPasswordVisible] = useState(false);
-
+}: CreateKitchenModalProps) {
     if (!isOpen) return null;
 
     return (
         <>
+            <style>{`
+                input[type="number"]::-webkit-outer-spin-button,
+                input[type="number"]::-webkit-inner-spin-button {
+                    -webkit-appearance: none;
+                    margin: 0;
+                }
+                input[type="number"] {
+                    -moz-appearance: textfield;
+                }
+            `}</style>
+
             {/* Overlay */}
             <div
                 style={{
@@ -83,10 +85,10 @@ export default function CreateUserModal({
                 >
                     <div>
                         <h2 style={{ fontSize: '20px', fontWeight: '700', color: '#1F2937', margin: 0 }}>
-                            Tạo Người Dùng Mới
+                            Tạo Bếp Trung Tâm Mới
                         </h2>
                         <p style={{ fontSize: '13px', color: '#6B7280', margin: '8px 0 0 0' }}>
-                            Nhập thông tin người dùng mới
+                            Nhập thông tin bếp trung tâm mới
                         </p>
                     </div>
                     <button
@@ -110,136 +112,14 @@ export default function CreateUserModal({
                 <div style={{ padding: '24px' }}>
                     <div style={{ marginBottom: '20px' }}>
                         <label style={{ display: 'block', fontSize: '14px', fontWeight: '600', color: '#1F2937', marginBottom: '8px' }}>
-                            Vai Trò <span style={{ color: '#EF4444' }}>*</span>
-                        </label>
-                        <select
-                            value={formData.role}
-                            onChange={(e) => onFormChange('role', e.target.value)}
-                            disabled={loading}
-                            style={{
-                                width: '100%',
-                                padding: '12px',
-                                border: '1px solid #E5E7EB',
-                                borderRadius: '8px',
-                                fontSize: '14px',
-                                outline: 'none',
-                                transition: 'all 0.2s',
-                                backgroundColor: loading ? '#F3F4F6' : 'white',
-                                opacity: loading ? 0.7 : 1,
-                                cursor: loading ? 'not-allowed' : 'pointer',
-                            }}
-                            onFocus={(e) => {
-                                if (!loading) {
-                                    e.currentTarget.style.borderColor = '#FF6B35';
-                                    e.currentTarget.style.boxShadow = '0 0 0 3px rgba(255, 107, 53, 0.1)';
-                                }
-                            }}
-                            onBlur={(e) => {
-                                e.currentTarget.style.borderColor = '#E5E7EB';
-                                e.currentTarget.style.boxShadow = 'none';
-                            }}
-                        >
-                            <option value="">-- Chọn vai trò --</option>
-                            <option value="franchise_staff">Nhân viên cửa hàng</option>
-                            <option value="kitchen_staff">Nhân viên bếp</option>
-                            <option value="manager">Quản lý bếp</option>
-                        </select>
-                    </div>
-
-                    {formData.role === 'franchise_staff' && (
-                        <div style={{ marginBottom: '20px' }}>
-                            <label style={{ display: 'block', fontSize: '14px', fontWeight: '600', color: '#1F2937', marginBottom: '8px' }}>
-                                Cửa Hàng <span style={{ color: '#EF4444' }}>*</span>
-                            </label>
-                            <select
-                                value={formData.franchise_store_id || ''}
-                                onChange={(e) => onFormChange('franchise_store_id', e.target.value)}
-                                disabled={loading}
-                                style={{
-                                    width: '100%',
-                                    padding: '12px',
-                                    border: '1px solid #E5E7EB',
-                                    borderRadius: '8px',
-                                    fontSize: '14px',
-                                    outline: 'none',
-                                    transition: 'all 0.2s',
-                                    backgroundColor: loading ? '#F3F4F6' : 'white',
-                                    opacity: loading ? 0.7 : 1,
-                                    cursor: loading ? 'not-allowed' : 'pointer',
-                                }}
-                                onFocus={(e) => {
-                                    if (!loading) {
-                                        e.currentTarget.style.borderColor = '#FF6B35';
-                                        e.currentTarget.style.boxShadow = '0 0 0 3px rgba(255, 107, 53, 0.1)';
-                                    }
-                                }}
-                                onBlur={(e) => {
-                                    e.currentTarget.style.borderColor = '#E5E7EB';
-                                    e.currentTarget.style.boxShadow = 'none';
-                                }}
-                            >
-                                <option value="">-- Chọn cửa hàng --</option>
-                                {stores.map((store) => (
-                                    <option key={store.franchise_store_id} value={store.franchise_store_id}>
-                                        {store.store_name}
-                                    </option>
-                                ))}
-                            </select>
-                        </div>
-                    )}
-
-                    {(formData.role === 'kitchen_staff' || formData.role === 'manager') && (
-                        <div style={{ marginBottom: '20px' }}>
-                            <label style={{ display: 'block', fontSize: '14px', fontWeight: '600', color: '#1F2937', marginBottom: '8px' }}>
-                                Bếp Trung Tâm <span style={{ color: '#EF4444' }}>*</span>
-                            </label>
-                            <select
-                                value={formData.central_kitchen_id || ''}
-                                onChange={(e) => onFormChange('central_kitchen_id', e.target.value)}
-                                disabled={loading}
-                                style={{
-                                    width: '100%',
-                                    padding: '12px',
-                                    border: '1px solid #E5E7EB',
-                                    borderRadius: '8px',
-                                    fontSize: '14px',
-                                    outline: 'none',
-                                    transition: 'all 0.2s',
-                                    backgroundColor: loading ? '#F3F4F6' : 'white',
-                                    opacity: loading ? 0.7 : 1,
-                                    cursor: loading ? 'not-allowed' : 'pointer',
-                                }}
-                                onFocus={(e) => {
-                                    if (!loading) {
-                                        e.currentTarget.style.borderColor = '#FF6B35';
-                                        e.currentTarget.style.boxShadow = '0 0 0 3px rgba(255, 107, 53, 0.1)';
-                                    }
-                                }}
-                                onBlur={(e) => {
-                                    e.currentTarget.style.borderColor = '#E5E7EB';
-                                    e.currentTarget.style.boxShadow = 'none';
-                                }}
-                            >
-                                <option value="">-- Chọn bếp --</option>
-                                {kitchens.map((kitchen) => (
-                                    <option key={kitchen.central_kitchen_id} value={kitchen.central_kitchen_id}>
-                                        {kitchen.kitchen_name}
-                                    </option>
-                                ))}
-                            </select>
-                        </div>
-                    )}
-
-                    <div style={{ marginBottom: '20px' }}>
-                        <label style={{ display: 'block', fontSize: '14px', fontWeight: '600', color: '#1F2937', marginBottom: '8px' }}>
-                            Tên Người Dùng <span style={{ color: '#EF4444' }}>*</span>
+                            Mã Bếp <span style={{ color: '#EF4444' }}>*</span>
                         </label>
                         <input
                             type="text"
-                            value={formData.username}
-                            onChange={(e) => onFormChange('username', e.target.value)}
+                            value={formData.kitchen_code}
+                            onChange={(e) => onFormChange('kitchen_code', e.target.value)}
                             disabled={loading}
-                            placeholder="Nhập tên người dùng"
+                            placeholder="Nhập mã bếp (VD: CK-001)"
                             style={{
                                 width: '100%',
                                 padding: '12px',
@@ -266,14 +146,14 @@ export default function CreateUserModal({
 
                     <div style={{ marginBottom: '20px' }}>
                         <label style={{ display: 'block', fontSize: '14px', fontWeight: '600', color: '#1F2937', marginBottom: '8px' }}>
-                            Email <span style={{ color: '#EF4444' }}>*</span>
+                            Tên Bếp <span style={{ color: '#EF4444' }}>*</span>
                         </label>
                         <input
-                            type="email"
-                            value={formData.email}
-                            onChange={(e) => onFormChange('email', e.target.value)}
+                            type="text"
+                            value={formData.kitchen_name}
+                            onChange={(e) => onFormChange('kitchen_name', e.target.value)}
                             disabled={loading}
-                            placeholder="Nhập email"
+                            placeholder="Nhập tên bếp"
                             style={{
                                 width: '100%',
                                 padding: '12px',
@@ -284,6 +164,42 @@ export default function CreateUserModal({
                                 transition: 'all 0.2s',
                                 backgroundColor: loading ? '#F3F4F6' : 'white',
                                 opacity: loading ? 0.7 : 1,
+                            }}
+                            onFocus={(e) => {
+                                if (!loading) {
+                                    e.currentTarget.style.borderColor = '#FF6B35';
+                                    e.currentTarget.style.boxShadow = '0 0 0 3px rgba(255, 107, 53, 0.1)';
+                                }
+                            }}
+                            onBlur={(e) => {
+                                e.currentTarget.style.borderColor = '#E5E7EB';
+                                e.currentTarget.style.boxShadow = 'none';
+                            }}
+                        />
+                    </div>
+
+                    <div style={{ marginBottom: '20px' }}>
+                        <label style={{ display: 'block', fontSize: '14px', fontWeight: '600', color: '#1F2937', marginBottom: '8px' }}>
+                            Địa Chỉ <span style={{ color: '#EF4444' }}>*</span>
+                        </label>
+                        <textarea
+                            value={formData.kitchen_address}
+                            onChange={(e) => onFormChange('kitchen_address', e.target.value)}
+                            disabled={loading}
+                            placeholder="Nhập địa chỉ bếp"
+                            style={{
+                                width: '100%',
+                                padding: '12px',
+                                border: '1px solid #E5E7EB',
+                                borderRadius: '8px',
+                                fontSize: '14px',
+                                outline: 'none',
+                                transition: 'all 0.2s',
+                                backgroundColor: loading ? '#F3F4F6' : 'white',
+                                opacity: loading ? 0.7 : 1,
+                                fontFamily: 'inherit',
+                                minHeight: '80px',
+                                resize: 'vertical',
                             }}
                             onFocus={(e) => {
                                 if (!loading) {
@@ -300,18 +216,57 @@ export default function CreateUserModal({
 
                     <div style={{ marginBottom: '24px' }}>
                         <label style={{ display: 'block', fontSize: '14px', fontWeight: '600', color: '#1F2937', marginBottom: '8px' }}>
-                            Mật Khẩu <span style={{ color: '#EF4444' }}>*</span>
+                            Công Suất Sản Xuất (hộp/ngày) <span style={{ color: '#EF4444' }}>*</span>
                         </label>
-                        <div style={{ position: 'relative' }}>
-                            <input
-                                type={passwordVisible ? 'text' : 'password'}
-                                value={formData.password}
-                                onChange={(e) => onFormChange('password', e.target.value)}
-                                disabled={loading}
-                                placeholder="Nhập mật khẩu"
+                        <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                            <button
+                                type="button"
+                                onClick={() => {
+                                    const newValue = Math.max(1, (formData.production_capacity || 0) - 1);
+                                    onFormChange('production_capacity', newValue);
+                                }}
+                                disabled={loading || (formData.production_capacity || 0) <= 1}
                                 style={{
-                                    width: '100%',
-                                    padding: '12px 40px 12px 12px',
+                                    width: '40px',
+                                    height: '40px',
+                                    padding: '0',
+                                    border: '1px solid #E5E7EB',
+                                    borderRadius: '8px',
+                                    backgroundColor: (formData.production_capacity || 0) <= 1 ? '#F3F4F6' : 'white',
+                                    cursor: (formData.production_capacity || 0) <= 1 ? 'not-allowed' : 'pointer',
+                                    fontSize: '18px',
+                                    fontWeight: '600',
+                                    color: (formData.production_capacity || 0) <= 1 ? '#D1D5DB' : '#FF6B35',
+                                    transition: 'all 0.2s',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                }}
+                                onMouseEnter={(e) => {
+                                    if (!loading && (formData.production_capacity || 0) > 1) {
+                                        e.currentTarget.style.borderColor = '#FF6B35';
+                                        e.currentTarget.style.backgroundColor = '#FFF5F0';
+                                    }
+                                }}
+                                onMouseLeave={(e) => {
+                                    e.currentTarget.style.borderColor = '#E5E7EB';
+                                    e.currentTarget.style.backgroundColor = 'white';
+                                }}
+                            >
+                                −
+                            </button>
+                            <input
+                                type="number"
+                                value={formData.production_capacity || ''}
+                                onChange={(e) => {
+                                    const val = e.target.value === '' ? 0 : parseInt(e.target.value);
+                                    onFormChange('production_capacity', val);
+                                }}
+                                disabled={loading}
+                                placeholder="Nhập số"
+                                style={{
+                                    flex: 1,
+                                    padding: '12px',
                                     border: '1px solid #E5E7EB',
                                     borderRadius: '8px',
                                     fontSize: '14px',
@@ -319,6 +274,7 @@ export default function CreateUserModal({
                                     transition: 'all 0.2s',
                                     backgroundColor: loading ? '#F3F4F6' : 'white',
                                     opacity: loading ? 0.7 : 1,
+                                    textAlign: 'center',
                                 }}
                                 onFocus={(e) => {
                                     if (!loading) {
@@ -333,22 +289,40 @@ export default function CreateUserModal({
                             />
                             <button
                                 type="button"
-                                onClick={() => setPasswordVisible(!passwordVisible)}
+                                onClick={() => {
+                                    const newValue = (formData.production_capacity || 0) + 1;
+                                    onFormChange('production_capacity', newValue);
+                                }}
                                 disabled={loading}
                                 style={{
-                                    position: 'absolute',
-                                    right: '12px',
-                                    top: '50%',
-                                    transform: 'translateY(-50%)',
-                                    background: 'none',
-                                    border: 'none',
+                                    width: '40px',
+                                    height: '40px',
+                                    padding: '0',
+                                    border: '1px solid #E5E7EB',
+                                    borderRadius: '8px',
+                                    backgroundColor: loading ? '#F3F4F6' : 'white',
                                     cursor: loading ? 'not-allowed' : 'pointer',
                                     fontSize: '18px',
-                                    color: '#6B7280',
-                                    opacity: loading ? 0.5 : 1,
+                                    fontWeight: '600',
+                                    color: loading ? '#D1D5DB' : '#FF6B35',
+                                    transition: 'all 0.2s',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    opacity: loading ? 0.7 : 1,
+                                }}
+                                onMouseEnter={(e) => {
+                                    if (!loading) {
+                                        e.currentTarget.style.borderColor = '#FF6B35';
+                                        e.currentTarget.style.backgroundColor = '#FFF5F0';
+                                    }
+                                }}
+                                onMouseLeave={(e) => {
+                                    e.currentTarget.style.borderColor = '#E5E7EB';
+                                    e.currentTarget.style.backgroundColor = 'white';
                                 }}
                             >
-                                {passwordVisible ? '👁️' : '👁️‍🗨️'}
+                                +
                             </button>
                         </div>
                     </div>
@@ -401,7 +375,7 @@ export default function CreateUserModal({
                         onMouseEnter={(e) => !loading && (e.currentTarget.style.backgroundColor = '#059669')}
                         onMouseLeave={(e) => !loading && (e.currentTarget.style.backgroundColor = '#10B981')}
                     >
-                        {loading ? '⟳ Đang tạo...' : 'Tạo Người Dùng'}
+                        {loading ? '⟳ Đang tạo...' : 'Tạo Bếp'}
                     </button>
                 </div>
             </div>

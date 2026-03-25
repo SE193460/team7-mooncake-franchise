@@ -6,9 +6,6 @@ export interface EditStoreFormData {
     store_code: string;
     store_name: string;
     store_address: string;
-    store_phone: string;
-    store_email: string;
-    manager_name: string;
 }
 
 interface EditStoreModalProps {
@@ -71,7 +68,7 @@ export default function EditStoreModal({
                     </label>
                     <input
                         type="text"
-                        value={formData.store_code}
+                        value={formData.store_code ?? ''}
                         onChange={(e) => onFormDataChange({ ...formData, store_code: e.target.value })}
                         style={{
                             width: '100%',
@@ -101,7 +98,7 @@ export default function EditStoreModal({
                     </label>
                     <input
                         type="text"
-                        value={formData.store_name}
+                        value={formData.store_name ?? ''}
                         onChange={(e) => onFormDataChange({ ...formData, store_name: e.target.value })}
                         style={{
                             width: '100%',
@@ -130,7 +127,7 @@ export default function EditStoreModal({
                         Địa Chỉ
                     </label>
                     <textarea
-                        value={formData.store_address}
+                        value={formData.store_address ?? ''}
                         onChange={(e) => onFormDataChange({ ...formData, store_address: e.target.value })}
                         style={{
                             width: '100%',
@@ -156,95 +153,7 @@ export default function EditStoreModal({
                     />
                 </div>
 
-                {/* Store Phone */}
-                <div style={{ marginBottom: '20px' }}>
-                    <label style={{ display: 'block', fontSize: '14px', fontWeight: '600', color: '#374151', marginBottom: '8px' }}>
-                        Số Điện Thoại
-                    </label>
-                    <input
-                        type="tel"
-                        value={formData.store_phone}
-                        onChange={(e) => onFormDataChange({ ...formData, store_phone: e.target.value })}
-                        style={{
-                            width: '100%',
-                            padding: '12px 16px',
-                            border: '1px solid #E5E7EB',
-                            borderRadius: '8px',
-                            fontSize: '14px',
-                            outline: 'none',
-                            transition: 'all 0.2s',
-                            boxSizing: 'border-box',
-                        }}
-                        onFocus={(e) => {
-                            e.currentTarget.style.borderColor = '#FF6B35';
-                            e.currentTarget.style.boxShadow = '0 0 0 3px rgba(255, 107, 53, 0.1)';
-                        }}
-                        onBlur={(e) => {
-                            e.currentTarget.style.borderColor = '#E5E7EB';
-                            e.currentTarget.style.boxShadow = 'none';
-                        }}
-                    />
-                </div>
 
-                {/* Store Email */}
-                <div style={{ marginBottom: '20px' }}>
-                    <label style={{ display: 'block', fontSize: '14px', fontWeight: '600', color: '#374151', marginBottom: '8px' }}>
-                        Email
-                    </label>
-                    <input
-                        type="email"
-                        value={formData.store_email}
-                        onChange={(e) => onFormDataChange({ ...formData, store_email: e.target.value })}
-                        style={{
-                            width: '100%',
-                            padding: '12px 16px',
-                            border: '1px solid #E5E7EB',
-                            borderRadius: '8px',
-                            fontSize: '14px',
-                            outline: 'none',
-                            transition: 'all 0.2s',
-                            boxSizing: 'border-box',
-                        }}
-                        onFocus={(e) => {
-                            e.currentTarget.style.borderColor = '#FF6B35';
-                            e.currentTarget.style.boxShadow = '0 0 0 3px rgba(255, 107, 53, 0.1)';
-                        }}
-                        onBlur={(e) => {
-                            e.currentTarget.style.borderColor = '#E5E7EB';
-                            e.currentTarget.style.boxShadow = 'none';
-                        }}
-                    />
-                </div>
-
-                {/* Manager Name */}
-                <div style={{ marginBottom: '32px' }}>
-                    <label style={{ display: 'block', fontSize: '14px', fontWeight: '600', color: '#374151', marginBottom: '8px' }}>
-                        Người Quản Lý
-                    </label>
-                    <input
-                        type="text"
-                        value={formData.manager_name}
-                        onChange={(e) => onFormDataChange({ ...formData, manager_name: e.target.value })}
-                        style={{
-                            width: '100%',
-                            padding: '12px 16px',
-                            border: '1px solid #E5E7EB',
-                            borderRadius: '8px',
-                            fontSize: '14px',
-                            outline: 'none',
-                            transition: 'all 0.2s',
-                            boxSizing: 'border-box',
-                        }}
-                        onFocus={(e) => {
-                            e.currentTarget.style.borderColor = '#FF6B35';
-                            e.currentTarget.style.boxShadow = '0 0 0 3px rgba(255, 107, 53, 0.1)';
-                        }}
-                        onBlur={(e) => {
-                            e.currentTarget.style.borderColor = '#E5E7EB';
-                            e.currentTarget.style.boxShadow = 'none';
-                        }}
-                    />
-                </div>
 
                 {/* Buttons */}
                 <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end' }}>

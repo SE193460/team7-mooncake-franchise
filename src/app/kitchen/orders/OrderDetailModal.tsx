@@ -8,6 +8,7 @@ interface OrderDetail {
         desired_date: string;
         created_at: string;
         store_name: string;
+        note?: string;
     };
     items: {
         order_item_id: string;
@@ -88,6 +89,21 @@ export default function OrderDetailModal({
                                     </div>
                                 ))}
                             </div>
+
+                            {/* Note Section */}
+                            {order.order.note && (
+                                <div style={{
+                                    padding: '12px',
+                                    backgroundColor: '#f5f5f5',
+                                    borderRadius: '6px',
+                                    marginBottom: '16px',
+                                    borderLeft: '3px solid var(--primary-orange)',
+                                }}>
+                                    <p style={{ margin: '0', fontSize: '13px', color: '#555' }}>
+                                        <strong>Ghi Chú:</strong> {order.order.note}
+                                    </p>
+                                </div>
+                            )}
 
                             {/* Total Amount */}
                             <div className={styles.totalSection}>

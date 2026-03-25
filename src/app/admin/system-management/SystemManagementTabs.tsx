@@ -19,7 +19,7 @@ interface SystemManagementTabsProps {
   onEditKitchen?: (kitchen: CentralKitchen) => void;
   onDeleteKitchen?: (kitchen: CentralKitchen) => void;
   openMenuId?: string | null;
-  onMenuToggle?: (userId: string) => void;
+  onMenuToggle?: (userId: string | null) => void;
   onEditUser?: (user: AdminUser) => void;
   onResetPasswordUser?: (user: AdminUser) => void;
   onDisableUser?: (user: AdminUser) => void;
