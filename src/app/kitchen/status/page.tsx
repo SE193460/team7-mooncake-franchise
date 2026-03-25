@@ -14,6 +14,7 @@ interface Order {
     created_at?: string;
     desired_date?: string;
     fulfilled_at?: string;
+    note?: string;
     // For processing orders
     total_items?: string;
     product_names?: string;
@@ -294,6 +295,20 @@ export default function UpdateStatusPage() {
                                             </div>
                                         )}
                                     </div>
+
+                                    {order.note && (
+                                        <div style={{ 
+                                            padding: '12px', 
+                                            backgroundColor: '#f5f5f5', 
+                                            borderRadius: '6px', 
+                                            marginBottom: '16px',
+                                            borderLeft: '3px solid var(--primary-orange)',
+                                        }}>
+                                            <p style={{ margin: '0', fontSize: '13px', color: '#555' }}>
+                                                <strong>Ghi Chú:</strong> {order.note}
+                                            </p>
+                                        </div>
+                                    )}
 
                                     <div style={{ marginTop: 'auto' }}>
                                         {order.created_at && (

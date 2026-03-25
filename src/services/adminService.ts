@@ -53,9 +53,12 @@ export interface UpdateUserStatusRequest {
 }
 
 export interface CreateUserRequest {
+  role: 'kitchen_staff' | 'manager' | 'franchise_staff';
   username: string;
   email: string;
   password: string;
+  franchise_store_id?: string;
+  central_kitchen_id?: string;
 }
 
 export interface CreateUserResponse {
@@ -77,9 +80,8 @@ export interface FranchiseStore {
   store_name: string;
   store_status: 'active' | 'inactive';
   store_address: string;
-  store_phone: string;
-  store_email: string;
   manager_name: string;
+  manager_email: string;
 }
 
 export interface GetStoresResponse {
@@ -92,9 +94,6 @@ export interface UpdateStoreRequest {
   store_code: string;
   store_name: string;
   store_address: string;
-  store_phone: string;
-  store_email: string;
-  manager_name: string;
 }
 
 export interface UpdateStoreStatusRequest {
@@ -138,8 +137,6 @@ export interface UpdateKitchenRequest {
   kitchen_code: string;
   kitchen_name: string;
   kitchen_address: string;
-  kitchen_phone: string;
-  kitchen_email: string;
   production_capacity: number;
 }
 
@@ -374,6 +371,35 @@ const adminService = {
       };
     } catch (error) {
       console.error('Error fetching system report:', error);
+      throw error;
+    }
+  },
+
+  // Tạo cửa hàng mới
+  async createStore(data: {
+    store_code: string;
+    store_name: string;
+    store_address: string;
+  }): Promise<void> {
+    try {
+      await fetchClient.post('/admin/createfranchise_stores', data);
+    } catch (error) {
+      console.error('Error creating store:', error);
+      throw error;
+    }
+  },
+
+  // Tạo bếp trung tâm mới
+  async createKitchen(data: {
+    kitchen_code: string;
+    kitchen_name: string;
+    kitchen_address: string;
+    production_capacity: number;
+  }): Promise<void> {
+    try {
+      await fetchClient.post('/admin/central_kitchens', data);
+    } catch (error) {
+      console.error('Error creating kitchen:', error);
       throw error;
     }
   },

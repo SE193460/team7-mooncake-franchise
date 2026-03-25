@@ -6,8 +6,10 @@ import Sidebar from '../../../components/Sidebar';
 import SystemManagementTabs from './SystemManagementTabs';
 import EditStoreModal, { EditStoreFormData } from './EditStoreModal';
 import DeleteStoreModal from './DeleteStoreModal';
+import CreateStoreModal, { CreateStoreFormData } from './CreateStoreModal';
 import EditKitchenModal, { EditKitchenFormData } from './EditKitchenModal';
 import DeleteKitchenModal from './DeleteKitchenModal';
+import CreateKitchenModal, { CreateKitchenFormData } from './CreateKitchenModal';
 import EditUserModal from './EditUserModal';
 import CreateUserModal, { CreateUserFormData } from './CreateUserModal';
 import ResetPasswordModal from './ResetPasswordModal';
@@ -18,7 +20,7 @@ import { EditUserFormData, ModalState, AdminUser } from './types';
 
 export default function SystemManagementPage() {
     // ============ COMMON STATE ============
-    const [activeTab, setActiveTab] = useState<'stores' | 'kitchens' | 'users'>('stores');
+    const [activeTab, setActiveTab] = useState<'stores' | 'kitchens' | 'users'>('users');
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [actionLoading, setActionLoading] = useState(false);
@@ -28,13 +30,17 @@ export default function SystemManagementPage() {
     const [selectedStore, setSelectedStore] = useState<FranchiseStore | null>(null);
     const [editStoreModalOpen, setEditStoreModalOpen] = useState(false);
     const [deleteStoreModalOpen, setDeleteStoreModalOpen] = useState(false);
+    const [createStoreModalOpen, setCreateStoreModalOpen] = useState(false);
+    const [createStoreLoading, setCreateStoreLoading] = useState(false);
     const [editStoreFormData, setEditStoreFormData] = useState<EditStoreFormData>({
         store_code: '',
         store_name: '',
         store_address: '',
-        store_phone: '',
-        store_email: '',
-        manager_name: '',
+    });
+    const [createStoreFormData, setCreateStoreFormData] = useState<CreateStoreFormData>({
+        store_code: '',
+        store_name: '',
+        store_address: '',
     });
 
     // ============ KITCHEN STATE ============
@@ -42,12 +48,18 @@ export default function SystemManagementPage() {
     const [selectedKitchen, setSelectedKitchen] = useState<CentralKitchen | null>(null);
     const [editKitchenModalOpen, setEditKitchenModalOpen] = useState(false);
     const [deleteKitchenModalOpen, setDeleteKitchenModalOpen] = useState(false);
+    const [createKitchenModalOpen, setCreateKitchenModalOpen] = useState(false);
+    const [createKitchenLoading, setCreateKitchenLoading] = useState(false);
     const [editKitchenFormData, setEditKitchenFormData] = useState<EditKitchenFormData>({
         kitchen_code: '',
         kitchen_name: '',
         kitchen_address: '',
-        kitchen_phone: '',
-        kitchen_email: '',
+        production_capacity: 0,
+    });
+    const [createKitchenFormData, setCreateKitchenFormData] = useState<CreateKitchenFormData>({
+        kitchen_code: '',
+        kitchen_name: '',
+        kitchen_address: '',
         production_capacity: 0,
     });
 
@@ -69,9 +81,12 @@ export default function SystemManagementPage() {
     const [createUserModalOpen, setCreateUserModalOpen] = useState(false);
     const [createUserLoading, setCreateUserLoading] = useState(false);
     const [createUserFormData, setCreateUserFormData] = useState<CreateUserFormData>({
+        role: '',
         username: '',
         email: '',
         password: '',
+        franchise_store_id: '',
+        central_kitchen_id: '',
     });
 
     // ============ FETCH FUNCTIONS ============
@@ -83,11 +98,22 @@ export default function SystemManagementPage() {
             setLoading(true);
             setError(null);
             const data = await adminService.getStores();
-            setStores(data);
+            
+            // Deduplicate stores by franchise_store_id
+            const seenIds = new Set<string>();
+            const uniqueStores = data.filter(store => {
+                if (seenIds.has(store.franchise_store_id)) {
+                    return false;
+                }
+                seenIds.add(store.franchise_store_id);
+                return true;
+            });
+            
+            setStores(uniqueStores);
             
             if (showNotification && toastId) {
                 toast.dismiss(toastId);
-                toast.success(`✓ Tải dữ liệu thành công! Tổng ${data.length} cửa hàng`, {
+                toast.success(`✓ Tải dữ liệu thành công! Tổng ${uniqueStores.length} cửa hàng`, {
                     position: 'top-right',
                     autoClose: 3000,
                 });
@@ -114,11 +140,22 @@ export default function SystemManagementPage() {
             setLoading(true);
             setError(null);
             const data = await adminService.getKitchens();
-            setKitchens(data);
+            
+            // Deduplicate kitchens by central_kitchen_id
+            const seenIds = new Set<string>();
+            const uniqueKitchens = data.filter(kitchen => {
+                if (seenIds.has(kitchen.central_kitchen_id)) {
+                    return false;
+                }
+                seenIds.add(kitchen.central_kitchen_id);
+                return true;
+            });
+            
+            setKitchens(uniqueKitchens);
             
             if (showNotification && toastId) {
                 toast.dismiss(toastId);
-                toast.success(`✓ Tải dữ liệu thành công! Tổng ${data.length} bếp`, {
+                toast.success(`✓ Tải dữ liệu thành công! Tổng ${uniqueKitchens.length} bếp`, {
                     position: 'top-right',
                     autoClose: 3000,
                 });
@@ -144,7 +181,18 @@ export default function SystemManagementPage() {
             setLoading(true);
             setError(null);
             const data = await adminService.getUsers(keyword, role);
-            setUsers(data);
+            
+            // Deduplicate users by user_id
+            const seenIds = new Set<string>();
+            const uniqueUsers = data.filter(user => {
+                if (seenIds.has(user.user_id)) {
+                    return false;
+                }
+                seenIds.add(user.user_id);
+                return true;
+            });
+            
+            setUsers(uniqueUsers);
         } catch (err) {
             setError('Không thể tải danh sách người dùng');
             console.error('Error fetching users:', err);
@@ -171,9 +219,6 @@ export default function SystemManagementPage() {
             store_code: store.store_code,
             store_name: store.store_name,
             store_address: store.store_address,
-            store_phone: store.store_phone,
-            store_email: store.store_email,
-            manager_name: store.manager_name,
         });
         setEditStoreModalOpen(true);
     };
@@ -185,9 +230,6 @@ export default function SystemManagementPage() {
             store_code: '',
             store_name: '',
             store_address: '',
-            store_phone: '',
-            store_email: '',
-            manager_name: '',
         });
     };
 
@@ -252,6 +294,49 @@ export default function SystemManagementPage() {
         }
     };
 
+    const openCreateStoreModal = () => {
+        setCreateStoreFormData({
+            store_code: '',
+            store_name: '',
+            store_address: '',
+        });
+        setCreateStoreModalOpen(true);
+    };
+
+    const closeCreateStoreModal = () => {
+        setCreateStoreModalOpen(false);
+        setCreateStoreFormData({
+            store_code: '',
+            store_name: '',
+            store_address: '',
+        });
+    };
+
+    const submitCreateStore = async () => {
+        if (!createStoreFormData.store_code || !createStoreFormData.store_name || !createStoreFormData.store_address) return;
+
+        try {
+            setCreateStoreLoading(true);
+            await adminService.createStore(createStoreFormData);
+            
+            await fetchStores(false);
+            closeCreateStoreModal();
+            
+            toast.success('✓ Tạo cửa hàng thành công!', {
+                position: 'top-right',
+                autoClose: 3000,
+            });
+        } catch (err) {
+            toast.error('❌ Lỗi khi tạo cửa hàng. Vui lòng thử lại!', {
+                position: 'top-right',
+                autoClose: 4000,
+            });
+            console.error('Error creating store:', err);
+        } finally {
+            setCreateStoreLoading(false);
+        }
+    };
+
     // ============ KITCHEN HANDLERS ============
     const handleEditKitchen = (kitchen: CentralKitchen) => {
         setSelectedKitchen(kitchen);
@@ -259,8 +344,6 @@ export default function SystemManagementPage() {
             kitchen_code: kitchen.kitchen_code,
             kitchen_name: kitchen.kitchen_name,
             kitchen_address: kitchen.kitchen_address,
-            kitchen_phone: kitchen.kitchen_phone,
-            kitchen_email: kitchen.kitchen_email,
             production_capacity: kitchen.capacity,
         });
         setEditKitchenModalOpen(true);
@@ -273,8 +356,6 @@ export default function SystemManagementPage() {
             kitchen_code: '',
             kitchen_name: '',
             kitchen_address: '',
-            kitchen_phone: '',
-            kitchen_email: '',
             production_capacity: 0,
         });
     };
@@ -337,6 +418,51 @@ export default function SystemManagementPage() {
             console.error('Error updating kitchen status:', err);
         } finally {
             setActionLoading(false);
+        }
+    };
+
+    const openCreateKitchenModal = () => {
+        setCreateKitchenFormData({
+            kitchen_code: '',
+            kitchen_name: '',
+            kitchen_address: '',
+            production_capacity: 0,
+        });
+        setCreateKitchenModalOpen(true);
+    };
+
+    const closeCreateKitchenModal = () => {
+        setCreateKitchenModalOpen(false);
+        setCreateKitchenFormData({
+            kitchen_code: '',
+            kitchen_name: '',
+            kitchen_address: '',
+            production_capacity: 0,
+        });
+    };
+
+    const submitCreateKitchen = async () => {
+        if (!createKitchenFormData.kitchen_code || !createKitchenFormData.kitchen_name || !createKitchenFormData.kitchen_address || !createKitchenFormData.production_capacity) return;
+
+        try {
+            setCreateKitchenLoading(true);
+            await adminService.createKitchen(createKitchenFormData);
+            
+            await fetchKitchens(false);
+            closeCreateKitchenModal();
+            
+            toast.success('✓ Tạo bếp trung tâm thành công!', {
+                position: 'top-right',
+                autoClose: 3000,
+            });
+        } catch (err) {
+            toast.error('❌ Lỗi khi tạo bếp trung tâm. Vui lòng thử lại!', {
+                position: 'top-right',
+                autoClose: 4000,
+            });
+            console.error('Error creating kitchen:', err);
+        } finally {
+            setCreateKitchenLoading(false);
         }
     };
 
@@ -511,21 +637,21 @@ export default function SystemManagementPage() {
         if (searchTimeout) clearTimeout(searchTimeout);
         setIsModalOpen(true);
         setCreateUserModalOpen(true);
-        setCreateUserFormData({ username: '', email: '', password: '' });
+        setCreateUserFormData({ role: '', username: '', email: '', password: '', franchise_store_id: '', central_kitchen_id: '' });
     };
 
     const closeCreateUserModal = () => {
         setCreateUserModalOpen(false);
         setIsModalOpen(false);
-        setCreateUserFormData({ username: '', email: '', password: '' });
+        setCreateUserFormData({ role: '', username: '', email: '', password: '', franchise_store_id: '', central_kitchen_id: '' });
     };
 
-    const handleCreateUserFormChange = (field: keyof CreateUserFormData, value: string) => {
+    const handleCreateUserFormChange = (field: string, value: string) => {
         setCreateUserFormData((prev) => ({ ...prev, [field]: value }));
     };
 
     const submitCreateUser = async () => {
-        if (!createUserFormData.username || !createUserFormData.email || !createUserFormData.password) {
+        if (!createUserFormData.role || !createUserFormData.username || !createUserFormData.email || !createUserFormData.password) {
             toast.error('Vui lòng điền đầy đủ thông tin', {
                 position: 'top-right',
                 autoClose: 3000,
@@ -535,12 +661,31 @@ export default function SystemManagementPage() {
 
         try {
             setCreateUserLoading(true);
-            await adminService.createUser({
+            const requestData: any = {
+                role: createUserFormData.role,
                 username: createUserFormData.username,
                 email: createUserFormData.email,
                 password: createUserFormData.password,
-            });
+            };
+
+            if (createUserFormData.role === 'franchise_staff' && createUserFormData.franchise_store_id) {
+                requestData.franchise_store_id = createUserFormData.franchise_store_id;
+            } else if ((createUserFormData.role === 'kitchen_staff' || createUserFormData.role === 'manager') && createUserFormData.central_kitchen_id) {
+                requestData.central_kitchen_id = createUserFormData.central_kitchen_id;
+            }
+
+            await adminService.createUser(requestData);
             
+            // Reset form
+            setCreateUserFormData({
+                role: '',
+                username: '',
+                email: '',
+                password: '',
+                franchise_store_id: '',
+                central_kitchen_id: '',
+            });
+
             // Refresh users list
             const role = filterRole === 'Tất cả vai trò' ? undefined : filterRole;
             await fetchUsers(searchQuery || undefined, role);
@@ -593,9 +738,9 @@ export default function SystemManagementPage() {
                         <button
                             onClick={() => {
                                 if (activeTab === 'stores') {
-                                    alert(`Mở form thêm cửa hàng`);
+                                    openCreateStoreModal();
                                 } else if (activeTab === 'kitchens') {
-                                    alert(`Mở form thêm bếp trung tâm`);
+                                    openCreateKitchenModal();
                                 } else {
                                     openCreateUserModal();
                                 }
@@ -668,6 +813,15 @@ export default function SystemManagementPage() {
                 onClose={closeDeleteStoreModal}
             />
 
+            <CreateStoreModal
+                isOpen={createStoreModalOpen}
+                formData={createStoreFormData}
+                loading={createStoreLoading}
+                onFormChange={(field, value) => setCreateStoreFormData({ ...createStoreFormData, [field]: value })}
+                onSubmit={submitCreateStore}
+                onCancel={closeCreateStoreModal}
+            />
+
             {/* KITCHEN MODALS */}
             <EditKitchenModal
                 isOpen={editKitchenModalOpen}
@@ -685,6 +839,15 @@ export default function SystemManagementPage() {
                 loading={actionLoading}
                 onSubmit={submitDeleteKitchen}
                 onClose={closeDeleteKitchenModal}
+            />
+
+            <CreateKitchenModal
+                isOpen={createKitchenModalOpen}
+                formData={createKitchenFormData}
+                loading={createKitchenLoading}
+                onFormChange={(field, value) => setCreateKitchenFormData({ ...createKitchenFormData, [field]: value })}
+                onSubmit={submitCreateKitchen}
+                onCancel={closeCreateKitchenModal}
             />
 
             {/* USER MODALS */}
@@ -723,6 +886,8 @@ export default function SystemManagementPage() {
                 onFormChange={handleCreateUserFormChange}
                 onSubmit={submitCreateUser}
                 onCancel={closeCreateUserModal}
+                stores={stores}
+                kitchens={kitchens}
             />
         </div>
     );

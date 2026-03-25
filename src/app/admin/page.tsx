@@ -117,35 +117,13 @@ export default function AdminDashboard() {
 
             <main style={{ flex: 1, padding: '32px 40px' }}>
                 {/* Header */}
-                <div style={{ marginBottom: '32px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                    <div>
-                        <h1 style={{ fontSize: '32px', fontWeight: '700', color: '#1F2937', marginBottom: '8px' }}>
-                            Quản Trị Hệ Thống
-                        </h1>
-                        <p style={{ fontSize: '15px', color: '#6B7280' }}>
-                            Quản lý người dùng và các đặt hệ thống bánh Trung  Thu
-                        </p>
-                    </div>
-                    <button
-                        onClick={fetchDashboard}
-                        disabled={loading}
-                        style={{
-                            padding: '10px 20px',
-                            backgroundColor: loading ? '#D1D5DB' : '#3B82F6',
-                            color: 'white',
-                            border: 'none',
-                            borderRadius: '8px',
-                            cursor: loading ? 'not-allowed' : 'pointer',
-                            fontSize: '14px',
-                            fontWeight: '500',
-                            transition: 'all 0.3s ease',
-                            opacity: loading ? 0.7 : 1,
-                        }}
-                        onMouseEnter={(e) => !loading && (e.currentTarget.style.backgroundColor = '#2563EB')}
-                        onMouseLeave={(e) => !loading && (e.currentTarget.style.backgroundColor = '#3B82F6')}
-                    >
-                        {loading ? '⟳ Đang tải...' : '↻ Tải lại'}
-                    </button>
+                <div style={{ marginBottom: '32px' }}>
+                    <h1 style={{ fontSize: '32px', fontWeight: '700', color: '#1F2937', marginBottom: '8px' }}>
+                        Quản Trị Hệ Thống
+                    </h1>
+                    <p style={{ fontSize: '15px', color: '#6B7280' }}>
+                        Quản lý người dùng và các đặt hệ thống bánh Trung  Thu
+                    </p>
                 </div>
 
                 {/* Stats Cards */}
@@ -242,50 +220,10 @@ export default function AdminDashboard() {
                     <div style={{
                         padding: '24px',
                         borderBottom: '1px solid #E5E7EB',
-                        display: 'flex',
-                        justifyContent: 'space-between',
-                        alignItems: 'center',
-                        gap: '16px',
-                        flexWrap: 'wrap',
                     }}>
                         <h2 style={{ fontSize: '18px', fontWeight: '600', color: '#1F2937', margin: 0 }}>
                             Người Dùng Hệ Thống
                         </h2>
-                        <button
-                            onClick={() => window.location.href = '/admin/users'}
-                            style={{
-                                padding: '8px 16px',
-                                backgroundColor: 'transparent',
-                                border: '1px solid #E5E7EB',
-                                borderRadius: '8px',
-                                fontSize: '14px',
-                                color: '#1F2937',
-                                cursor: 'pointer',
-                                fontWeight: '500',
-                                transition: 'all 0.2s',
-                            }}
-                            onMouseEnter={(e) => {
-                                e.currentTarget.style.backgroundColor = '#F9FAFB';
-                            }}
-                            onMouseLeave={(e) => {
-                                e.currentTarget.style.backgroundColor = 'transparent';
-                            }}
-                        >
-                            Quản lý người dùng →
-                        </button>
-                    </div>
-
-                    {/* Search and Filter */}
-                    <div style={{
-                        padding: '16px 24px',
-                        borderBottom: '1px solid #E5E7EB',
-                        display: 'flex',
-                        gap: '12px',
-                        flexWrap: 'wrap',
-                    }}>
-                        <p style={{ fontSize: '14px', color: '#6B7280', margin: 0 }}>
-                            Hiển thị {users.length} người dùng hoạt động
-                        </p>
                     </div>
 
                     {loading ? (

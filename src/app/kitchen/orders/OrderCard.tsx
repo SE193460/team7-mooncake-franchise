@@ -14,12 +14,12 @@ interface Order {
     desired_date: string;
     created_at: string;
     items_preview: OrderItem[];
+    note?: string;
 }
 
 interface OrderCardProps {
     order: Order;
     onViewDetails: (orderId: string) => void;
-    onReject: (orderId: string) => void;
     onAccept: (orderId: string) => void;
     formatDate: (dateString: string) => string;
 }
@@ -27,7 +27,6 @@ interface OrderCardProps {
 export default function OrderCard({ 
     order, 
     onViewDetails, 
-    onReject, 
     onAccept,
     formatDate 
 }: OrderCardProps) {
@@ -59,6 +58,20 @@ export default function OrderCard({
                 ))}
             </div>
 
+            {order.note && (
+                <div style={{ 
+                    padding: '12px', 
+                    backgroundColor: '#f5f5f5', 
+                    borderRadius: '6px', 
+                    marginBottom: '12px',
+                    borderLeft: '3px solid var(--primary-orange)',
+                }}>
+                    <p style={{ margin: '0', fontSize: '14px', color: '#555' }}>
+                        <strong>Ghi Chú:</strong> {order.note}
+                    </p>
+                </div>
+            )}
+
             <div className={styles.orderMeta}>
                 <div className={styles.metaItem}>
                     <span className={styles.metaLabel}>
@@ -74,12 +87,6 @@ export default function OrderCard({
                         className={styles.btnDetail}
                     >
                         👁️ Chi Tiết
-                    </button>
-                    <button
-                        onClick={() => onReject(order.order_id)}
-                        className={styles.btnReject}
-                    >
-                        ✕ Từ Chối
                     </button>
                     <button
                         onClick={() => onAccept(order.order_id)}

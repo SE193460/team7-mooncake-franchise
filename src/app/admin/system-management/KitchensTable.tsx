@@ -43,9 +43,6 @@ export default function KitchensTable({
                                 ĐỊA CHỈ
                             </th>
                             <th style={{ padding: '14px 24px', textAlign: 'left', fontSize: '12px', fontWeight: '600', color: '#6B7280', textTransform: 'uppercase' }}>
-                                LIÊN HỆ
-                            </th>
-                            <th style={{ padding: '14px 24px', textAlign: 'left', fontSize: '12px', fontWeight: '600', color: '#6B7280', textTransform: 'uppercase' }}>
                                 CÔNG SUẤT
                             </th>
                             <th style={{ padding: '14px 24px', textAlign: 'left', fontSize: '12px', fontWeight: '600', color: '#6B7280', textTransform: 'uppercase' }}>
@@ -59,19 +56,19 @@ export default function KitchensTable({
                     <tbody>
                         {loading ? (
                             <tr>
-                                <td colSpan={6} style={{ padding: '32px 24px', textAlign: 'center', color: '#6B7280' }}>
+                                <td colSpan={5} style={{ padding: '32px 24px', textAlign: 'center', color: '#6B7280' }}>
                                     ⟳ Đang tải dữ liệu...
                                 </td>
                             </tr>
                         ) : error ? (
                             <tr>
-                                <td colSpan={6} style={{ padding: '32px 24px', textAlign: 'center', color: '#DC2626' }}>
+                                <td colSpan={5} style={{ padding: '32px 24px', textAlign: 'center', color: '#DC2626' }}>
                                     ❌ {error}
                                 </td>
                             </tr>
                         ) : kitchens.length === 0 ? (
                             <tr>
-                                <td colSpan={6} style={{ padding: '32px 24px', textAlign: 'center', color: '#6B7280' }}>
+                                <td colSpan={5} style={{ padding: '32px 24px', textAlign: 'center', color: '#6B7280' }}>
                                     Không có dữ liệu bếp trung tâm
                                 </td>
                             </tr>
@@ -101,10 +98,6 @@ export default function KitchensTable({
                                             <span>📍</span>
                                             {kitchen.kitchen_address}
                                         </div>
-                                    </td>
-                                    <td style={{ padding: '18px 24px', fontSize: '14px', color: '#6B7280' }}>
-                                        <div style={{ marginBottom: '4px' }}>📞 {kitchen.kitchen_phone}</div>
-                                        <div>📧 {kitchen.kitchen_email}</div>
                                     </td>
                                     <td style={{ padding: '18px 24px', fontSize: '14px', color: '#1F2937' }}>
                                         {kitchen.capacity} hộp/ngày
