@@ -82,13 +82,19 @@ class FetchClient {
 
             // Handle non-OK responses
             if (!response.ok) {
-                console.error('API Error:', { url, status: response.status, data });
+                const errorMessage = data?.message || data?.error || `HTTP ${response.status}`;
+                console.error('API Error:', { 
+                    url, 
+                    status: response.status,
+                    data,
+                    message: errorMessage
+                });
                 throw {
                     response: {
                         status: response.status,
                         data,
                     },
-                    message: data.message || "Request failed",
+                    message: errorMessage,
                 };
             }
 

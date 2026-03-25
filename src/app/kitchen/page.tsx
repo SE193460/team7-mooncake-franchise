@@ -44,7 +44,7 @@ export default function KitchenDashboard() {
                 const token = localStorage.getItem("token");
 
                 const res = await fetch(
-                    "https://franchisemooncake.onrender.com/api/CentralKitchenStaff_dashborad",
+                    "https://franchisemooncake.onrender.com/api/CentralKitchenStaff_dashborad?expiry_days=60",
                     {
                         headers: {
                             Authorization: `Bearer ${token}`,
@@ -52,12 +52,18 @@ export default function KitchenDashboard() {
                     }
                 );
 
+                if (!res.ok) {
+                    throw new Error(`API error: ${res.status} ${res.statusText}`);
+                }
+
                 const data = await res.json();
 
                 console.log("API DATA:", data);
 
                 if (data.success) {
                     setDashboardData(data.data);
+                } else {
+                    console.error("API returned success: false", data);
                 }
             } catch (err) {
                 console.error("Fetch error:", err);

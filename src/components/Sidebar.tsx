@@ -63,6 +63,7 @@ export default function Sidebar({ activePage = 'dashboard', type = 'franchise' }
         { id: 'dashboard', label: 'Bảng điều khiển', icon: '📊', href: '/kitchen' },
         { id: 'new-orders', label: 'Đơn Hàng Mới', icon: '📋', href: '/kitchen/orders' },
         { id: 'update-status', label: 'Cập Nhật Trạng Thái', icon: '🔄', href: '/kitchen/status' },
+        { id: 'management', label: 'Quản Lý Đơn Hàng', icon: '📑', href: '/kitchen/management' },
         { id: 'ingredients', label: 'Nguyên Liệu & HSD', icon: '📦', href: '/kitchen/ingredients' },
         { id: 'product-storage', label: 'Kho Thành Phẩm', icon: '🏪', href: '/kitchen/product-storage' },
     ];
@@ -75,8 +76,8 @@ export default function Sidebar({ activePage = 'dashboard', type = 'franchise' }
 
     const adminMenuItems = [
         { id: 'dashboard', label: 'Dashboard', icon: '📊', href: '/admin' },
-        { id: 'users', label: 'Quản Lý Users', icon: '👥', href: '/admin/users' },
-        { id: 'categories', label: 'Dữ Liệu Danh Mục', icon: '📋', href: '/admin/categories' },
+        { id: 'system-management', label: 'Quản Lý Hệ Thống', icon: '⚙️', href: '/admin/system-management' },
+        { id: 'report', label: 'Báo Cáo Hệ Thống', icon: '📈', href: '/admin/report' },
     ];
 
     const menuItems = type === 'kitchen' ? kitchenMenuItems :

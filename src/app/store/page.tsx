@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import Sidebar from '../../components/Sidebar';
 
 import OrdersTable from '../../components/OrdersTable';
+import DashboardOrdersTable from '../../components/DashboardOrdersTable';
 import storeService, { DashboardStats, Order } from '../../services/storeService';
 type OrderStatus = "pending" | "confirmed" | "processing" | "fulfilled" | "cancelled";
 
@@ -13,6 +14,8 @@ export default function StoreDashboard() {
     const [cards, setCards] = useState<any>(null);
     const [orders, setOrders] = useState<any[]>([]);
     const [summary, setSummary] = useState<any>(null);
+    const [currentPage, setCurrentPage] = useState(1);
+    const [totalItems, setTotalItems] = useState(0);
 
     const statusLabelMap: Record<OrderStatus, string> = {
         pending: "Chờ xác nhận",
@@ -34,34 +37,41 @@ export default function StoreDashboard() {
         return new Intl.NumberFormat("vi-VN").format(amount) + " VNĐ";
     };
 
+    const handlePageChange = async (page: number) => {
+        try {
+            const pageOrders = await storeService.getOrders(page, 5);
+            setOrders(pageOrders);
+            setCurrentPage(page);
+        } catch (error) {
+            console.error('Failed to load orders:', error);
+        }
+    };
+
     useEffect(() => {
-        const token = localStorage.getItem('token');
-        if (!token) return;
+        const loadDashboard = async () => {
+            try {
+                const data = await storeService.getDashboard();
 
-        fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/franchiseStaff_dashboard?page=1&limit=50`, {
-            headers: {
-                Authorization: `Bearer ${token}`,
-            },
-        })
-            .then(res => res.json())
-            .then(result => {
-                console.log("DASHBOARD:", result);
+                setCards({
+                    pending: data.stats.pendingOrders,
+                    approved: data.stats.approvedOrders,
+                    processing: data.stats.processingOrders,
+                    fulfilled: data.stats.fulfilledOrders,
+                });
+                setOrders(data.recentOrders);
+                setCurrentPage(1);
+                setTotalItems(data.summary.total_orders);
+                setSummary({
+                    paid_amount: data.summary.paid_amount,
+                    unpaid_amount: data.summary.unpaid_amount,
+                    total_orders: data.summary.total_orders,
+                });
+            } catch (error) {
+                console.error('Failed to load store dashboard:', error);
+            }
+        };
 
-                const dashboard = result.data;
-
-                if (!dashboard) {
-                    console.error("Dashboard data is null");
-                    return;
-                }
-
-                setCards(dashboard.cards || {});
-                setOrders(dashboard.recent_orders || []);
-                setSummary(dashboard.summary);
-
-                console.log("ORDERS:", dashboard.recent_orders);
-                console.log("First order delivery_date:", dashboard.recent_orders?.[0]?.delivery_date);
-            })
-            .catch(console.error);
+        loadDashboard();
     }, []);
 
     return (
@@ -183,41 +193,29 @@ export default function StoreDashboard() {
                 </div>
 
                 {/* Orders Table */}
-                <OrdersTable
+                <DashboardOrdersTable
                     orders={orders?.map((o) => {
                         const status = o.status as OrderStatus;
 
-                        let paymentStatus: 'paid' | 'unpaid' | undefined;
-                        let paymentStatusLabel: string | undefined;
-
-                        if (o.payment_status === 'paid') {
-                            paymentStatus = 'paid';
-                            paymentStatusLabel = 'Đã Thanh Toán';
-                        } else if (o.payment_status === 'unpaid') {
-                            paymentStatus = 'unpaid';
-                            paymentStatusLabel = 'Chưa Thanh Toán';
-                        }
-
                         return {
-                            id: o.order_id,
-                            orderCode: o.order_code,
-                            products: `${o.total_product_qty} sản phẩm`,
-                            totalAmount: o.total_amount,
+                            id: o.id,
+                            orderCode: o.orderCode,
+                            products: o.products,
+                            totalAmount: Number(o.totalAmount.replace(/\D/g, '')) || 0,
                             status,
-                            statusLabel: statusLabelMap[status],
+                            statusLabel: o.statusLabel,
                             statusColor: statusColorMap[status],
-                            paymentStatus,
-                            paymentStatusLabel,
-                            createdDate: new Date(o.created_at).toLocaleDateString(),
-                            desiredDate: o.desired_date
-                                ? new Date(o.desired_date).toLocaleDateString()
-                                : "",
-                            deliveryDate: o.fulfilled_at
-                                ? new Date(o.fulfilled_at).toLocaleDateString()
-                                : "",
-                            note: o.note ?? "",
+                            paymentStatus: o.paymentStatus as 'paid' | 'unpaid',
+                            paymentStatusLabel: o.paymentStatusLabel,
+                            createdDate: o.createdDate,
+                            desiredDate: o.desiredDate,
+                            deliveryDate: o.deliveryDate,
+                            note: o.note,
                         };
                     })}
+                    totalItems={totalItems}
+                    currentPage={currentPage}
+                    onPageChange={handlePageChange}
                 />
             </main>
         </div>

@@ -37,13 +37,17 @@ export default function ProductStoragePage() {
 
                 // Assuming the endpoint for products inventory exists
                 const res = await fetch(
-                    `${process.env.NEXT_PUBLIC_API_URL}/api/centralKitchen/product-inventory`,
+                    "https://franchisemooncake.onrender.com/api/centralKitchen/product-inventory",
                     {
                         headers: {
                             Authorization: `Bearer ${token}`,
                         },
                     }
                 );
+
+                if (!res.ok) {
+                    throw new Error(`API error: ${res.status} ${res.statusText}`);
+                }
 
                 const result = await res.json();
 
