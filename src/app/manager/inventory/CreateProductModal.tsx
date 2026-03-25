@@ -34,6 +34,7 @@ const CreateProductModal: React.FC<CreateProductModalProps> = ({
   useEffect(() => {
     if (isOpen) {
       fetchInitialData();
+
     }
   }, [isOpen]);
 
@@ -80,42 +81,74 @@ const CreateProductModal: React.FC<CreateProductModalProps> = ({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formData.name || !formData.product_type_id || !formData.price) {
-      alert("Vui lòng điền đầy đủ các thông tin bắt buộc.");
+
+    const token = localStorage.getItem("token");
+
+    if (!token) {
+      alert("Bạn chưa đăng nhập");
       return;
     }
 
+    if (!formData.name || !formData.product_type_id || !formData.price) {
+      alert("Vui lòng điền đầy đủ thông tin");
+      return;
+    }
+
+    const validMaterials = materials
+      .filter(m => m.material_id && m.qty_required)
+      .map(m => ({
+        material_id: Number(m.material_id),
+        qty_required: Number(m.qty_required),
+        uom: m.uom,
+        note: m.note || ""
+      }));
+
+    if (validMaterials.length === 0) {
+      alert("Phải có ít nhất 1 nguyên liệu");
+      return;
+    }
+
+    const requestData = {
+      name: formData.name,
+      product_type_id: Number(formData.product_type_id),
+      uom: formData.uom,
+      price: Number(formData.price),
+      description: formData.description,
+      materials: validMaterials
+    };
+
+    console.log("🚀 REQUEST:", requestData); // DEBUG
+
     try {
       setLoading(true);
-      const requestData: CreateProductRequest = {
-        name: formData.name,
-        product_type_id: parseInt(formData.product_type_id),
-        uom: formData.uom,
-        price: parseFloat(formData.price),
-        description: formData.description,
-        materials: materials
-          .filter(m => m.material_id && m.qty_required)
-          .map(m => ({
-            material_id: parseInt(m.material_id),
-            qty_required: parseFloat(m.qty_required),
-            uom: m.uom,
-            note: m.note || ""
-          }))
-      };
 
-      const response = await inventoryService.createProduct(requestData);
-      if (response.success) {
-        alert("Tạo sản phẩm thành công!");
-        onSuccess();
-        onClose();
-        // Reset form
-        setFormData({ name: "", product_type_id: "", uom: "cái", price: "", description: "" });
-        setMaterials([]);
-      } else {
-        alert(response.message || "Có lỗi xảy ra khi tạo sản phẩm.");
+      const res = await fetch(
+        `https://franchise-mooncake-swp.onrender.com/api/Manager_create_products`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`, // 🔥 QUAN TRỌNG
+          },
+          body: JSON.stringify(requestData),
+        }
+      );
+
+      const data = await res.json();
+      console.log("🔥 RESPONSE:", data); // DEBUG
+
+      if (!res.ok) {
+        alert(data.message || "Tạo thất bại");
+        return;
       }
-    } catch (err: any) {
-      alert(err.message || "Có lỗi xảy ra khi kết nối máy chủ.");
+
+      alert("Tạo sản phẩm thành công!");
+      onSuccess();
+      onClose();
+
+    } catch (err) {
+      console.error(err);
+      alert("Server error");
     } finally {
       setLoading(false);
     }
@@ -244,8 +277,8 @@ const CreateProductModal: React.FC<CreateProductModalProps> = ({
                     <input
                       type="text"
                       value={m.uom}
-                      readOnly
                       className={styles.input}
+                      onChange={(e) => handleMaterialChange(index, "uom", e.target.value)}
                       style={{ backgroundColor: "#f9f9f9", color: "#666" }}
                     />
                     <input
@@ -281,7 +314,7 @@ const CreateProductModal: React.FC<CreateProductModalProps> = ({
             <button type="button" onClick={onClose} className={styles.cancelBtn}>
               Hủy
             </button>
-            <button type="submit" className={styles.saveBtn} disabled={loading}>
+            <button type="submit" className={`${styles.saveBtn} ${loading ? styles.disabledBtn : ""}`}>
               {loading ? "Đang lưu..." : "Lưu sản phẩm"}
             </button>
           </div>
