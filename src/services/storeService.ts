@@ -79,6 +79,7 @@ export interface ApiOrder {
         qty: string | number;
         unit_price?: number;
         line_total?: number;
+        uom?: string;
     }>;
 }
 
@@ -91,6 +92,7 @@ export interface Order {
     productDetails?: Array<{
         product_name: string;
         qty: string | number;
+        uom?: string;
     }>;
     status: 'pending' | 'processing' | 'fulfilled' | 'confirmed' | 'cancelled';
     statusLabel: string;
@@ -175,6 +177,7 @@ export interface ConfirmOrder {
     product_details?: Array<{
         product_name: string;
         qty: number;
+        uom?: string;
     }>;
 }
 
@@ -231,6 +234,7 @@ const convertApiOrderToOrder = (apiOrder: ApiOrder): Order => {
         productDetails: apiOrder.product_details?.map(p => ({
             product_name: p.product_name,
             qty: p.qty,
+            uom: p.uom,
         })),
         status: mappedStatus.status,
         statusLabel: mappedStatus.label,

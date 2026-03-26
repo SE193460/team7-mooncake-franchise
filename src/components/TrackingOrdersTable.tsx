@@ -72,7 +72,7 @@ export default function TrackingOrdersTable({
                       <div className={styles.productList}>
                         {order.productDetails.map((product, idx) => (
                           <div key={idx} className={styles.productItem}>
-                            {product.product_name} : {product.qty}
+                            {product.product_name} : {product.qty}{product.uom ? ` ${product.uom}` : ''}
                           </div>
                         ))}
                       </div>
