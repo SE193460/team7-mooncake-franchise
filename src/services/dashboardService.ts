@@ -26,7 +26,10 @@ export interface ManagerDashboardCards {
 
 export interface MaterialInventory {
   inventory_item_id: string;
+  material_id: string;
   material_name: string;
+  cost_price: number;
+  min_stock: number;
   on_hand_qty: string;
   expiry_date: string;
   uom: string;
@@ -46,7 +49,8 @@ export interface ManagerDashboardResponse {
 }
 
 export async function getManagerDashboard(token: string): Promise<ManagerDashboardResponse> {
-  const res = await fetch(`${BASE_URL}/manager/dashboard`, {
+  const timestamp = new Date().getTime();
+  const res = await fetch(`${BASE_URL}/manager/dashboard?t=${timestamp}`, {
     method: "GET",
     headers: {
       "Content-Type": "application/json",

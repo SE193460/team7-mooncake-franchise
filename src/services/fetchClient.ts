@@ -83,8 +83,8 @@ class FetchClient {
             // Handle non-OK responses
             if (!response.ok) {
                 const errorMessage = data?.message || data?.error || `HTTP ${response.status}`;
-                console.error('API Error:', { 
-                    url, 
+                console.error('API Error:', {
+                    url,
                     status: response.status,
                     data,
                     message: errorMessage

@@ -16,6 +16,7 @@ interface Order {
   productDetails?: Array<{
     product_name: string;
     qty: number;
+    uom?: string;
   }>;
   createdDate: string;
   deliveryDate: string;

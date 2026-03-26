@@ -1,233 +1,227 @@
 'use client'
 
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import Sidebar from "../../../components/Sidebar";
 
-interface StoreRevenue {
-    name: string;
-    totalOrders: number;
-    paid: string;
-    pending: string;
-    status: "active" | "inactive";
-}
-
-interface RecentPayment {
-    orderId: string;
-    store: string;
-    amount: string;
-    status: "paid";
-}
-
-const storeRevenue: StoreRevenue[] = [
-    {
-        name: "Chi nhánh Quận 1",
-        totalOrders: 6,
-        paid: "4.000.000 VNĐ",
-        pending: "39.600.000 VNĐ",
-        status: "active",
-    },
-    {
-        name: "Chi nhánh Quận 3",
-        totalOrders: 3,
-        paid: "9.000.000 VNĐ",
-        pending: "—",
-        status: "active",
-    },
-    {
-        name: "Chi nhánh Quận 7",
-        totalOrders: 2,
-        paid: "—",
-        pending: "—",
-        status: "active",
-    },
-    {
-        name: "Chi nhánh Bình Thạnh",
-        totalOrders: 0,
-        paid: "—",
-        pending: "—",
-        status: "inactive",
-    },
-];
-
-const recentPayments: RecentPayment[] = [
-    {
-        orderId: "ORD-005",
-        store: "Chi nhánh Quận 3",
-        amount: "9.000.000 VNĐ",
-        status: "paid",
-    },
-    {
-        orderId: "ORD-006",
-        store: "Chi nhánh Quận 1",
-        amount: "4.000.000 VNĐ",
-        status: "paid",
-    },
-];
-
 export default function ManagerReportPage() {
+
+    const router = useRouter();
+    const [pendingOrders, setPendingOrders] = useState<any[]>([]);
+    const [history, setHistory] = useState<any[]>([]);
+    const [stats, setStats] = useState({
+        waiting: 0,
+        paid: 0,
+    });
+
+    const formatVND = (amount: number) => {
+        return new Intl.NumberFormat("vi-VN").format(amount) + " VNĐ";
+    };
+
+    const formatDate = (date: string | null) => {
+        if (!date) return '—';
+        try {
+            return new Date(date).toLocaleDateString('vi-VN');
+        } catch {
+            return date;
+        }
+    };
+
+    useEffect(() => {
+        const token = localStorage.getItem("token");
+
+        if (!token) {
+            router.push("/login");
+            return;
+        }
+
+        fetch(`https://franchisemooncake.onrender.com/api/franchise/payment-orders?page=1&limit=50`, {
+            headers: {
+                Authorization: `Bearer ${token}`,
+            },
+        })
+            .then(res => {
+                if (res.status === 401) {
+                    router.push("/login");
+                    return;
+                }
+                return res.json();
+            })
+            .then(data => {
+                if (!data?.data) return;
+
+                const d = data.data;
+
+                setPendingOrders(d.waiting_payment_orders || []);
+                setHistory(d.payment_history || []);
+                setStats({
+                    waiting: d.waiting_payment_count,
+                    paid: d.paid_count,
+                });
+            })
+            .catch(console.error);
+    }, []);
+
+    const handlePayment = async (orderId: number) => {
+        try {
+            const token = localStorage.getItem("token");
+
+            const res = await fetch(
+                `https://franchisemooncake.onrender.com/api/Manager_confirmPaymentOrder/orders/${orderId}`,
+                {
+                    method: "PATCH",
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                }
+            );
+
+            const data = await res.json();
+
+            if (!res.ok) {
+                alert(data.message || "Lỗi xác nhận thanh toán");
+                return;
+            }
+
+            alert("Xác nhận thanh toán thành công!");
+
+            // 👉 cập nhật UI (cách 1: reload lại data)
+            window.location.reload();
+
+        } catch (err) {
+            console.error(err);
+            alert("Server error");
+        }
+    };
+
     return (
-        <div style={{ display: "flex", minHeight: "100vh" }}>
-            <Sidebar activePage="report" />
+        <div className="flex min-h-screen">
+            <Sidebar type="manager" activePage="report" />
+            <main className="flex-1 p-8 bg-[#FAF9F6]">
+                {/* Title */}
+                <h1 className="text-3xl font-bold text-[#3D2B1F] mb-1">Báo Cáo Doanh Thu</h1>
+                <p className="text-gray-400 mb-10 text-sm">
+                    Quản lý báo cáo doanh thu
+                </p>
 
-            <main className="flex-1 p-8 bg-gray-50">
+                {/* Stats */}
+                <div className="grid grid-cols-2 gap-8 mb-10">
+                    <div className="bg-white rounded-[24px] border border-gray-100 shadow-sm p-8 flex justify-between items-center group transition-all hover:shadow-md">
+                        <div>
+                            <p className="text-gray-400 text-sm font-medium mb-3">Chờ Thanh Toán</p>
+                            <p className="text-4xl font-bold text-[#E65C00]">
+                                {stats.waiting}
+                            </p>
+                        </div>
+                        <div className="text-[#E65C00]">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><rect width="20" height="14" x="2" y="5" rx="3" /><line x1="2" x2="22" y1="10" y2="10" /></svg>
+                        </div>
+                    </div>
 
-                {/* Header */}
-                <div className="mb-6">
-                    <h1 className="text-2xl font-bold">Báo Cáo & Thống Kê</h1>
-                    <p className="text-gray-500 text-sm">
-                        Tổng hợp doanh thu và hiệu suất kinh doanh
-                    </p>
+                    <div className="bg-white rounded-[24px] border border-gray-100 shadow-sm p-8 flex justify-between items-center group transition-all hover:shadow-md">
+                        <div>
+                            <p className="text-gray-400 text-sm font-medium mb-3">Đã Thanh Toán</p>
+                            <p className="text-4xl font-bold text-[#10B981]">
+                                {stats.paid}
+                            </p>
+                        </div>
+                        <div className="text-[#10B981]">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><line x1="12" x2="12" y1="4" y2="20" /><path d="M17 8H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" /></svg>
+                        </div>
+                    </div>
                 </div>
 
-                {/* Top Revenue Cards */}
-                <div className="grid grid-cols-4 gap-6 mb-6">
-
-                    <div className="bg-white p-6 rounded-xl border-l-4 border-green-500 shadow">
-                        <p className="text-sm text-gray-500 mb-2">Đã Thu</p>
-                        <p className="text-xl font-bold text-green-600">13.000.000 VNĐ</p>
-                    </div>
-
-                    <div className="bg-white p-6 rounded-xl border-l-4 border-orange-500 shadow">
-                        <p className="text-sm text-gray-500 mb-2">Chờ Thu</p>
-                        <p className="text-xl font-bold text-orange-600">39.600.000 VNĐ</p>
-                    </div>
-
-                    <div className="bg-white p-6 rounded-xl shadow">
-                        <p className="text-sm text-gray-500 mb-2">Tổng Giá Trị</p>
-                        <p className="text-xl font-bold">126.350.000 VNĐ</p>
-                    </div>
-
-                    <div className="bg-white p-6 rounded-xl shadow">
-                        <p className="text-sm text-gray-500 mb-2">Tỷ Lệ Thu Tiền</p>
-                        <p className="text-xl font-bold">10%</p>
-                    </div>
-
-                </div>
-
-                {/* Stats Cards */}
-                <div className="grid grid-cols-4 gap-6 mb-8">
-
-                    <div className="bg-white p-6 rounded-xl shadow">
-                        <p className="text-sm text-gray-500">Tổng Đơn Hàng</p>
-                        <p className="text-xl font-bold">11</p>
-                    </div>
-
-                    <div className="bg-white p-6 rounded-xl shadow">
-                        <p className="text-sm text-gray-500">Đã Hoàn Thành</p>
-                        <p className="text-xl font-bold text-green-600">8</p>
-                    </div>
-
-                    <div className="bg-white p-6 rounded-xl shadow">
-                        <p className="text-sm text-gray-500">Tổng Tồn Kho</p>
-                        <p className="text-xl font-bold">1145 hộp</p>
-                    </div>
-
-                    <div className="bg-white p-6 rounded-xl shadow">
-                        <p className="text-sm text-gray-500">Tỷ Lệ Hoàn Thành</p>
-                        <p className="text-xl font-bold">73%</p>
-                    </div>
-
-                </div>
-
-                {/* Revenue by Store */}
-                <div className="bg-white rounded-xl shadow mb-8">
-
-                    <div className="p-6 border-b font-semibold">
-                        Doanh Thu Theo Cửa Hàng
-                    </div>
-
-                    <table className="w-full text-left">
-
-                        <thead className="bg-gray-100 text-gray-600 text-sm">
-                            <tr>
-                                <th className="p-4">Cửa Hàng</th>
-                                <th className="p-4">Tổng Đơn</th>
-                                <th className="p-4">Đã Thanh Toán</th>
-                                <th className="p-4">Chờ Thanh Toán</th>
-                                <th className="p-4">Trạng Thái</th>
+                {/* Pending Orders */}
+                <h2 className="text-xl font-bold text-[#3D2B1F] mb-6">Đơn Hàng Chờ Thanh Toán</h2>
+                <div className="bg-white rounded-[24px] border border-gray-100 shadow-sm mb-12 overflow-hidden">
+                    <table className="w-full text-left border-collapse">
+                        <thead>
+                            <tr className="border-b border-gray-50">
+                                <th className="px-8 py-5 text-[11px] font-bold text-gray-400 uppercase tracking-[0.1em]">Mã Đơn Hàng</th>
+                                <th className="px-8 py-5 text-[11px] font-bold text-gray-400 uppercase tracking-[0.1em]">Sản Phẩm</th>
+                                <th className="px-8 py-5 text-[11px] font-bold text-gray-400 uppercase tracking-[0.1em]">Số Tiền</th>
+                                <th className="px-8 py-5 text-[11px] font-bold text-gray-400 uppercase tracking-[0.1em]">Ngày Nhận Hàng</th>
+                                <th className="px-8 py-5 text-[11px] font-bold text-gray-400 uppercase tracking-[0.1em]">Thao Tác</th>
                             </tr>
                         </thead>
-
-                        <tbody>
-                            {storeRevenue.map((store, index) => (
-                                <tr key={index} className="border-t">
-
-                                    <td className="p-4">{store.name}</td>
-
-                                    <td className="p-4">{store.totalOrders}</td>
-
-                                    <td className="p-4 text-green-600 font-semibold">
-                                        {store.paid}
+                        <tbody className="divide-y divide-gray-50">
+                            {pendingOrders.map((order) => (
+                                <tr key={order.order_id} className="hover:bg-gray-50/40 transition-colors group">
+                                    <td className="px-8 py-7">
+                                        <div className="flex items-center gap-3">
+                                            <svg className="text-[#E65C00]" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" /></svg>
+                                            <span className="font-bold text-gray-700">{order.order_code}</span>
+                                        </div>
                                     </td>
-
-                                    <td className="p-4 text-orange-600 font-semibold">
-                                        {store.pending}
+                                    <td className="px-8 py-7">
+                                        <div className="flex flex-col gap-1">
+                                            {order.product_summary}
+                                        </div>
                                     </td>
-
-                                    <td className="p-4">
-                                        {store.status === "active" ? (
-                                            <span className="bg-green-100 text-green-600 px-3 py-1 rounded-full text-sm">
-                                                Hoạt Động
-                                            </span>
-                                        ) : (
-                                            <span className="bg-gray-200 text-gray-600 px-3 py-1 rounded-full text-sm">
-                                                Ngừng Hoạt Động
-                                            </span>
-                                        )}
+                                    <td className="px-8 py-7">
+                                        <div className="flex items-center gap-2 font-bold text-[#E65C00]">
+                                            <span>{formatVND(order?.amount || 0)}</span>
+                                        </div>
                                     </td>
-
+                                    <td className="px-8 py-7 text-[14px] text-gray-500">
+                                        {formatDate(order?.received_date)}
+                                    </td>
+                                    <td className="px-8 py-7">
+                                        <button
+                                            onClick={() => handlePayment(order.order_id)}
+                                            className="bg-[#10B981] hover:bg-[#059669] text-white px-5 py-2.5 rounded-xl text-sm font-bold flex items-center gap-2.5 transition-all transform hover:scale-[1.02] active:scale-[0.98] shadow-sm"
+                                        >
+                                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><rect width="20" height="14" x="2" y="5" rx="2" /><line x1="2" x2="22" y1="10" y2="10" /></svg>
+                                            Xác Nhận Thanh Toán
+                                        </button>
+                                    </td>
                                 </tr>
                             ))}
                         </tbody>
-
                     </table>
-
                 </div>
 
-                {/* Recent Payments */}
-                <div className="bg-white rounded-xl shadow">
-
-                    <div className="p-6 border-b font-semibold">
-                        Thanh Toán Gần Đây
-                    </div>
-
-                    <table className="w-full text-left">
-
-                        <thead className="bg-gray-100 text-gray-600 text-sm">
-                            <tr>
-                                <th className="p-4">Mã Đơn</th>
-                                <th className="p-4">Cửa Hàng</th>
-                                <th className="p-4">Số Tiền</th>
-                                <th className="p-4">Thanh Toán</th>
+                {/* Payment History */}
+                <h2 className="text-xl font-bold text-[#3D2B1F] mb-6">Lịch Sử Thanh Toán</h2>
+                <div className="bg-white rounded-[24px] border border-gray-100 shadow-sm overflow-hidden mb-12">
+                    <table className="w-full text-left border-collapse">
+                        <thead>
+                            <tr className="border-b border-gray-50">
+                                <th className="px-8 py-5 text-[11px] font-bold text-gray-400 uppercase tracking-[0.1em]">Mã Đơn Hàng</th>
+                                <th className="px-8 py-5 text-[11px] font-bold text-gray-400 uppercase tracking-[0.1em]">Số Tiền</th>
+                                <th className="px-8 py-5 text-[11px] font-bold text-gray-400 uppercase tracking-[0.1em]">Ngày Thanh Toán</th>
+                                <th className="px-8 py-5 text-[11px] font-bold text-gray-400 uppercase tracking-[0.1em]">Trạng Thái</th>
                             </tr>
                         </thead>
-
-                        <tbody>
-                            {recentPayments.map((p) => (
-                                <tr key={p.orderId} className="border-t">
-
-                                    <td className="p-4">{p.orderId}</td>
-
-                                    <td className="p-4">{p.store}</td>
-
-                                    <td className="p-4 text-green-600 font-semibold">
-                                        {p.amount}
+                        <tbody className="divide-y divide-gray-50">
+                            {history.map((item) => (
+                                <tr key={item.order_id} className="hover:bg-gray-50/40 transition-colors group">
+                                    <td className="px-8 py-7">
+                                        <div className="flex items-center gap-3">
+                                            <svg className="text-[#DAA06D]" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" /></svg>
+                                            <span className="font-bold text-gray-700">{item.order_code}</span>
+                                        </div>
                                     </td>
-
-                                    <td className="p-4">
-                                        <span className="bg-green-100 text-green-600 px-3 py-1 rounded-full text-sm">
-                                            Đã Thanh Toán
+                                    <td className="px-8 py-7">
+                                        <div className="flex items-center gap-2 font-bold text-gray-800">
+                                            <span>{formatVND(item.amount || 0)}</span>
+                                        </div>
+                                    </td>
+                                    <td className="px-8 py-7 text-[14px] text-gray-500">
+                                        {formatDate(item.paid_at)}
+                                    </td>
+                                    <td className="px-8 py-7">
+                                        <span className="bg-[#D1FAE5] text-[#059669] px-4 py-2 rounded-full text-[11px] font-black uppercase tracking-wider">
+                                            {item.status_label}
                                         </span>
                                     </td>
-
                                 </tr>
                             ))}
                         </tbody>
-
                     </table>
-
                 </div>
-
             </main>
         </div>
     );
-}
+};
+
