@@ -123,7 +123,7 @@ const CreateProductModal: React.FC<CreateProductModalProps> = ({
       setLoading(true);
 
       const res = await fetch(
-        `https://franchise-mooncake-swp.onrender.com/api/Manager_create_products`,
+        `https://franchisemooncake.onrender.com/api/Manager_create_products`,
         {
           method: "POST",
           headers: {

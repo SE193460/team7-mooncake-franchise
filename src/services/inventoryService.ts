@@ -8,7 +8,7 @@ export interface ManagerInventoryItem {
   product_id: string;
   product_code: string;
   product_name: string;
-  category_name: string;
+  description: string;
   quantity: number;
   on_hand_qty: string;
   reserved_qty: string;
@@ -37,6 +37,9 @@ export interface ProductDetail {
   price: string;
   description: string;
   is_active: boolean;
+  expiry_date: string;
+  on_hand_qty: number;
+  min_qty: number;
   materials: ProductMaterial[];
 }
 
@@ -76,6 +79,9 @@ export interface CreateProductRequest {
 export interface UpdateProductRequest extends CreateProductRequest {
   sku: string;
   is_active: boolean;
+  expiry_date: string;
+  on_hand_qty: number;
+  min_qty: number;
 }
 
 export interface InventoryResponse {
@@ -114,7 +120,7 @@ const inventoryService = {
         product_id: item.product_id,
         product_code: item.uom || "N/A",
         product_name: item.product_name,
-        category_name: item.description?.substring(0, 15) || "N/A",
+        description: item.description?.substring(0, 15) || "N/A",
         quantity: parseFloat(item.on_hand_qty) || 0,
         on_hand_qty: String(item.on_hand_qty),
         min_qty: String(item.min_qty),

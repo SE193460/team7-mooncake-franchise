@@ -14,12 +14,12 @@ export default function InventoryManagement() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [openDropdownId, setOpenDropdownId] = useState<string | null>(null);
-  
+
   // Detail Modal State
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<ProductDetail | null>(null);
   const [modalLoading, setModalLoading] = useState(false);
-  
+
   // Create Modal State
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
 
@@ -300,7 +300,7 @@ export default function InventoryManagement() {
                     letterSpacing: "0.5px",
                   }}
                 >
-                  Loại
+                  Mô Tả
                 </th>
                 <th
                   style={{
@@ -398,7 +398,7 @@ export default function InventoryManagement() {
                         color: "#666",
                       }}
                     >
-                      {item.category_name}
+                      {item.description}
                     </td>
                     <td
                       style={{
@@ -560,7 +560,7 @@ export default function InventoryManagement() {
         </div>
       </div>
 
-      <ProductDetailModal 
+      <ProductDetailModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         product={selectedProduct}
