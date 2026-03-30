@@ -9,7 +9,7 @@ interface UsersTableProps {
     loading: boolean;
     error: string | null;
     openMenuId: string | null;
-    onMenuToggle: (userId: string) => void;
+    onMenuToggle: (userId: string | null) => void;
     onEditClick: (user: AdminUser) => void;
     onResetPasswordClick: (user: AdminUser) => void;
     onDisableClick: (user: AdminUser) => void;
@@ -56,7 +56,13 @@ export default function UsersTable({
 
     // Store button coordinates when menu opens
     const handleMenuToggle = (userId: string) => {
-        onMenuToggle(userId);
+        if (openMenuId === userId) {
+            // Close menu if already open
+            onMenuToggle(null);
+        } else {
+            // Open menu
+            onMenuToggle(userId);
+        }
         const buttonElement = buttonRefs.current[userId];
         if (buttonElement && openMenuId !== userId) {
             const rect = buttonElement.getBoundingClientRect();
@@ -152,6 +158,24 @@ export default function UsersTable({
 
     return (
         <>
+            {/* Backdrop to close menu when clicking outside */}
+            {openMenuId && (
+                createPortal(
+                    <div
+                        style={{
+                            position: 'fixed',
+                            top: 0,
+                            left: 0,
+                            right: 0,
+                            bottom: 0,
+                            zIndex: 40,
+                        }}
+                        onClick={() => onMenuToggle(null)}
+                    />,
+                    document.body
+                )
+            )}
+
             <div
                 style={{
                     backgroundColor: 'white',
@@ -304,7 +328,7 @@ export default function UsersTable({
                                         onClick={(e) => {
                                             e.stopPropagation();
                                             onEditClick(user);
-                                            onMenuToggle(user.user_id);
+                                            onMenuToggle(null);
                                         }}
                                         style={{
                                             display: 'block',
@@ -328,7 +352,7 @@ export default function UsersTable({
                                         onClick={(e) => {
                                             e.stopPropagation();
                                             onResetPasswordClick(user);
-                                            onMenuToggle(user.user_id);
+                                            onMenuToggle(null);
                                         }}
                                         style={{
                                             display: 'block',
@@ -352,7 +376,7 @@ export default function UsersTable({
                                         onClick={(e) => {
                                             e.stopPropagation();
                                             onDisableClick(user);
-                                            onMenuToggle(user.user_id);
+                                            onMenuToggle(null);
                                         }}
                                         style={{
                                             display: 'block',

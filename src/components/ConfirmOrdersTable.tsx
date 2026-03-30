@@ -9,6 +9,7 @@ interface Order {
   productDetails?: Array<{
     product_name: string;
     qty: number;
+    uom?: string;
   }>;
   createdDate: string;
   deliveryDate: string;
@@ -54,7 +55,7 @@ export default function ConfirmOrdersTable({
                     <div className={styles.productList}>
                       {order.productDetails.map((product, idx) => (
                         <div key={idx} className={styles.productItem}>
-                          {product.product_name} : {product.qty}
+                          {product.product_name} : {product.qty}{product.uom ? ` ${product.uom}` : ''}
                         </div>
                       ))}
                     </div>

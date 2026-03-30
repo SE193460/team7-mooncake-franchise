@@ -22,6 +22,7 @@ interface Order {
     desired_date: string;
     created_at: string;
     items_preview: OrderItem[];
+    note?: string;
 }
 
 interface OrderDetail {
@@ -32,6 +33,7 @@ interface OrderDetail {
         desired_date: string;
         created_at: string;
         store_name: string;
+        note?: string;
     };
     items: {
         order_item_id: string;
@@ -248,7 +250,6 @@ export default function NewOrdersPage() {
                                     key={order.order_id}
                                     order={order}
                                     onViewDetails={handleViewDetails}
-                                    onReject={openRejectModal}
                                     onAccept={handleAccept}
                                     formatDate={formatDate}
                                 />

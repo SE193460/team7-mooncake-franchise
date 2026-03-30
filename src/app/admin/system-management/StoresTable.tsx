@@ -103,8 +103,10 @@ export default function StoresTable({
                                         </div>
                                     </td>
                                     <td style={{ padding: '18px 24px', fontSize: '14px', color: '#6B7280' }}>
-                                        <div style={{ marginBottom: '4px' }}>📞 {store.store_phone}</div>
-                                        <div>📧 {store.store_email}</div>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                            <span>📧</span>
+                                            {store.manager_email}
+                                        </div>
                                     </td>
                                     <td style={{ padding: '18px 24px', fontSize: '14px', color: '#1F2937' }}>
                                         {store.manager_name}

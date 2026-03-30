@@ -12,14 +12,17 @@ interface UserDistributionSectionProps {
 }
 
 const ROLE_LABELS: Record<string, string> = {
-    'franchise_staff': 'Cửa hàng Franchise',
-    'kitchen_staff': 'Bếp Trung Tâm',
+    'franchise_staff': 'Nhân viên cửa hàng Franchise',
+    'kitchen_staff': 'Nhân viên bếp trung tâm',
     'coordinator': 'Điều phối viên',
-    'manager': 'Quản lý',
-    'admin': 'Quản trị viên',
+    'manager': 'Quản Lý',
+    'admin': 'Quản Trị Viên',
 };
 
 export default function UserDistributionSection({ data }: UserDistributionSectionProps) {
+    // Filter to only show: franchise_staff, kitchen_staff, admin, manager
+    const allowedRoles = ['franchise_staff', 'kitchen_staff', 'admin', 'manager'];
+    const filteredData = data.filter(item => allowedRoles.includes(item.role));
     return (
         <div style={{ marginBottom: '32px' }}>
             <h2 style={{ fontSize: '18px', fontWeight: '700', color: '#1F2937', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -53,11 +56,11 @@ export default function UserDistributionSection({ data }: UserDistributionSectio
                             </tr>
                         </thead>
                         <tbody>
-                            {data.map((item, index) => (
+                            {filteredData.map((item, index) => (
                                 <tr
                                     key={index}
                                     style={{
-                                        borderBottom: index !== data.length - 1 ? '1px solid #F3F4F6' : 'none',
+                                        borderBottom: index !== filteredData.length - 1 ? '1px solid #F3F4F6' : 'none',
                                         transition: 'background-color 0.2s',
                                     }}
                                     onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#F9FAFB'}

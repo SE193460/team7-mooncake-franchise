@@ -225,26 +225,34 @@ export default function Sidebar({ activePage = 'dashboard', type = 'franchise' }
                     style={{
                         display: 'flex',
                         alignItems: 'center',
-                        gap: '10px',
-                        padding: '10px 14px',
-                        border: 'none',
-                        background: 'transparent',
-                        color: 'rgba(255, 255, 255, 0.9)',
-                        fontSize: '14px',
+                        justifyContent: 'center',
+                        padding: '12px 16px',
+                        border: '1.5px solid rgba(255, 107, 53, 0.6)',
+                        backgroundColor: 'rgba(255, 107, 53, 0.1)',
+                        color: 'var(--primary-orange)',
+                        fontSize: '15px',
+                        fontWeight: '500',
                         cursor: 'pointer',
                         width: '100%',
-                        borderRadius: '6px',
-                        transition: 'all 0.2s ease',
+                        borderRadius: '8px',
+                        transition: 'all 0.3s ease',
                     }}
                     onMouseEnter={(e) => {
-                        e.currentTarget.style.backgroundColor = 'rgba(255, 107, 53, 0.15)';
+                        e.currentTarget.style.backgroundColor = 'var(--primary-orange)';
+                        e.currentTarget.style.color = 'white';
+                        e.currentTarget.style.borderColor = 'var(--primary-orange)';
+                        e.currentTarget.style.transform = 'translateY(-2px)';
+                        e.currentTarget.style.boxShadow = '0 4px 12px rgba(255, 107, 53, 0.3)';
                     }}
                     onMouseLeave={(e) => {
-                        e.currentTarget.style.backgroundColor = 'transparent';
+                        e.currentTarget.style.backgroundColor = 'rgba(255, 107, 53, 0.1)';
+                        e.currentTarget.style.color = 'var(--primary-orange)';
+                        e.currentTarget.style.borderColor = 'rgba(255, 107, 53, 0.6)';
+                        e.currentTarget.style.transform = 'translateY(0)';
+                        e.currentTarget.style.boxShadow = 'none';
                     }}
                 >
-                    <span>🚪</span>
-                    <span>Đăng Xuất</span>
+                    Đăng Xuất
                 </button>
             </div>
         </aside>
