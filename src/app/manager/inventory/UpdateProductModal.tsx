@@ -2,9 +2,9 @@
 
 import React, { useState, useEffect } from "react";
 import styles from "./inventory.module.css";
-import inventoryService, { 
-  Material, 
-  ProductType, 
+import inventoryService, {
+  Material,
+  ProductType,
   UpdateProductRequest,
   ProductDetail
 } from "../../../services/inventoryService";
@@ -26,7 +26,7 @@ const UpdateProductModal: React.FC<UpdateProductModalProps> = ({
   const [fetchingData, setFetchingData] = useState(false);
   const [productTypes, setProductTypes] = useState<ProductType[]>([]);
   const [allMaterials, setAllMaterials] = useState<Material[]>([]);
-  
+
   // Form State
   const [formData, setFormData] = useState({
     name: "",
@@ -36,6 +36,9 @@ const UpdateProductModal: React.FC<UpdateProductModalProps> = ({
     price: "",
     description: "",
     is_active: true,
+    expiry_date: "",
+    on_hand_qty: 0,
+    min_qty: 0,
   });
 
   const [materials, setMaterials] = useState<any[]>([]);
@@ -54,10 +57,10 @@ const UpdateProductModal: React.FC<UpdateProductModalProps> = ({
         inventoryService.getAllMaterials(),
         inventoryService.getProductDetail(productId!)
       ]);
-      
+
       setProductTypes(types);
       setAllMaterials(mats);
-      
+
       // Populate form with existing data
       setFormData({
         name: detail.name,
@@ -67,6 +70,9 @@ const UpdateProductModal: React.FC<UpdateProductModalProps> = ({
         price: String(detail.price),
         description: detail.description,
         is_active: detail.is_active,
+        expiry_date: detail.expiry_date,
+        on_hand_qty: detail.on_hand_qty,
+        min_qty: detail.min_qty,
       });
 
       // Map materials
@@ -131,6 +137,9 @@ const UpdateProductModal: React.FC<UpdateProductModalProps> = ({
         price: parseFloat(formData.price),
         description: formData.description,
         is_active: formData.is_active,
+        expiry_date: formData.expiry_date,
+        on_hand_qty: formData.on_hand_qty,
+        min_qty: formData.min_qty,
         materials: materials
           .filter(m => m.material_id && m.qty_required)
           .map(m => ({
@@ -232,6 +241,39 @@ const UpdateProductModal: React.FC<UpdateProductModalProps> = ({
                     type="number"
                     name="price"
                     value={formData.price}
+                    onChange={handleInputChange}
+                    className={styles.input}
+                    required
+                  />
+                </div>
+                <div className={styles.formGroup}>
+                  <label className={styles.label}>Ngày hết hạn *</label>
+                  <input
+                    type="date"
+                    name="expiry_date"
+                    value={formData.expiry_date}
+                    onChange={handleInputChange}
+                    className={styles.input}
+                    required
+                  />
+                </div>
+                <div className={styles.formGroup}>
+                  <label className={styles.label}>Số lượng tồn kho *</label>
+                  <input
+                    type="number"
+                    name="on_hand_qty"
+                    value={formData.on_hand_qty}
+                    onChange={handleInputChange}
+                    className={styles.input}
+                    required
+                  />
+                </div>
+                <div className={styles.formGroup}>
+                  <label className={styles.label}>Số lượng tối thiểu *</label>
+                  <input
+                    type="number"
+                    name="min_qty"
+                    value={formData.min_qty}
                     onChange={handleInputChange}
                     className={styles.input}
                     required
