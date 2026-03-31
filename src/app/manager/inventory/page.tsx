@@ -7,6 +7,7 @@ import inventoryService, { ManagerInventoryItem, ProductDetail } from "../../../
 import ProductDetailModal from "./ProductDetailModal";
 import CreateProductModal from "./CreateProductModal";
 import UpdateProductModal from "./UpdateProductModal";
+import ConfirmModal from "../ConfirmModal";
 import { toast } from "react-toastify";
 
 export default function InventoryManagement() {
@@ -27,6 +28,9 @@ export default function InventoryManagement() {
   // Update Modal State
   const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
   const [updateProductId, setUpdateProductId] = useState<string | null>(null);
+
+  const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
+  const [itemToDelete, setItemToDelete] = useState<{ id: string; name: string } | null>(null);
 
   useEffect(() => {
     fetchInventory();
@@ -53,18 +57,24 @@ export default function InventoryManagement() {
   const banhNuongCount = cardsData?.baked_mooncake || 0;
   const banhDeoCount = cardsData?.sticky_mooncake || 0;
 
-  const handleDelete = async (id: string, name: string) => {
-    if (window.confirm(`Bạn có chắc chắn muốn xóa "${name}" khỏi kho?`)) {
-      try {
-        await inventoryService.deleteInventoryItem(id);
-        // Refresh data or filter out the deleted item
-        setInventoryData(prev => prev.filter(item => item.inventory_item_id !== id));
-        toast.success("Xóa sản phẩm thành công!");
-      } catch (err) {
-        toast.error("Có lỗi xảy ra khi xóa sản phẩm.");
-      }
-    }
+  const handleDelete = (id: string, name: string) => {
+    setItemToDelete({ id, name });
+    setIsConfirmModalOpen(true);
     setOpenDropdownId(null);
+  };
+
+  const confirmDelete = async () => {
+    if (!itemToDelete) return;
+    try {
+      await inventoryService.deleteInventoryItem(itemToDelete.id);
+      // Refresh data or filter out the deleted item
+      setInventoryData((prev) => prev.filter((item) => item.inventory_item_id !== itemToDelete.id));
+      toast.success("Xóa sản phẩm thành công!");
+    } catch (err) {
+      toast.error("Có lỗi xảy ra khi xóa sản phẩm.");
+    } finally {
+      setItemToDelete(null);
+    }
   };
 
   const handleViewDetail = async (productId: string) => {
@@ -578,6 +588,16 @@ export default function InventoryManagement() {
         productId={updateProductId}
         onClose={() => setIsUpdateModalOpen(false)}
         onSuccess={fetchInventory}
+      />
+
+      <ConfirmModal
+        isOpen={isConfirmModalOpen}
+        onClose={() => setIsConfirmModalOpen(false)}
+        onConfirm={confirmDelete}
+        title="Xác nhận xóa"
+        message={`Bạn có chắc chắn muốn xóa "${itemToDelete?.name}" khỏi kho?`}
+        confirmText="Xóa"
+        isDanger={true}
       />
     </div>
   );

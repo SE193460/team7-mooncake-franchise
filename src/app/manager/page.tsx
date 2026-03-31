@@ -12,6 +12,7 @@ import materialService from "../../services/materialService";
 import CreateMaterialModal from "./CreateMaterialModal";
 import MaterialDetailModal from "./MaterialDetailModal";
 import UpdateMaterialModal from "./UpdateMaterialModal";
+import ConfirmModal from "./ConfirmModal";
 import { toast } from "react-toastify";
 
 export default function ManagerDashboard() {
@@ -34,6 +35,9 @@ export default function ManagerDashboard() {
   const [selectedMaterialId, setSelectedMaterialId] = useState<string | null>(null);
   const [selectedMaterial, setSelectedMaterial] = useState<any | null>(null);
   const [modalLoading, setModalLoading] = useState(false);
+
+  const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
+  const [itemToDelete, setItemToDelete] = useState<{ id: string; name: string } | null>(null);
 
   const fetchDashboard = async () => {
     try {
@@ -58,25 +62,31 @@ export default function ManagerDashboard() {
     }
   };
 
-  const handleDelete = async (id: string, name: string) => {
+  const handleDelete = (id: string, name: string) => {
     if (!id) {
       toast.error("Lỗi: Không tìm thấy ID nguyên liệu để xóa");
       return;
     }
-    if (window.confirm(`Bạn có chắc chắn muốn xóa nguyên liệu "${name}"?`)) {
-      try {
-        const res = await materialService.deleteMaterial(id);
-        if (res.success) {
-          toast.success("Xóa thành công!");
-          fetchDashboard();
-        } else {
-          toast.error(res.message || "Xóa thất bại");
-        }
-      } catch (err) {
-        toast.error("Có lỗi xảy ra khi xóa");
-      }
-    }
+    setItemToDelete({ id, name });
+    setIsConfirmModalOpen(true);
     setOpenDropdownId(null);
+  };
+
+  const confirmDelete = async () => {
+    if (!itemToDelete) return;
+    try {
+      const res = await materialService.deleteMaterial(itemToDelete.id);
+      if (res.success) {
+        toast.success("Xóa thành công!");
+        fetchDashboard();
+      } else {
+        toast.error(res.message || "Xóa thất bại");
+      }
+    } catch (err) {
+      toast.error("Có lỗi xảy ra khi xóa");
+    } finally {
+      setItemToDelete(null);
+    }
   };
 
   const handleViewDetail = async (id: string) => {
@@ -357,6 +367,16 @@ export default function ManagerDashboard() {
         materialId={selectedMaterialId}
         onClose={() => setIsUpdateModalOpen(false)}
         onSuccess={fetchDashboard}
+      />
+
+      <ConfirmModal
+        isOpen={isConfirmModalOpen}
+        onClose={() => setIsConfirmModalOpen(false)}
+        onConfirm={confirmDelete}
+        title="Xác nhận xóa"
+        message={`Bạn có chắc chắn muốn xóa nguyên liệu "${itemToDelete?.name}"?`}
+        confirmText="Xóa"
+        isDanger={true}
       />
     </div>
   );
