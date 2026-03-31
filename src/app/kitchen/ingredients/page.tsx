@@ -181,18 +181,33 @@ export default function IngredientsPage() {
                                         <span style={{ color: '#1f2937', fontSize: '14px', fontWeight: '500' }}>
                                             {item.on_hand_qty} {item.uom}
                                         </span>
-                                        <span
-                                            style={{
-                                                backgroundColor: '#dcfce7',
-                                                color: '#16a34a',
-                                                padding: '2px 8px',
-                                                borderRadius: '10px',
-                                                fontSize: '11px',
-                                                fontWeight: '500',
-                                            }}
-                                        >
-                                            Đủ
-                                        </span>
+                                        {item.on_hand_qty >= item.min_stock ? (
+                                            <span
+                                                style={{
+                                                    backgroundColor: '#dcfce7',
+                                                    color: '#16a34a',
+                                                    padding: '2px 8px',
+                                                    borderRadius: '10px',
+                                                    fontSize: '11px',
+                                                    fontWeight: '500',
+                                                }}
+                                            >
+                                                Đủ
+                                            </span>
+                                        ) : (
+                                            <span
+                                                style={{
+                                                    backgroundColor: '#fee2e2',
+                                                    color: '#dc2626',
+                                                    padding: '2px 8px',
+                                                    borderRadius: '10px',
+                                                    fontSize: '11px',
+                                                    fontWeight: '500',
+                                                }}
+                                            >
+                                                Thiếu
+                                            </span>
+                                        )}
                                     </div>
 
                                     {/* Expiry Date */}

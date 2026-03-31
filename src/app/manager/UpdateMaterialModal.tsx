@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 import styles from "./inventory/inventory.module.css";
 import materialService, { MaterialType, CentralKitchen } from "../../services/materialService";
+import { toast } from "react-toastify";
 
 interface UpdateMaterialModalProps {
   isOpen: boolean;
@@ -117,7 +118,7 @@ const UpdateMaterialModal: React.FC<UpdateMaterialModalProps> = ({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.name || !formData.materials_type_id || !formData.uom || !formData.material_code) {
-      alert("Vui lòng điền đầy đủ các thông tin bắt buộc.");
+      toast.error("Vui lòng điền đầy đủ các thông tin bắt buộc.");
       return;
     }
 
@@ -138,14 +139,14 @@ const UpdateMaterialModal: React.FC<UpdateMaterialModalProps> = ({
 
       const response = await materialService.updateMaterial(materialId!.toString(), requestData);
       if (response.success) {
-        alert("Cập nhật nguyên liệu thành công!");
+        toast.success("Cập nhật nguyên liệu thành công!");
         onSuccess();
         onClose();
       } else {
-        alert(response.message || "Có lỗi xảy ra khi cập nhật nguyên liệu.");
+        toast.error(response.message || "Có lỗi xảy ra khi cập nhật nguyên liệu.");
       }
     } catch (err: any) {
-      alert(err.message || "Có lỗi xảy ra khi kết nối máy chủ.");
+      toast.error(err.message || "Có lỗi xảy ra khi kết nối máy chủ.");
     } finally {
       setLoading(false);
     }

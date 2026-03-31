@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 import styles from "./inventory.module.css";
 import inventoryService, { Material, ProductType, CreateProductRequest } from "../../../services/inventoryService";
+import { toast } from "react-toastify";
 
 
 interface CreateProductModalProps {
@@ -85,12 +86,20 @@ const CreateProductModal: React.FC<CreateProductModalProps> = ({
     const token = localStorage.getItem("token");
 
     if (!token) {
-      alert("Bạn chưa đăng nhập");
+      toast.error("Bạn chưa đăng nhập");
       return;
     }
 
-    if (!formData.name || !formData.product_type_id || !formData.price) {
-      alert("Vui lòng điền đầy đủ thông tin");
+    if (!formData.name) {
+      toast.error("Vui lòng điền đầy đủ thông tin");
+      return;
+    }
+    if (!formData.product_type_id) {
+      toast.error("Vui lòng chọn loại sản phẩm");
+      return;
+    }
+    if (!formData.price) {
+      toast.error("Vui lòng nhập giá");
       return;
     }
 
@@ -104,7 +113,7 @@ const CreateProductModal: React.FC<CreateProductModalProps> = ({
       }));
 
     if (validMaterials.length === 0) {
-      alert("Phải có ít nhất 1 nguyên liệu");
+      toast.error("Phải có ít nhất 1 nguyên liệu");
       return;
     }
 
@@ -138,17 +147,17 @@ const CreateProductModal: React.FC<CreateProductModalProps> = ({
       console.log("🔥 RESPONSE:", data); // DEBUG
 
       if (!res.ok) {
-        alert(data.message || "Tạo thất bại");
+        toast.error(data.message || "Tạo thất bại");
         return;
       }
 
-      alert("Tạo sản phẩm thành công!");
+      toast.success("Tạo sản phẩm thành công!");
       onSuccess();
       onClose();
 
     } catch (err) {
       console.error(err);
-      alert("Server error");
+      toast.error("Server error");
     } finally {
       setLoading(false);
     }

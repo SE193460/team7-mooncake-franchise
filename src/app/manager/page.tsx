@@ -12,6 +12,7 @@ import materialService from "../../services/materialService";
 import CreateMaterialModal from "./CreateMaterialModal";
 import MaterialDetailModal from "./MaterialDetailModal";
 import UpdateMaterialModal from "./UpdateMaterialModal";
+import { toast } from "react-toastify";
 
 export default function ManagerDashboard() {
   const [loading, setLoading] = useState(true);
@@ -38,7 +39,7 @@ export default function ManagerDashboard() {
     try {
       const token = localStorage.getItem("token");
       if (!token) {
-        setError("Vui lòng đăng nhập");
+        toast.error("Vui lòng đăng nhập");
         setLoading(false);
         return;
       }
@@ -48,10 +49,10 @@ export default function ManagerDashboard() {
         setMaterials(res.data.materials_inventory);
         console.log("materials_inventory", res.data.materials_inventory);
       } else {
-        setError(res.message || "Lỗi khi tải dữ liệu");
+        toast.error(res.message || "Lỗi khi tải dữ liệu");
       }
     } catch (err) {
-      setError("Không thể kết nối đến máy chủ");
+      toast.error("Không thể kết nối đến máy chủ");
     } finally {
       setLoading(false);
     }
@@ -59,20 +60,20 @@ export default function ManagerDashboard() {
 
   const handleDelete = async (id: string, name: string) => {
     if (!id) {
-      alert("Lỗi: Không tìm thấy ID nguyên liệu để xóa");
+      toast.error("Lỗi: Không tìm thấy ID nguyên liệu để xóa");
       return;
     }
     if (window.confirm(`Bạn có chắc chắn muốn xóa nguyên liệu "${name}"?`)) {
       try {
         const res = await materialService.deleteMaterial(id);
         if (res.success) {
-          alert("Xóa thành công!");
+          toast.success("Xóa thành công!");
           fetchDashboard();
         } else {
-          alert(res.message || "Xóa thất bại");
+          toast.error(res.message || "Xóa thất bại");
         }
       } catch (err) {
-        alert("Có lỗi xảy ra khi xóa");
+        toast.error("Có lỗi xảy ra khi xóa");
       }
     }
     setOpenDropdownId(null);
@@ -81,7 +82,7 @@ export default function ManagerDashboard() {
   const handleViewDetail = async (id: string) => {
     try {
       if (!id) {
-        alert("Lỗi: Không tìm thấy ID nguyên liệu");
+        toast.error("Lỗi: Không tìm thấy ID nguyên liệu");
         return;
       }
       setOpenDropdownId(null);
@@ -92,7 +93,7 @@ export default function ManagerDashboard() {
         setSelectedMaterial(res.data);
       }
     } catch (err) {
-      alert("Lỗi khi tải chi tiết");
+      toast.error("Lỗi khi tải chi tiết");
     } finally {
       setModalLoading(false);
     }
@@ -100,7 +101,7 @@ export default function ManagerDashboard() {
 
   const handleEdit = (id: string) => {
     if (!id) {
-      alert("Lỗi: Không tìm thấy ID nguyên liệu để chỉnh sửa");
+      toast.error("Lỗi: Không tìm thấy ID nguyên liệu để chỉnh sửa");
       return;
     }
     setOpenDropdownId(null);

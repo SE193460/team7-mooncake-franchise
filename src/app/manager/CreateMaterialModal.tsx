@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 import styles from "./inventory/inventory.module.css";
 import materialService, { MaterialType, CentralKitchen } from "../../services/materialService";
+import { toast } from "react-toastify";
 
 interface CreateMaterialModalProps {
   isOpen: boolean;
@@ -68,8 +69,20 @@ const CreateMaterialModal: React.FC<CreateMaterialModalProps> = ({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formData.name || !formData.materials_type_id || !formData.uom || !formData.material_code) {
-      alert("Vui lòng điền đầy đủ các thông tin bắt buộc.");
+    if (!formData.name) {
+      toast.error("Vui lòng nhập tên nguyên liệu");
+      return;
+    }
+    if (!formData.materials_type_id) {
+      toast.error("Vui lòng chọn loại nguyên liệu");
+      return;
+    }
+    if (!formData.uom) {
+      toast.error("Vui lòng nhập đơn vị tính");
+      return;
+    }
+    if (!formData.material_code) {
+      toast.error("Vui lòng nhập mã nguyên liệu");
       return;
     }
 
@@ -89,7 +102,7 @@ const CreateMaterialModal: React.FC<CreateMaterialModalProps> = ({
 
       const response = await materialService.createMaterial(requestData);
       if (response.success) {
-        alert("Tạo nguyên liệu thành công!");
+        toast.success("Tạo nguyên liệu thành công!");
         onSuccess();
         onClose();
         // Reset form
@@ -105,10 +118,10 @@ const CreateMaterialModal: React.FC<CreateMaterialModalProps> = ({
           min_stock: "",
         });
       } else {
-        alert(response.message || "Có lỗi xảy ra khi tạo nguyên liệu.");
+        toast.error(response.message || "Có lỗi xảy ra khi tạo nguyên liệu.");
       }
     } catch (err: any) {
-      alert(err.message || "Có lỗi xảy ra khi kết nối máy chủ.");
+      toast.error(err.message || "Có lỗi xảy ra khi kết nối máy chủ.");
     } finally {
       setLoading(false);
     }
