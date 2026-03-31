@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Sidebar from "../../../components/Sidebar";
+import { toast } from "react-toastify";
 
 export default function ManagerReportPage() {
 
@@ -79,18 +80,18 @@ export default function ManagerReportPage() {
             const data = await res.json();
 
             if (!res.ok) {
-                alert(data.message || "Lỗi xác nhận thanh toán");
+                toast.error(data.message || "Lỗi xác nhận thanh toán");
                 return;
             }
 
-            alert("Xác nhận thanh toán thành công!");
+            toast.success("Xác nhận thanh toán thành công!");
 
             // 👉 cập nhật UI (cách 1: reload lại data)
             window.location.reload();
 
         } catch (err) {
             console.error(err);
-            alert("Server error");
+            toast.error("Server error");
         }
     };
 
@@ -150,7 +151,7 @@ export default function ManagerReportPage() {
                                     <td className="px-8 py-7">
                                         <div className="flex items-center gap-3">
                                             <svg className="text-[#E65C00]" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" /></svg>
-                                            <span className="font-bold text-gray-700">{order.order_code}</span>
+                                            <span className="font-bold text-gray-700">{order.order_id}</span>
                                         </div>
                                     </td>
                                     <td className="px-8 py-7">
