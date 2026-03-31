@@ -245,7 +245,7 @@ const CreateProductModal: React.FC<CreateProductModalProps> = ({
 
             {materials.length > 0 && (
               <div style={{ marginBottom: "12px" }}>
-                <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr 1fr 2fr 40px", gap: "12px", marginBottom: "8px" }}>
+                <div className={styles.recipeHeader}>
                   <span style={{ fontSize: "12px", fontWeight: "600", color: "#666" }}>Nguyên liệu</span>
                   <span style={{ fontSize: "12px", fontWeight: "600", color: "#666" }}>Số lượng</span>
                   <span style={{ fontSize: "12px", fontWeight: "600", color: "#666" }}>ĐVT</span>
@@ -257,7 +257,7 @@ const CreateProductModal: React.FC<CreateProductModalProps> = ({
                     <select
                       value={m.material_id}
                       onChange={(e) => handleMaterialChange(index, "material_id", e.target.value)}
-                      className={styles.select}
+                      className={`${styles.select} ${styles.recipeSelect}`}
                     >
                       <option value="">Chọn nguyên liệu</option>
                       {allMaterials.map(mat => (
@@ -271,13 +271,13 @@ const CreateProductModal: React.FC<CreateProductModalProps> = ({
                       step="0.01"
                       value={m.qty_required}
                       onChange={(e) => handleMaterialChange(index, "qty_required", e.target.value)}
-                      className={styles.input}
+                      className={`${styles.input} ${styles.recipeInput}`}
                       placeholder="0.0"
                     />
                     <input
                       type="text"
                       value={m.uom}
-                      className={styles.input}
+                      className={`${styles.input} ${styles.recipeInput}`}
                       onChange={(e) => handleMaterialChange(index, "uom", e.target.value)}
                       style={{ backgroundColor: "#f9f9f9", color: "#666" }}
                     />
@@ -285,7 +285,7 @@ const CreateProductModal: React.FC<CreateProductModalProps> = ({
                       type="text"
                       value={m.note}
                       onChange={(e) => handleMaterialChange(index, "note", e.target.value)}
-                      className={styles.input}
+                      className={`${styles.input} ${styles.recipeInput}`}
                       placeholder="Ghi chú..."
                     />
                     <button

@@ -151,7 +151,7 @@ export default function ManagerDashboard() {
             <div
               style={{
                 display: "grid",
-                gridTemplateColumns: "repeat(4, 1fr)",
+                gridTemplateColumns: "repeat(3, 1fr)",
                 gap: "24px",
                 marginBottom: "40px",
               }}
@@ -224,29 +224,6 @@ export default function ManagerDashboard() {
                   </div>
                 </div>
               </div>
-
-              {/* Total Material Card */}
-              <div
-                style={{
-                  backgroundColor: "white",
-                  borderRadius: "12px",
-                  padding: "24px",
-                  boxShadow: "0 1px 3px rgba(0,0,0,0.08)",
-                  border: "1px solid #eee",
-                }}
-              >
-                <div style={{ display: "flex", justifyContent: "space-between" }}>
-                  <div>
-                    <p style={{ fontSize: "14px", color: "#666", margin: "0 0 8px 0" }}>Tồn Kho Nguyên Liệu</p>
-                    <p style={{ fontSize: "36px", fontWeight: "bold", color: "#3d3530", margin: 0 }}>
-                      {cards?.total_material_stock || 0}
-                    </p>
-                  </div>
-                  <div style={{ width: "48px", height: "48px", backgroundColor: "#fff5eb", borderRadius: "12px", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                    <span style={{ fontSize: "24px" }}>🌾</span>
-                  </div>
-                </div>
-              </div>
             </div>
 
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "20px" }}>
@@ -288,7 +265,7 @@ export default function ManagerDashboard() {
                     <tr key={item.inventory_item_id} style={{ borderTop: "1px solid #f0f0f0" }}>
                       <td style={{ padding: "16px 24px", fontSize: "14px", fontWeight: "500", color: "#3d3530" }}>{item.material_name}</td>
                       <td style={{ padding: "16px 24px", fontSize: "14px", color: "#666" }}>{item.material_type}</td>
-                      <td style={{ padding: "16px 24px", fontSize: "14px", color: "#3d3530" }}>{formatQuantity(item.on_hand_qty)} {item.uom}</td>
+                      <td style={{ padding: "16px 24px", fontSize: "14px", color: "#3d3530" }}>{item.on_hand_qty} {item.uom}</td>
                       <td style={{ padding: "16px 24px", fontSize: "14px", color: "#666" }}>{formatDate(item.expiry_date)}</td>
                       <td style={{ padding: "16px 24px", textAlign: "center", position: "relative" }}>
                         <button

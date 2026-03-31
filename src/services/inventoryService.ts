@@ -10,11 +10,11 @@ export interface ManagerInventoryItem {
   product_name: string;
   description: string;
   quantity: number;
-  on_hand_qty: string;
-  reserved_qty: string;
+  on_hand_qty: number;
+  reserved_qty: number;
   last_updated_at: string;
   expiry_date: string | null;
-  min_qty?: string;
+  min_qty: number;
 }
 
 export interface ProductMaterial {
@@ -22,7 +22,7 @@ export interface ProductMaterial {
   material_id: string;
   material_code: string;
   material_name: string;
-  qty_required: string;
+  qty_required: number;
   uom: string;
   note: string;
 }
@@ -122,9 +122,9 @@ const inventoryService = {
         product_name: item.product_name,
         description: item.description?.substring(0, 15) || "N/A",
         quantity: parseFloat(item.on_hand_qty) || 0,
-        on_hand_qty: String(item.on_hand_qty),
-        min_qty: String(item.min_qty),
-        reserved_qty: "0",
+        on_hand_qty: parseFloat(item.on_hand_qty) || 0,
+        min_qty: parseFloat(item.min_qty) || 0,
+        reserved_qty: parseFloat(item.reserved_qty) || 0,
         last_updated_at: new Date().toISOString(),
         expiry_date: item.expiry_date
       }));
