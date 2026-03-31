@@ -137,19 +137,6 @@ export default function KitchenDashboard() {
                             <h2 style={{ fontSize: '18px', fontWeight: '600', color: 'var(--text-primary)' }}>
                                 Đơn Hàng Chờ Xử Lý
                             </h2>
-                            <button
-                                style={{
-                                    padding: '8px 16px',
-                                    backgroundColor: 'white',
-                                    border: '1px solid var(--border-color)',
-                                    borderRadius: '8px',
-                                    fontSize: '14px',
-                                    color: 'var(--text-primary)',
-                                    cursor: 'pointer',
-                                }}
-                            >
-                                Xem Tất Cả
-                            </button>
                         </div>
 
                         {/* Order Items */}
@@ -209,19 +196,6 @@ export default function KitchenDashboard() {
                             <h2 style={{ fontSize: '18px', fontWeight: '600', color: 'var(--text-primary)' }}>
                                 Cảnh Báo Tồn Kho
                             </h2>
-                            <button
-                                style={{
-                                    padding: '8px 16px',
-                                    backgroundColor: 'white',
-                                    border: '1px solid var(--border-color)',
-                                    borderRadius: '8px',
-                                    fontSize: '14px',
-                                    color: 'var(--text-primary)',
-                                    cursor: 'pointer',
-                                }}
-                            >
-                                Xem Chi Tiết
-                            </button>
                         </div>
 
                         {/* Warning Items */}

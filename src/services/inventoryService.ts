@@ -8,13 +8,13 @@ export interface ManagerInventoryItem {
   product_id: string;
   product_code: string;
   product_name: string;
-  category_name: string;
+  description: string;
   quantity: number;
-  on_hand_qty: string;
-  reserved_qty: string;
+  on_hand_qty: number;
+  reserved_qty: number;
   last_updated_at: string;
   expiry_date: string | null;
-  min_qty?: string;
+  min_qty: number;
 }
 
 export interface ProductMaterial {
@@ -22,7 +22,7 @@ export interface ProductMaterial {
   material_id: string;
   material_code: string;
   material_name: string;
-  qty_required: string;
+  qty_required: number;
   uom: string;
   note: string;
 }
@@ -37,6 +37,9 @@ export interface ProductDetail {
   price: string;
   description: string;
   is_active: boolean;
+  expiry_date: string;
+  on_hand_qty: number;
+  min_qty: number;
   materials: ProductMaterial[];
 }
 
@@ -76,6 +79,9 @@ export interface CreateProductRequest {
 export interface UpdateProductRequest extends CreateProductRequest {
   sku: string;
   is_active: boolean;
+  expiry_date: string;
+  on_hand_qty: number;
+  min_qty: number;
 }
 
 export interface InventoryResponse {
@@ -114,11 +120,11 @@ const inventoryService = {
         product_id: item.product_id,
         product_code: item.uom || "N/A",
         product_name: item.product_name,
-        category_name: item.description?.substring(0, 15) || "N/A",
+        description: item.description?.substring(0, 15) || "N/A",
         quantity: parseFloat(item.on_hand_qty) || 0,
-        on_hand_qty: String(item.on_hand_qty),
-        min_qty: String(item.min_qty),
-        reserved_qty: "0",
+        on_hand_qty: parseFloat(item.on_hand_qty) || 0,
+        min_qty: parseFloat(item.min_qty) || 0,
+        reserved_qty: parseFloat(item.reserved_qty) || 0,
         last_updated_at: new Date().toISOString(),
         expiry_date: item.expiry_date
       }));

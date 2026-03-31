@@ -1,4 +1,5 @@
 const BASE_URL = "https://franchisemooncake.onrender.com/api";
+const BASE_URL1 = "http://localhost:8000/api";
 
 export async function getFranchiseDashboard(token: string) {
   const res = await fetch(`${BASE_URL}/franchiseStaff_dashboard`, {
@@ -30,7 +31,7 @@ export interface MaterialInventory {
   material_name: string;
   cost_price: number;
   min_stock: number;
-  on_hand_qty: string;
+  on_hand_qty: number;
   expiry_date: string;
   uom: string;
   material_type: string;
@@ -43,7 +44,6 @@ export interface ManagerDashboardResponse {
     cards: ManagerDashboardCards;
     materials_inventory: MaterialInventory[];
     low_stock_alerts: MaterialInventory[];
-    threshold: number;
   };
   message: string | null;
 }

@@ -14,12 +14,12 @@ export default function InventoryManagement() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [openDropdownId, setOpenDropdownId] = useState<string | null>(null);
-  
+
   // Detail Modal State
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<ProductDetail | null>(null);
   const [modalLoading, setModalLoading] = useState(false);
-  
+
   // Create Modal State
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
 
@@ -48,8 +48,6 @@ export default function InventoryManagement() {
 
   // Calculate statistics from backend real data
   const totalProducts = cardsData?.total_products || 0;
-  // Using a threshold of 50 for "low stock"
-  const lowStockThreshold = 50;
   const lowStockCount = cardsData?.low_stock || 0;
   const banhNuongCount = cardsData?.baked_mooncake || 0;
   const banhDeoCount = cardsData?.sticky_mooncake || 0;
@@ -94,8 +92,8 @@ export default function InventoryManagement() {
     return () => window.removeEventListener("click", handleClickOutside);
   }, []);
 
-  const getStatusStyle = (quantity: number) => {
-    if (quantity >= lowStockThreshold) {
+  const getStatusStyle = (on_hand_qty: number, min_qty: number) => {
+    if (on_hand_qty >= min_qty) {
       return {
         color: "#22c55e",
         icon: "↗",
@@ -187,7 +185,7 @@ export default function InventoryManagement() {
                 marginBottom: "8px",
               }}
             >
-              Tồn Kho Thấp (&lt;{lowStockThreshold})
+              Tồn Kho Thấp
             </p>
             <p className={styles.cardValue} style={{ color: "#f97316" }}>
               {lowStockCount}
@@ -300,7 +298,7 @@ export default function InventoryManagement() {
                     letterSpacing: "0.5px",
                   }}
                 >
-                  Loại
+                  Mô Tả
                 </th>
                 <th
                   style={{
@@ -360,7 +358,7 @@ export default function InventoryManagement() {
 
             <tbody>
               {inventoryData.map((item, index) => {
-                const statusStyle = getStatusStyle(item.quantity);
+                const statusStyle = getStatusStyle(item.on_hand_qty, item.min_qty);
                 return (
                   <tr
                     key={item.inventory_item_id}
@@ -398,7 +396,7 @@ export default function InventoryManagement() {
                         color: "#666",
                       }}
                     >
-                      {item.category_name}
+                      {item.description}
                     </td>
                     <td
                       style={{
@@ -560,7 +558,7 @@ export default function InventoryManagement() {
         </div>
       </div>
 
-      <ProductDetailModal 
+      <ProductDetailModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         product={selectedProduct}
