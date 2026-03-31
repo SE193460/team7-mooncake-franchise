@@ -8,6 +8,7 @@ import inventoryService, {
   UpdateProductRequest,
   ProductDetail
 } from "../../../services/inventoryService";
+import { toast } from "react-toastify";
 
 interface UpdateProductModalProps {
   isOpen: boolean;
@@ -85,7 +86,7 @@ const UpdateProductModal: React.FC<UpdateProductModalProps> = ({
 
     } catch (err) {
       console.error("Error fetching data:", err);
-      alert("Không thể tải thông tin sản phẩm.");
+      toast.error("Không thể tải thông tin sản phẩm.");
       onClose();
     } finally {
       setFetchingData(false);
@@ -120,10 +121,21 @@ const UpdateProductModal: React.FC<UpdateProductModalProps> = ({
     setMaterials(materials.filter((_, i) => i !== index));
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!formData.name || !formData.product_type_id || !formData.price || !formData.sku) {
-      alert("Vui lòng điền đầy đủ các thông tin bắt buộc.");
+  const handleSubmit = async () => {
+    if (!formData.name) {
+      toast.error("Vui lòng nhập tên sản phẩm.");
+      return;
+    }
+    if (!formData.product_type_id) {
+      toast.error("Vui lòng chọn loại sản phẩm.");
+      return;
+    }
+    if (!formData.price) {
+      toast.error("Vui lòng nhập giá.");
+      return;
+    }
+    if (!formData.sku) {
+      toast.error("Vui lòng nhập mã SKU.");
       return;
     }
 
@@ -152,14 +164,14 @@ const UpdateProductModal: React.FC<UpdateProductModalProps> = ({
 
       const response = await inventoryService.updateProduct(productId!, requestData);
       if (response.success) {
-        alert("Cập nhật sản phẩm thành công!");
+        toast.success("Cập nhật sản phẩm thành công!");
         onSuccess();
         onClose();
       } else {
-        alert(response.message || "Có lỗi xảy ra khi cập nhật sản phẩm.");
+        toast.error(response.message || "Có lỗi xảy ra khi cập nhật sản phẩm.");
       }
     } catch (err: any) {
-      alert(err.message || "Có lỗi xảy ra khi kết nối máy chủ.");
+      toast.error(err.message || "Có lỗi xảy ra khi kết nối máy chủ.");
     } finally {
       setLoading(false);
     }

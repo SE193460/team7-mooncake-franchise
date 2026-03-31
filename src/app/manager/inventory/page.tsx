@@ -7,6 +7,7 @@ import inventoryService, { ManagerInventoryItem, ProductDetail } from "../../../
 import ProductDetailModal from "./ProductDetailModal";
 import CreateProductModal from "./CreateProductModal";
 import UpdateProductModal from "./UpdateProductModal";
+import { toast } from "react-toastify";
 
 export default function InventoryManagement() {
   const [inventoryData, setInventoryData] = useState<ManagerInventoryItem[]>([]);
@@ -39,7 +40,7 @@ export default function InventoryManagement() {
       setCardsData(data.cards);
       setError(null);
     } catch (err) {
-      setError("Không thể tải dữ liệu tồn kho. Vui lòng thử lại sau.");
+      toast.error("Không thể tải dữ liệu tồn kho. Vui lòng thử lại sau.");
       console.error(err);
     } finally {
       setLoading(false);
@@ -58,8 +59,9 @@ export default function InventoryManagement() {
         await inventoryService.deleteInventoryItem(id);
         // Refresh data or filter out the deleted item
         setInventoryData(prev => prev.filter(item => item.inventory_item_id !== id));
+        toast.success("Xóa sản phẩm thành công!");
       } catch (err) {
-        alert("Có lỗi xảy ra khi xóa sản phẩm.");
+        toast.error("Có lỗi xảy ra khi xóa sản phẩm.");
       }
     }
     setOpenDropdownId(null);
@@ -73,7 +75,7 @@ export default function InventoryManagement() {
       const detail = await inventoryService.getProductDetail(productId);
       setSelectedProduct(detail);
     } catch (err) {
-      alert("Không thể tải chi tiết sản phẩm.");
+      toast.error("Không thể tải chi tiết sản phẩm.");
       setIsModalOpen(false);
     } finally {
       setModalLoading(false);
