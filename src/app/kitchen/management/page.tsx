@@ -4,7 +4,6 @@ import React, { useEffect, useState } from 'react';
 import { toast } from 'react-toastify';
 import Sidebar from '../../../components/Sidebar';
 import styles from './management.module.css';
-import SummaryCards from './SummaryCards';
 import SearchAndFilters from './SearchAndFilters';
 import OrdersTable from './OrdersTable';
 import type { Order } from './types';
@@ -155,16 +154,6 @@ export default function KitchenOrderManagementPage() {
           onSearchChange={setSearchTerm}
           statusFilter={statusFilter}
           onStatusFilterChange={setStatusFilter}
-        />
-
-        {/* Summary */}
-        <SummaryCards
-          totalOrders={orders.length}
-          filteredOrdersCount={filteredOrders.length}
-          totalAmount={formatVND(
-            orders.reduce((sum, order) => sum + parseFloat(order.total_amount || '0'), 0)
-          )}
-          formatVND={formatVND}
         />
 
         {/* Table */}

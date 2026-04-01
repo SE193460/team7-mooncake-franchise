@@ -6,16 +6,12 @@ interface KitchensTableProps {
     kitchens?: CentralKitchen[];
     loading?: boolean;
     error?: string | null;
-    onEditClick?: (kitchen: CentralKitchen) => void;
-    onDeleteClick?: (kitchen: CentralKitchen) => void;
 }
 
 export default function KitchensTable({ 
     kitchens = [], 
     loading = false, 
     error = null,
-    onEditClick,
-    onDeleteClick,
 }: KitchensTableProps) {
     const getStatusBadgeStyle = (status: string) => ({
         backgroundColor: status === 'active' ? '#D1FAE5' : '#FEE2E2',
@@ -48,27 +44,24 @@ export default function KitchensTable({
                             <th style={{ padding: '14px 24px', textAlign: 'left', fontSize: '12px', fontWeight: '600', color: '#6B7280', textTransform: 'uppercase' }}>
                                 TRẠNG THÁI
                             </th>
-                            <th style={{ padding: '14px 24px', textAlign: 'center', fontSize: '12px', fontWeight: '600', color: '#6B7280', textTransform: 'uppercase' }}>
-                                THAO TÁC
-                            </th>
                         </tr>
                     </thead>
                     <tbody>
                         {loading ? (
                             <tr>
-                                <td colSpan={5} style={{ padding: '32px 24px', textAlign: 'center', color: '#6B7280' }}>
+                                <td colSpan={4} style={{ padding: '32px 24px', textAlign: 'center', color: '#6B7280' }}>
                                     ⟳ Đang tải dữ liệu...
                                 </td>
                             </tr>
                         ) : error ? (
                             <tr>
-                                <td colSpan={5} style={{ padding: '32px 24px', textAlign: 'center', color: '#DC2626' }}>
+                                <td colSpan={4} style={{ padding: '32px 24px', textAlign: 'center', color: '#DC2626' }}>
                                     ❌ {error}
                                 </td>
                             </tr>
                         ) : kitchens.length === 0 ? (
                             <tr>
-                                <td colSpan={5} style={{ padding: '32px 24px', textAlign: 'center', color: '#6B7280' }}>
+                                <td colSpan={4} style={{ padding: '32px 24px', textAlign: 'center', color: '#6B7280' }}>
                                     Không có dữ liệu bếp trung tâm
                                 </td>
                             </tr>
@@ -115,80 +108,6 @@ export default function KitchensTable({
                                         >
                                             {kitchen.kitchen_status === 'active' ? 'Hoạt Động' : 'Ngưng Hoạt Động'}
                                         </span>
-                                    </td>
-                                    <td style={{ padding: '18px 24px', textAlign: 'center', display: 'flex', gap: '8px', justifyContent: 'center' }}>
-                                        <button
-                                            onClick={() => onEditClick?.(kitchen)}
-                                            style={{
-                                                padding: '8px 16px',
-                                                backgroundColor: '#F0F9FF',
-                                                color: '#0369A1',
-                                                border: '1.5px solid #E0F2FE',
-                                                borderRadius: '8px',
-                                                cursor: 'pointer',
-                                                fontSize: '13px',
-                                                fontWeight: '500',
-                                                transition: 'all 0.25s cubic-bezier(0.4, 0, 0.2, 1)',
-                                                boxShadow: '0 1px 2px rgba(0, 0, 0, 0.05)',
-                                                display: 'inline-flex',
-                                                alignItems: 'center',
-                                                gap: '4px',
-                                                whiteSpace: 'nowrap',
-                                            }}
-                                            onMouseEnter={(e) => {
-                                                e.currentTarget.style.backgroundColor = '#E0F2FE';
-                                                e.currentTarget.style.borderColor = '#0EA5E9';
-                                                e.currentTarget.style.boxShadow = '0 4px 6px rgba(3, 105, 161, 0.15)';
-                                                e.currentTarget.style.transform = 'translateY(-1px)';
-                                            }}
-                                            onMouseLeave={(e) => {
-                                                e.currentTarget.style.backgroundColor = '#F0F9FF';
-                                                e.currentTarget.style.borderColor = '#E0F2FE';
-                                                e.currentTarget.style.boxShadow = '0 1px 2px rgba(0, 0, 0, 0.05)';
-                                                e.currentTarget.style.transform = 'translateY(0)';
-                                            }}
-                                        >
-                                            ✏️ Sửa
-                                        </button>
-                                        <button
-                                            onClick={() => onDeleteClick?.(kitchen)}
-                                            disabled={kitchen.kitchen_status !== 'active'}
-                                            style={{
-                                                padding: '8px 16px',
-                                                backgroundColor: kitchen.kitchen_status === 'active' ? '#FEF2F2' : '#F3F4F6',
-                                                color: kitchen.kitchen_status === 'active' ? '#DC2626' : '#9CA3AF',
-                                                border: kitchen.kitchen_status === 'active' ? '1.5px solid #FECDD3' : '1.5px solid #E5E7EB',
-                                                borderRadius: '8px',
-                                                cursor: kitchen.kitchen_status === 'active' ? 'pointer' : 'not-allowed',
-                                                fontSize: '13px',
-                                                fontWeight: '500',
-                                                transition: 'all 0.25s cubic-bezier(0.4, 0, 0.2, 1)',
-                                                boxShadow: kitchen.kitchen_status === 'active' ? '0 1px 2px rgba(0, 0, 0, 0.05)' : 'none',
-                                                display: 'inline-flex',
-                                                alignItems: 'center',
-                                                gap: '4px',
-                                                whiteSpace: 'nowrap',
-                                                opacity: kitchen.kitchen_status === 'active' ? 1 : 0.6,
-                                            }}
-                                            onMouseEnter={(e) => {
-                                                if (kitchen.kitchen_status === 'active') {
-                                                    e.currentTarget.style.backgroundColor = '#FEE2E2';
-                                                    e.currentTarget.style.borderColor = '#F87171';
-                                                    e.currentTarget.style.boxShadow = '0 4px 6px rgba(220, 38, 38, 0.15)';
-                                                    e.currentTarget.style.transform = 'translateY(-1px)';
-                                                }
-                                            }}
-                                            onMouseLeave={(e) => {
-                                                if (kitchen.kitchen_status === 'active') {
-                                                    e.currentTarget.style.backgroundColor = '#FEF2F2';
-                                                    e.currentTarget.style.borderColor = '#FECDD3';
-                                                    e.currentTarget.style.boxShadow = '0 1px 2px rgba(0, 0, 0, 0.05)';
-                                                    e.currentTarget.style.transform = 'translateY(0)';
-                                                }
-                                            }}
-                                        >
-                                            🗑️ Xóa
-                                        </button>
                                     </td>
                                 </tr>
                             ))

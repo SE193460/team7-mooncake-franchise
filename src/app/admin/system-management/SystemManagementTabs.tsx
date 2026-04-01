@@ -16,8 +16,6 @@ interface SystemManagementTabsProps {
   error?: string | null;
   onEditStore?: (store: FranchiseStore) => void;
   onDeleteStore?: (store: FranchiseStore) => void;
-  onEditKitchen?: (kitchen: CentralKitchen) => void;
-  onDeleteKitchen?: (kitchen: CentralKitchen) => void;
   openMenuId?: string | null;
   onMenuToggle?: (userId: string | null) => void;
   onEditUser?: (user: AdminUser) => void;
@@ -35,8 +33,6 @@ export default function SystemManagementTabs({
   error = null,
   onEditStore,
   onDeleteStore,
-  onEditKitchen,
-  onDeleteKitchen,
   openMenuId,
   onMenuToggle,
   onEditUser,
@@ -154,8 +150,6 @@ export default function SystemManagementTabs({
           kitchens={kitchens}
           loading={loading}
           error={error}
-          onEditClick={onEditKitchen}
-          onDeleteClick={onDeleteKitchen}
         />
       )}
       {activeTab === "users" && (
