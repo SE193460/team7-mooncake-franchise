@@ -107,7 +107,7 @@ export default function CreateStoreModal({
                             value={formData.store_code}
                             onChange={(e) => onFormChange('store_code', e.target.value)}
                             disabled={loading}
-                            placeholder="Nhập mã cửa hàng (VD: FS-001)"
+                            placeholder="Nhập mã cửa hàng (VD: FS001)"
                             style={{
                                 width: '100%',
                                 padding: '12px',

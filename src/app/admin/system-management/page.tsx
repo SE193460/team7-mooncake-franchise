@@ -7,9 +7,6 @@ import SystemManagementTabs from './SystemManagementTabs';
 import EditStoreModal, { EditStoreFormData } from './EditStoreModal';
 import DeleteStoreModal from './DeleteStoreModal';
 import CreateStoreModal, { CreateStoreFormData } from './CreateStoreModal';
-import EditKitchenModal, { EditKitchenFormData } from './EditKitchenModal';
-import DeleteKitchenModal from './DeleteKitchenModal';
-import CreateKitchenModal, { CreateKitchenFormData } from './CreateKitchenModal';
 import EditUserModal from './EditUserModal';
 import CreateUserModal, { CreateUserFormData } from './CreateUserModal';
 import ResetPasswordModal from './ResetPasswordModal';
@@ -45,24 +42,6 @@ export default function SystemManagementPage() {
 
     // ============ KITCHEN STATE ============
     const [kitchens, setKitchens] = useState<CentralKitchen[]>([]);
-    const [selectedKitchen, setSelectedKitchen] = useState<CentralKitchen | null>(null);
-    const [editKitchenModalOpen, setEditKitchenModalOpen] = useState(false);
-    const [deleteKitchenModalOpen, setDeleteKitchenModalOpen] = useState(false);
-    const [createKitchenModalOpen, setCreateKitchenModalOpen] = useState(false);
-    const [createKitchenLoading, setCreateKitchenLoading] = useState(false);
-    const [editKitchenFormData, setEditKitchenFormData] = useState<EditKitchenFormData>({
-        kitchen_code: '',
-        kitchen_name: '',
-        kitchen_address: '',
-        production_capacity: 0,
-    });
-    const [createKitchenFormData, setCreateKitchenFormData] = useState<CreateKitchenFormData>({
-        kitchen_code: '',
-        kitchen_name: '',
-        kitchen_address: '',
-        production_capacity: 0,
-    });
-
     // ============ USER STATE ============
     const [users, setUsers] = useState<AdminUser[]>([]);
     const [selectedUser, setSelectedUser] = useState<AdminUser | null>(null);
@@ -334,135 +313,6 @@ export default function SystemManagementPage() {
             console.error('Error creating store:', err);
         } finally {
             setCreateStoreLoading(false);
-        }
-    };
-
-    // ============ KITCHEN HANDLERS ============
-    const handleEditKitchen = (kitchen: CentralKitchen) => {
-        setSelectedKitchen(kitchen);
-        setEditKitchenFormData({
-            kitchen_code: kitchen.kitchen_code,
-            kitchen_name: kitchen.kitchen_name,
-            kitchen_address: kitchen.kitchen_address,
-            production_capacity: kitchen.capacity,
-        });
-        setEditKitchenModalOpen(true);
-    };
-
-    const closeEditKitchenModal = () => {
-        setEditKitchenModalOpen(false);
-        setSelectedKitchen(null);
-        setEditKitchenFormData({
-            kitchen_code: '',
-            kitchen_name: '',
-            kitchen_address: '',
-            production_capacity: 0,
-        });
-    };
-
-    const submitEditKitchen = async () => {
-        if (!selectedKitchen) return;
-
-        try {
-            setActionLoading(true);
-            await adminService.updateKitchen(selectedKitchen.central_kitchen_id, editKitchenFormData);
-            
-            await fetchKitchens(false);
-            closeEditKitchenModal();
-            
-            toast.success('✓ Cập nhật bếp trung tâm thành công!', {
-                position: 'top-right',
-                autoClose: 3000,
-            });
-        } catch (err) {
-            toast.error('❌ Lỗi khi cập nhật bếp. Vui lòng thử lại!', {
-                position: 'top-right',
-                autoClose: 4000,
-            });
-            console.error('Error updating kitchen:', err);
-        } finally {
-            setActionLoading(false);
-        }
-    };
-
-    const handleDeleteKitchen = (kitchen: CentralKitchen) => {
-        setSelectedKitchen(kitchen);
-        setDeleteKitchenModalOpen(true);
-    };
-
-    const closeDeleteKitchenModal = () => {
-        setDeleteKitchenModalOpen(false);
-        setSelectedKitchen(null);
-    };
-
-    const submitDeleteKitchen = async () => {
-        if (!selectedKitchen || selectedKitchen.kitchen_status !== 'active') return;
-
-        try {
-            setActionLoading(true);
-            const newStatus = 'inactive';
-            await adminService.updateKitchenStatus(selectedKitchen.central_kitchen_id, newStatus);
-            
-            await fetchKitchens(false);
-            closeDeleteKitchenModal();
-            
-            toast.success(`✓ Vô hiệu hóa bếp trung tâm thành công!`, {
-                position: 'top-right',
-                autoClose: 3000,
-            });
-        } catch (err) {
-            toast.error('❌ Lỗi khi cập nhật trạng thái. Vui lòng thử lại!', {
-                position: 'top-right',
-                autoClose: 4000,
-            });
-            console.error('Error updating kitchen status:', err);
-        } finally {
-            setActionLoading(false);
-        }
-    };
-
-    const openCreateKitchenModal = () => {
-        setCreateKitchenFormData({
-            kitchen_code: '',
-            kitchen_name: '',
-            kitchen_address: '',
-            production_capacity: 0,
-        });
-        setCreateKitchenModalOpen(true);
-    };
-
-    const closeCreateKitchenModal = () => {
-        setCreateKitchenModalOpen(false);
-        setCreateKitchenFormData({
-            kitchen_code: '',
-            kitchen_name: '',
-            kitchen_address: '',
-            production_capacity: 0,
-        });
-    };
-
-    const submitCreateKitchen = async () => {
-        if (!createKitchenFormData.kitchen_code || !createKitchenFormData.kitchen_name || !createKitchenFormData.kitchen_address || !createKitchenFormData.production_capacity) return;
-
-        try {
-            setCreateKitchenLoading(true);
-            await adminService.createKitchen(createKitchenFormData);
-            
-            await fetchKitchens(false);
-            closeCreateKitchenModal();
-            
-            toast.success('✓ Tạo bếp trung tâm thành công!', {
-                position: 'top-right',
-                autoClose: 3000,
-            });
-        } catch (err) {
-            toast.error('❌ Lỗi khi tạo bếp trung tâm. Vui lòng thử lại!', {
-                position: 'top-right',
-                autoClose: 4000,
-            });
-            console.error('Error creating kitchen:', err);
-        } finally {
-            setCreateKitchenLoading(false);
         }
     };
 
@@ -739,27 +589,35 @@ export default function SystemManagementPage() {
                             onClick={() => {
                                 if (activeTab === 'stores') {
                                     openCreateStoreModal();
-                                } else if (activeTab === 'kitchens') {
-                                    openCreateKitchenModal();
                                 } else {
                                     openCreateUserModal();
                                 }
                             }}
+                            disabled={activeTab === 'kitchens'}
                             style={{
                                 padding: '10px 20px',
-                                backgroundColor: '#10B981',
+                                backgroundColor: activeTab === 'kitchens' ? '#D1D5DB' : '#10B981',
                                 color: 'white',
                                 border: 'none',
                                 borderRadius: '8px',
-                                cursor: 'pointer',
+                                cursor: activeTab === 'kitchens' ? 'not-allowed' : 'pointer',
                                 fontSize: '14px',
                                 fontWeight: '500',
                                 transition: 'all 0.3s ease',
+                                opacity: activeTab === 'kitchens' ? 0.6 : 1,
                             }}
-                            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#059669'}
-                            onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#10B981'}
+                            onMouseEnter={(e) => {
+                                if (activeTab !== 'kitchens') {
+                                    e.currentTarget.style.backgroundColor = '#059669';
+                                }
+                            }}
+                            onMouseLeave={(e) => {
+                                if (activeTab !== 'kitchens') {
+                                    e.currentTarget.style.backgroundColor = '#10B981';
+                                }
+                            }}
                         >
-                            + Thêm {activeTab === 'stores' ? 'Cửa Hàng' : activeTab === 'kitchens' ? 'Bếp Trung Tâm' : 'Người Dùng'}
+                            + Thêm {activeTab === 'stores' ? 'Cửa Hàng' : 'Người Dùng'}
                         </button>
                     </div>
 
@@ -783,8 +641,6 @@ export default function SystemManagementPage() {
                         error={error}
                         onEditStore={handleEditStore}
                         onDeleteStore={handleDeleteStore}
-                        onEditKitchen={handleEditKitchen}
-                        onDeleteKitchen={handleDeleteKitchen}
                         openMenuId={openMenuId}
                         onMenuToggle={setOpenMenuId}
                         onEditUser={openEditModal}
@@ -820,34 +676,6 @@ export default function SystemManagementPage() {
                 onFormChange={(field, value) => setCreateStoreFormData({ ...createStoreFormData, [field]: value })}
                 onSubmit={submitCreateStore}
                 onCancel={closeCreateStoreModal}
-            />
-
-            {/* KITCHEN MODALS */}
-            <EditKitchenModal
-                isOpen={editKitchenModalOpen}
-                selectedKitchen={selectedKitchen}
-                formData={editKitchenFormData}
-                loading={actionLoading}
-                onFormDataChange={setEditKitchenFormData}
-                onSubmit={submitEditKitchen}
-                onClose={closeEditKitchenModal}
-            />
-
-            <DeleteKitchenModal
-                isOpen={deleteKitchenModalOpen}
-                selectedKitchen={selectedKitchen}
-                loading={actionLoading}
-                onSubmit={submitDeleteKitchen}
-                onClose={closeDeleteKitchenModal}
-            />
-
-            <CreateKitchenModal
-                isOpen={createKitchenModalOpen}
-                formData={createKitchenFormData}
-                loading={createKitchenLoading}
-                onFormChange={(field, value) => setCreateKitchenFormData({ ...createKitchenFormData, [field]: value })}
-                onSubmit={submitCreateKitchen}
-                onCancel={closeCreateKitchenModal}
             />
 
             {/* USER MODALS */}

@@ -54,9 +54,10 @@ export default function StoreDashboard() {
 
                 setCards({
                     pending: data.stats.pendingOrders,
-                    approved: data.stats.approvedOrders,
                     processing: data.stats.processingOrders,
                     fulfilled: data.stats.fulfilledOrders,
+                    confirmed: data.stats.confirmedOrders,
+                    cancelled: data.stats.cancelledOrders,
                 });
                 setOrders(data.recentOrders);
                 setCurrentPage(1);
@@ -168,8 +169,8 @@ export default function StoreDashboard() {
                     </div>
                     <div style={{ flex: 1, padding: '20px', backgroundColor: 'white', borderRadius: '12px', border: '1px solid var(--border-color)', boxShadow: '0 1px 3px rgba(0,0,0,0.05)', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                         <div>
-                            <div style={{ fontSize: '14px', color: 'var(--text-secondary)', marginBottom: '8px', fontWeight: '500' }}>Đã Chấp Nhận</div>
-                            <div style={{ fontSize: '24px', fontWeight: '700', color: 'var(--text-primary)', marginBottom: '4px' }}>{cards?.approved ?? 0}</div>
+                            <div style={{ fontSize: '14px', color: 'var(--text-secondary)', marginBottom: '8px', fontWeight: '500' }}>Đang Chuẩn Bị</div>
+                            <div style={{ fontSize: '24px', fontWeight: '700', color: 'var(--text-primary)', marginBottom: '4px' }}>{cards?.processing ?? 0}</div>
                             <div style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>Đang chuẩn bị</div>
                         </div>
                         <div style={{ width: '40px', height: '40px', borderRadius: '50%', backgroundColor: '#FFF7ED', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '18px', color: 'var(--primary-orange)' }}>📦</div>
@@ -177,15 +178,15 @@ export default function StoreDashboard() {
                     <div style={{ flex: 1, padding: '20px', backgroundColor: 'white', borderRadius: '12px', border: '1px solid var(--border-color)', boxShadow: '0 1px 3px rgba(0,0,0,0.05)', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                         <div>
                             <div style={{ fontSize: '14px', color: 'var(--text-secondary)', marginBottom: '8px', fontWeight: '500' }}>Sẵn Sàng Giao</div>
-                            <div style={{ fontSize: '24px', fontWeight: '700', color: 'var(--text-primary)', marginBottom: '4px' }}>{cards?.processing ?? 0}</div>
+                            <div style={{ fontSize: '24px', fontWeight: '700', color: 'var(--text-primary)', marginBottom: '4px' }}>{cards?.fulfilled ?? 0}</div>
                             <div style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>Chờ điều phối</div>
                         </div>
                         <div style={{ width: '40px', height: '40px', borderRadius: '50%', backgroundColor: '#FFF7ED', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '18px', color: 'var(--primary-orange)' }}>🚚</div>
                     </div>
                     <div style={{ flex: 1, padding: '20px', backgroundColor: 'white', borderRadius: '12px', border: '1px solid var(--border-color)', borderLeft: '4px solid #10B981', boxShadow: '0 1px 3px rgba(0,0,0,0.05)', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                         <div>
-                            <div style={{ fontSize: '14px', color: 'var(--text-secondary)', marginBottom: '8px', fontWeight: '500' }}>Đã Giao</div>
-                            <div style={{ fontSize: '24px', fontWeight: '700', color: 'var(--text-primary)', marginBottom: '4px' }}>{cards?.fulfilled ?? 0}</div>
+                            <div style={{ fontSize: '14px', color: 'var(--text-secondary)', marginBottom: '8px', fontWeight: '500' }}>Đã Hoàn Thành</div>
+                            <div style={{ fontSize: '24px', fontWeight: '700', color: 'var(--text-primary)', marginBottom: '4px' }}>{cards?.confirmed ?? 0}</div>
                             <div style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>Hoàn tất giao hàng</div>
                         </div>
                         <div style={{ width: '40px', height: '40px', borderRadius: '50%', backgroundColor: '#FFF7ED', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '18px', color: 'var(--primary-orange)' }}>✅</div>

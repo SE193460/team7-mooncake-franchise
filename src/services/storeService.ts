@@ -26,6 +26,8 @@ export interface DashboardStats {
     approvedOrders: number;
     processingOrders: number;
     fulfilledOrders: number;
+    confirmedOrders: number;
+    cancelledOrders: number;
     totalOrders: number;
 }
 
@@ -272,6 +274,8 @@ const storeService = {
                 approvedOrders: cards.approved || 0,
                 processingOrders: cards.processing || 0,
                 fulfilledOrders: cards.fulfilled || 0,
+                confirmedOrders: cards.confirmed || 0,
+                cancelledOrders: cards.cancelled || 0,
                 totalOrders: dashboardData.summary?.total_orders || 0,
             };
 
@@ -400,9 +404,9 @@ const storeService = {
             const inventoryItems: InventoryItem[] = apiItems.map((item, index) => ({
                 inventory_item_id: item.product_id || String(index + 1),
                 product_id: item.product_id,
-                product_code: item.product_id, // Using product_id as code if not provided
+                product_code: item.product_id,
                 product_name: item.product_name,
-                category_name: item.product_type_name, // Map product_type_name to category_name
+                category_name: item.product_type_name, 
                 quantity: item.quantity,
                 expiry_date: item.expiry_date,
             }));

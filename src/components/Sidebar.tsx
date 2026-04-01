@@ -75,7 +75,7 @@ export default function Sidebar({ activePage = 'dashboard', type = 'franchise' }
     ];
 
     const adminMenuItems = [
-        { id: 'dashboard', label: 'Dashboard', icon: '📊', href: '/admin' },
+        { id: 'dashboard', label: 'Bảng điều khiển', icon: '📊', href: '/admin' },
         { id: 'system-management', label: 'Quản Lý Hệ Thống', icon: '⚙️', href: '/admin/system-management' },
         { id: 'report', label: 'Báo Cáo Hệ Thống', icon: '📈', href: '/admin/report' },
     ];
